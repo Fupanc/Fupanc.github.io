@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-04-28T13:32:25.831Z</updated>
+  <updated>2024-05-09T14:18:11.811Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>pickle反序列化</title>
+    <link href="https://fupanc.github.io/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    <id>https://fupanc.github.io/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</id>
+    <published>2024-05-09T14:10:02.260Z</published>
+    <updated>2024-05-09T14:18:11.811Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;pickle反序列化&quot;&gt;&lt;a href=&quot;#pickle反序列化&quot; class=&quot;headerlink&quot; title=&quot;pickle反序列化&quot;&gt;&lt;/a&gt;pickle反序列化&lt;/h1&gt;&lt;p&gt;简单入门&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
+    
+    <category term="pickle反序列化" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>session反序列化学习</title>
