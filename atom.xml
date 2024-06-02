@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-05-28T08:53:29.190Z</updated>
+  <updated>2024-06-02T08:59:25.687Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>python沙箱逃逸</title>
+    <link href="https://fupanc.github.io/2024/06/02/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/"/>
+    <id>https://fupanc.github.io/2024/06/02/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/</id>
+    <published>2024-06-02T08:35:06.867Z</published>
+    <updated>2024-06-02T08:59:25.687Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;建议看了本篇文章后可以去打一打NSSCTF上的很多沙箱逃逸的题，加深理解，同时我也发布了持续更新中的做题集合。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
+    
+    <category term="python沙箱逃逸" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>filter过滤器利用总结</title>
@@ -97,7 +116,7 @@
     <link href="https://fupanc.github.io/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/"/>
     <id>https://fupanc.github.io/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</id>
     <published>2024-04-28T06:37:55.888Z</published>
-    <updated>2024-05-27T14:24:12.254Z</updated>
+    <updated>2024-06-02T09:10:53.506Z</updated>
     
     
     <summary type="html">&lt;p&gt;好用，爱用，多用&lt;/p&gt;</summary>
@@ -139,10 +158,10 @@
     <link href="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/"/>
     <id>https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/</id>
     <published>2024-04-20T10:06:29.299Z</published>
-    <updated>2024-04-26T08:15:55.106Z</updated>
+    <updated>2024-06-02T09:07:01.331Z</updated>
     
     
-    <summary type="html">&lt;p&gt;  请移步正文&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;  JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录&lt;/p&gt;</summary>
     
     
     
