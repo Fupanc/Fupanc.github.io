@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-06-05T03:39:40.166Z</updated>
+  <updated>2024-06-06T10:29:30.835Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>python栈帧逃逸</title>
+    <link href="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/"/>
+    <id>https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/</id>
+    <published>2024-06-06T10:27:30.418Z</published>
+    <updated>2024-06-06T10:29:30.835Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;python栈帧逃逸&quot;&gt;&lt;a href=&quot;#python栈帧逃逸&quot; class=&quot;headerlink&quot; title=&quot;python栈帧逃逸&quot;&gt;&lt;/a&gt;python栈帧逃逸&lt;/h1&gt;&lt;p&gt;一个挺新的逃逸方式，最近比赛都在考，赶快学习。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
+    
+    <category term="Python栈帧逃逸" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/Python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>rce之利用shell变量</title>
