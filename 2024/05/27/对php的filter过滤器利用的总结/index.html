@@ -57,7 +57,7 @@
 <meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174418038.png">
 <meta property="og:image" content="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240527174628296.png">
 <meta property="article:published_time" content="2024-05-27T14:18:49.932Z">
-<meta property="article:modified_time" content="2024-05-28T08:53:29.190Z">
+<meta property="article:modified_time" content="2024-06-06T13:42:53.633Z">
 <meta property="article:author" content="Fupanc">
 <meta property="article:tag" content="学习笔记">
 <meta name="twitter:card" content="summary">
@@ -267,7 +267,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-28 16:53:29" itemprop="dateModified" datetime="2024-05-28T16:53:29+08:00">2024-05-28</time>
+      <time title="修改时间：2024-06-06 21:42:53" itemprop="dateModified" datetime="2024-06-06T21:42:53+08:00">2024-06-06</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -448,7 +448,7 @@
 <p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" alt="image-20240521202558001"></p>
 <p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" alt="image-20240521202621401"></p>
 <h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br></pre></td></tr></table></figure>
 
 <p>第一种情况已经在上面已经有比较清楚的说明，先在来说说第二种情况。</p>
 <h5 id="bypass相同变量"><a href="#bypass相同变量" class="headerlink" title="bypass相同变量"></a>bypass相同变量</h5><p>这里对应第二种情况，bypass的方法如下</p>

