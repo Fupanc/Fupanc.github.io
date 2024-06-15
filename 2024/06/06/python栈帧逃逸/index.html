@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605142732236.png">
 <meta property="og:image" content="https://fupanc.github.io/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/image-20240605224858187.png">
 <meta property="article:published_time" content="2024-06-06T10:27:30.418Z">
-<meta property="article:modified_time" content="2024-06-08T05:30:44.130Z">
+<meta property="article:modified_time" content="2024-06-10T15:01:49.276Z">
 <meta property="article:author" content="Fupanc">
 <meta property="article:tag" content="学习笔记">
 <meta name="twitter:card" content="summary">
@@ -161,13 +161,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -241,7 +241,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-06-08 13:30:44" itemprop="dateModified" datetime="2024-06-08T13:30:44+08:00">2024-06-08</time>
+      <time title="修改时间：2024-06-10 23:01:49" itemprop="dateModified" datetime="2024-06-10T23:01:49+08:00">2024-06-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -336,7 +336,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">co_argcount: 函数的命名参数数量（不包括 *args 和 **kwargs）。</span><br><span class="line">co_nlocals: 函数中的局部变量数量。</span><br><span class="line">co_stacksize: 函数调用所需的栈空间。</span><br><span class="line">co_consts: 函数中使用的常量。</span><br><span class="line">co_names: 函数中使用的全局变量的名称。</span><br><span class="line">co_varnames: 函数中使用的局部变量的名称。</span><br><span class="line">co_filename: 函数定义所在的文件名。</span><br><span class="line">co_firstlineno: 函数定义的第一行所在的行号。</span><br><span class="line">co_flags: 与函数相关的标志，例如是否是生成器函数、是否接受任意数量的位置参数等等。</span><br><span class="line">co_code: 函数的字节码指令序列。</span><br></pre></td></tr></table></figure>
 
 <p>先看一下如下代码：</p>
-<p>比如我想打印一个对象的字节码，如下：</p>
+<p>比如我想得到一个对象的字节码，这里使用dis模块将字节码反汇编，如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dis</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">haha</span>():</span><br><span class="line">    flag=<span class="string">&quot;flag&#123;ajhduiahdu&#125;&quot;</span></span><br><span class="line">    flag=<span class="string">&quot;haha&quot;</span></span><br><span class="line"><span class="built_in">print</span>(dis.dis(haha)) <span class="comment">#这里打印字节码</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span>           <span class="number">0</span> LOAD_CONST               <span class="number">1</span> (<span class="string">&#x27;flag&#123;ajhduiahdu&#125;&#x27;</span>)</span><br><span class="line">              <span class="number">2</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line"></span><br><span class="line">  <span class="number">4</span>           <span class="number">4</span> LOAD_CONST               <span class="number">2</span> (<span class="string">&#x27;haha&#x27;</span>)</span><br><span class="line">              <span class="number">6</span> STORE_FAST               <span class="number">0</span> (flag)</span><br><span class="line">              <span class="number">8</span> LOAD_CONST               <span class="number">0</span> (<span class="literal">None</span>)</span><br><span class="line">             <span class="number">10</span> RETURN_VALUE</span><br><span class="line"><span class="literal">None</span></span><br></pre></td></tr></table></figure>
 
 <p>常见的字节码指令：</p>
@@ -388,7 +388,7 @@
 
 <p>但是注意，这里使用for循环来获取生成器对象会增加一个栈帧，所以需要再加一个<code>f_back</code>。</p>
 <p><strong>（2）<code>send()</code>函数</strong></p>
-<p>可以通过send()给生成器传递数据，调用<code>send()</code>后，就不用再调用了<code>next()</code>了。</p>
+<p>可以通过send()给生成器传递数据，调用<code>send()</code>后，就不用再调用了<code>next()</code>了，但是这个方法应该只有在只禁了<code>next()</code>函数下可以使用，而不是上面那种直接将内置函数都禁了。</p>
 <p>直接给测试代码</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="keyword">yield</span> g.gi_frame.f_back</span><br><span class="line"></span><br><span class="line">g = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;1:&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(g)</span><br><span class="line">frame = g.send(<span class="literal">None</span>)</span><br><span class="line"><span class="built_in">print</span>(frame)</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">    <span class="number">1</span>:</span><br><span class="line">&lt;generator <span class="built_in">object</span> f at <span class="number">0x000001F30C930E40</span>&gt;</span><br><span class="line">&lt;frame at <span class="number">0x000001F30C527800</span>, file <span class="string">&#x27;D:\\clx\\venv\\haha.py&#x27;</span>, line <span class="number">8</span>, code &lt;module&gt;&gt;</span><br></pre></td></tr></table></figure>
 
@@ -567,6 +567,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" rel="next" title="Java反射机制">
+                  Java反射机制 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
