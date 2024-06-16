@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-06-15T12:24:26.599Z</updated>
+  <updated>2024-06-16T12:32:10.385Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -17,16 +17,36 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Java动态代理</title>
+    <link href="https://fupanc.github.io/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"/>
+    <id>https://fupanc.github.io/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</id>
+    <published>2024-06-16T12:18:29.066Z</published>
+    <updated>2024-06-16T12:32:10.385Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Java动态代理&quot;&gt;&lt;a href=&quot;#Java动态代理&quot; class=&quot;headerlink&quot; title=&quot;Java动态代理&quot;&gt;&lt;/a&gt;Java动态代理&lt;/h1&gt;&lt;p&gt;利用了代理模式，一个通俗易懂的说法：给某一个对象提供一个代理，并由代理对象来控制对真实对象的访问。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java基础" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%9F%BA%E7%A1%80/"/>
+    
+    <category term="Java动态代理" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%9F%BA%E7%A1%80/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Java反射机制</title>
     <link href="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/"/>
     <id>https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/</id>
     <published>2024-06-15T12:21:54.350Z</published>
-    <updated>2024-06-15T12:24:26.599Z</updated>
+    <updated>2024-06-16T05:05:53.055Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;Java反射机制&quot;&gt;&lt;a href=&quot;#Java反射机制&quot; class=&quot;headerlink&quot; title=&quot;Java反射机制&quot;&gt;&lt;/a&gt;Java反射机制&lt;/h1&gt;&lt;p&gt;Java反射（&lt;code&gt;Reflection&lt;/code&gt;）是Java非常重要的动态特性&lt;strong&gt;，通过使用反射我们可以获取到任何类的成员方法（&lt;code&gt;Methods&lt;/code&gt;）、成员变量（&lt;code&gt;Fields&lt;/code&gt;）、构造方法（&lt;code&gt;Constructors&lt;/code&gt;）等信息，还可以动态创建Java实例、调用任意的类方法、修改任意的类成员变量值等&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;Java反射机制是Java语言的动态性的重要体现。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;使用反射的前提条件&lt;/strong&gt;：必须先得到代表的字节码的Class，Class类用于表示.class文件（字节码）&lt;/p&gt;
+&lt;p&gt;这是一个重要的机制，可以绕过java私有访问权限检查，反射获取并调用私有的类从而可以进行命令执行&lt;/p&gt;
 &lt;p&gt;本文JDK测试版本为11,也有的文章说的是非public修饰符，而我测试出来只针对private修饰符，注意版本&lt;/p&gt;</summary>
     
     

