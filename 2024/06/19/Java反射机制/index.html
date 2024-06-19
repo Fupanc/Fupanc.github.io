@@ -24,27 +24,27 @@
     <meta name="description" content="Java反射机制Java反射（Reflection）是Java非常重要的动态特性，通过使用反射我们可以获取到任何类的成员方法（Methods）、成员变量（Fields）、构造方法（Constructors）等信息，还可以动态创建Java实例、调用任意的类方法、修改任意的类成员变量值等。 这是一个重要的机制，可以绕过java私有访问权限检查，反射获取并调用私有的类从而可以进行命令执行 本文JDK测试">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java反射机制">
-<meta property="og:url" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:url" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="Fupanc">
 <meta property="og:description" content="Java反射机制Java反射（Reflection）是Java非常重要的动态特性，通过使用反射我们可以获取到任何类的成员方法（Methods）、成员变量（Fields）、构造方法（Constructors）等信息，还可以动态创建Java实例、调用任意的类方法、修改任意的类成员变量值等。 这是一个重要的机制，可以绕过java私有访问权限检查，反射获取并调用私有的类从而可以进行命令执行 本文JDK测试">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png">
-<meta property="og:image" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614170106503.png">
-<meta property="og:image" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210420811.png">
-<meta property="og:image" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210432473.png">
-<meta property="article:published_time" content="2024-06-15T12:21:54.350Z">
-<meta property="article:modified_time" content="2024-06-16T05:05:53.055Z">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614170106503.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210420811.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210432473.png">
+<meta property="article:published_time" content="2024-06-19T08:06:26.377Z">
+<meta property="article:modified_time" content="2024-06-19T08:31:53.815Z">
 <meta property="article:author" content="Fupanc">
 <meta property="article:tag" content="学习笔记">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png">
 
 
-<link rel="canonical" href="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/">
+<link rel="canonical" href="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/","path":"2024/06/15/Java反射机制/","title":"Java反射机制"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/","path":"2024/06/19/Java反射机制/","title":"Java反射机制"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>Java反射机制 | Fupanc</title>
@@ -163,13 +163,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">22</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -207,7 +207,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/index.jpg">
@@ -235,15 +235,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2024-06-15 20:21:54" itemprop="dateCreated datePublished" datetime="2024-06-15T20:21:54+08:00">2024-06-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-06-16 13:05:53" itemprop="dateModified" datetime="2024-06-16T13:05:53+08:00">2024-06-16</time>
+      <time title="创建时间：2024-06-19 16:06:26 / 修改时间：16:31:53" itemprop="dateCreated datePublished" datetime="2024-06-19T16:06:26+08:00">2024-06-19</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -277,14 +271,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>16k</span>
+      <span>18k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>29 分钟</span>
+      <span>32 分钟</span>
     </span>
 </div>
 
@@ -296,10 +290,10 @@
     
     <div class="post-body" itemprop="articleBody"><h1 id="Java反射机制"><a href="#Java反射机制" class="headerlink" title="Java反射机制"></a>Java反射机制</h1><p>Java反射（<code>Reflection</code>）是Java非常重要的动态特性<strong>，通过使用反射我们可以获取到任何类的成员方法（<code>Methods</code>）、成员变量（<code>Fields</code>）、构造方法（<code>Constructors</code>）等信息，还可以动态创建Java实例、调用任意的类方法、修改任意的类成员变量值等</strong>。</p>
 <p>这是一个重要的机制，可以绕过java私有访问权限检查，反射获取并调用私有的类从而可以进行命令执行</p>
-<p>本文JDK测试版本为11,也有的文章说的是非public修饰符，而我测试出来只针对private修饰符，注意版本</p>
+<p>本文JDK测试版本为11,也有的文章说的是非public修饰符，而我测试出来只针对private修饰符，注意版本，其他java文章都是JDK8</p>
 <span id="more"></span>
 
-<h2 id="反射机制流程"><a href="#反射机制流程" class="headerlink" title="反射机制流程"></a>反射机制流程</h2><p><img src="/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png" alt="image-20240612223818680"></p>
+<h2 id="反射机制流程"><a href="#反射机制流程" class="headerlink" title="反射机制流程"></a>反射机制流程</h2><p><img src="/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240612223818680.png" alt="image-20240612223818680"></p>
 <p>当我们创建了一个类文件，经过javac编译之后，就会形成.class文件，同时JVM内存会查找生成的.class文件读入内存和经过ClassLoader加载，同时会自动创建生成一个Class对象，里面拥有其获取的成员变量，成员方法，和构造方法等。</p>
 <p>JVM为每个加载的class创建了对应的Class实例，并在实例中保存了该class的所有信息。获取了某个Class实例，就可以通过这个Class实例获取到该实例对应的class的所有信息</p>
 <h2 id="反射常用的包和类"><a href="#反射常用的包和类" class="headerlink" title="反射常用的包和类"></a>反射常用的包和类</h2><p>反射机制相关操作一般位于 <code>java.lang.reflect</code> 包中</p>
@@ -343,6 +337,36 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Main</span><br><span class="line">class Main</span><br><span class="line">class Main</span><br><span class="line">Main</span><br></pre></td></tr></table></figure>
 
 <p>需要注意的是，在获取class对象中，一般使用Class.forName方法去获取，其他两个都有一定的限制。</p>
+<p><strong>另外的一个点需要说明</strong></p>
+<p>forName有两个函数重载：</p>
+<ul>
+<li><p><code>Class&lt;?&gt; forName(String name)</code></p>
+</li>
+<li><p><code>Class&lt;?&gt; forName(String name, **boolean** initialize, ClassLoader loader)</code></p>
+</li>
+</ul>
+<p>第⼀个就是我们最常⻅的获取class的⽅式，其实可以理解为第⼆种⽅式的⼀个封装：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Class.forName(className)</span><br><span class="line"><span class="comment">// 等于</span></span><br><span class="line">Class.forName(className, <span class="literal">true</span>, currentLoader)</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下， forName 的第⼀个参数是类名；第⼆个参数表示是否初始化；第三个参数就是 ClassLoader 。</p>
+<p><strong>对于第二个参数，可以将其理解为对一个类的初始化</strong>，看如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">haha</span> &#123;</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.printf(<span class="string">&quot;Empty block initial %s\n&quot;</span>, <span class="built_in">this</span>.getClass());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.out.printf(<span class="string">&quot;Static initial %s\n&quot;</span>, haha.class);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">haha</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.printf(<span class="string">&quot;Initial %s\n&quot;</span>, <span class="built_in">this</span>.getClass());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Text</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">haha</span> <span class="variable">x</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">haha</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Static initial class haha</span><br><span class="line">Empty block initial class haha</span><br><span class="line">Initial class haha</span><br></pre></td></tr></table></figure>
+
+<p><strong>这样就可以很容易地看出类的初始化的顺序是<code>static &#123;&#125;</code>，其次是<code>&#123;&#125;</code>，最后是构造函数。</strong></p>
+<p>可以延伸一下，假设我们有如下函数，其中函数的参数name可控：</p>
+<p>我们就可以编写⼀个恶意类，将恶意代码放置在 static {} 中，从⽽执⾏：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">ref</span><span class="params">(String name)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"> Class.forName(name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以编写⼀个恶意类，将恶意代码放置在 static {} 中，从⽽执⾏：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.Runtime;</span><br><span class="line"><span class="keyword">import</span> java.lang.Process;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TouchFile</span> &#123;</span><br><span class="line"> <span class="keyword">static</span> &#123;</span><br><span class="line"> <span class="keyword">try</span> &#123;</span><br><span class="line"> <span class="type">Runtime</span> <span class="variable">rt</span> <span class="operator">=</span> Runtime.getRuntime();</span><br><span class="line"> String[] commands = &#123;<span class="string">&quot;touch&quot;</span>, <span class="string">&quot;/tmp/success&quot;</span>&#125;;</span><br><span class="line"> <span class="type">Process</span> <span class="variable">pc</span> <span class="operator">=</span> rt.exec(commands);</span><br><span class="line"> pc.waitFor();</span><br><span class="line"> &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"> <span class="comment">// do nothing</span></span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
 <h3 id="获取成员变量Field"><a href="#获取成员变量Field" class="headerlink" title="获取成员变量Field"></a>获取成员变量Field</h3><p>获取成员变量Field，位于java.lang.reflect.Field中，常使用的方法有如下几种</p>
 <ul>
 <li>Field[] getFields()：获取所有public修饰的成员变量（包括父类）</li>
@@ -470,6 +494,8 @@
 
 
 
+
+
 <h2 id="利用反射进行命令执行"><a href="#利用反射进行命令执行" class="headerlink" title="利用反射进行命令执行"></a>利用反射进行命令执行</h2><h3 id="利用java-lang-Runtime"><a href="#利用java-lang-Runtime" class="headerlink" title="利用java.lang.Runtime"></a>利用java.lang.Runtime</h3><p>java.lang.Runtime 中有一个exec方法可以执行本地命令，但是不能如下直接构造来执行命令</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.*;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Text</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        Class&lt;?&gt; ctf = Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method1</span> <span class="operator">=</span> ctf.getDeclaredMethod(<span class="string">&quot;exec&quot;</span>,String.class);</span><br><span class="line">        method1.invoke(ctf.newInstance(),<span class="string">&quot;id&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">中间代码可以简化如下，并且不需要导包，需要注意一下：</span></span><br><span class="line"><span class="comment">Class ctf = Class.forName(&quot;java.lang.Runtime&quot;);</span></span><br><span class="line"><span class="comment">ctf.getMethod(&quot;exec&quot;, String.class).invoke(ctf.newInstance(), &quot;id&quot;);    </span></span><br></pre></td></tr></table></figure>
 
@@ -478,7 +504,7 @@
 
 <p>原因就是<code>Runtime</code>类的构造方法是私有的，导致这样<code>ctf.newInstance()</code>直接调用是错误的。</p>
 <p>可以看一下源码</p>
-<p><img src="/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614170106503.png" alt="image-20240614170106503"></p>
+<p><img src="/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614170106503.png" alt="image-20240614170106503"></p>
 <p>这种设计就是“单例模式”，这里可以使用一个静态方法来获取对象，所以在这里我们只能通过<code>Runtime.getRuntime()</code>来获取到<code>Runtime</code>对象。</p>
 <p>这里Runtime.getRuntime()是一个静态方法，所以在使用invoke执行方法时，第一个参数需要传入一个Runtime类,所以可以将代码改成如下来执行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Text</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line">        clazz.getMethod(<span class="string">&quot;exec&quot;</span>,String.class).invoke(clazz.getMethod(<span class="string">&quot;getRuntime&quot;</span>).invoke(clazz),<span class="string">&quot;calc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//成功弹出计算机</span></span><br></pre></td></tr></table></figure>
@@ -490,8 +516,8 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WARNING: An illegal reflective access operation has occurred</span><br><span class="line">WARNING: Illegal reflective access by Text (file:/D:/java_text/java-1/out/production/java-1/) to constructor java.lang.Runtime()</span><br><span class="line">WARNING: Please consider reporting this to the maintainers of Text</span><br><span class="line">WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations</span><br><span class="line">WARNING: All illegal access operations will be denied in a future release</span><br></pre></td></tr></table></figure>
 
 <h3 id="利用ProcessBuilder"><a href="#利用ProcessBuilder" class="headerlink" title="利用ProcessBuilder"></a>利用<code>ProcessBuilder</code></h3><p><code>java.lang.ProcessBuilder</code>类用于创建操作系统进程， <code>ProcessBuilder</code> 有两个构造函数：</p>
-<p><img src="/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210420811.png" alt="image-20240614210420811"></p>
-<p><img src="/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210432473.png" alt="image-20240614210432473"></p>
+<p><img src="/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210420811.png" alt="image-20240614210420811"></p>
+<p><img src="/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/image-20240614210432473.png" alt="image-20240614210432473"></p>
 <p>利用第一种形式的构造函数，在<code>getConstructor</code>传入<code>List.class</code>，然后获取并调用<code>start</code>方法来执行命令</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.*;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Text</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">Class</span> <span class="variable">ctf</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>);</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor1</span> <span class="operator">=</span> ctf.getConstructor(List.class);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> constructor1.newInstance(Arrays.asList(<span class="string">&quot;calc&quot;</span>));</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method1</span> <span class="operator">=</span> ctf.getMethod(<span class="string">&quot;start&quot;</span>);</span><br><span class="line">        method1.invoke(o);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*成功弹计算机</span></span><br><span class="line"><span class="comment">中间代码精炼一下就是（这样就不用导lang下的包）：</span></span><br><span class="line"><span class="comment">Class ctf = Class.forName(&quot;java.lang.ProcessBuilder&quot;);        ctf.getMethod(&quot;start&quot;).invoke(ctf.getConstructor(List.class).newInstance(Arrays.asList(&quot;calc&quot;)));</span></span><br></pre></td></tr></table></figure>
 
@@ -525,7 +551,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://fupanc.github.io/2024/06/15/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" title="Java反射机制">https://fupanc.github.io/2024/06/15/Java反射机制/</a>
+      <a href="https://fupanc.github.io/2024/06/19/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" title="Java反射机制">https://fupanc.github.io/2024/06/19/Java反射机制/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -538,13 +564,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/06/06/python%E6%A0%88%E5%B8%A7%E9%80%83%E9%80%B8/" rel="prev" title="python栈帧逃逸">
-                  <i class="fa fa-angle-left"></i> python栈帧逃逸
+                <a href="/2024/06/19/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" rel="prev" title="Java动态代理">
+                  <i class="fa fa-angle-left"></i> Java动态代理
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/06/16/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" rel="next" title="Java动态代理">
-                  Java动态代理 <i class="fa fa-angle-right"></i>
+                <a href="/2024/06/19/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" rel="next" title="Java类加载机制">
+                  Java类加载机制 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
