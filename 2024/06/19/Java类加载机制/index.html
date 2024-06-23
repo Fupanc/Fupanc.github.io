@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/hah.jpg">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/hah.jpg">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/hah.jpg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/index.jpg">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
@@ -44,7 +44,7 @@
 <meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/image-20240619150123908.png">
 <meta property="og:image" content="https://fupanc.github.io/2024/06/19/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/image-20240619153615018.png">
 <meta property="article:published_time" content="2024-06-19T08:06:26.379Z">
-<meta property="article:modified_time" content="2024-06-19T08:11:17.046Z">
+<meta property="article:modified_time" content="2024-06-20T09:17:59.375Z">
 <meta property="article:author" content="Fupanc">
 <meta property="article:tag" content="学习笔记">
 <meta name="twitter:card" content="summary">
@@ -166,7 +166,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <img class="site-author-image" itemprop="image" alt="Fupanc"
-      src="/images/index.jpg">
+      src="/images/123.jpg">
   <p class="site-author-name" itemprop="name">Fupanc</p>
   <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
 </div>
@@ -174,13 +174,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -221,7 +221,7 @@
     <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/06/19/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/index.jpg">
+      <meta itemprop="image" content="/images/123.jpg">
       <meta itemprop="name" content="Fupanc">
     </span>
 
@@ -246,9 +246,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-06-19 16:06:26 / 修改时间：16:11:17" itemprop="dateCreated datePublished" datetime="2024-06-19T16:06:26+08:00">2024-06-19</time>
+      <time title="创建时间：2024-06-19 16:06:26" itemprop="dateCreated datePublished" datetime="2024-06-19T16:06:26+08:00">2024-06-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-06-20 17:17:59" itemprop="dateModified" datetime="2024-06-20T17:17:59+08:00">2024-06-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -354,7 +360,7 @@
 <h2 id="ClassLoader类加载器分类"><a href="#ClassLoader类加载器分类" class="headerlink" title="ClassLoader类加载器分类"></a>ClassLoader类加载器分类</h2><p>一切的Java类都必须经过JVM加载后才能运行，<strong>而<code>ClassLoader</code>的主要作用就是Java类文件的加载</strong>。</p>
 <p>类加载器类型包括四种，分别如下：</p>
 <ul>
-<li><strong>Bootstrap ClassLoader（启动类加载器）</strong>：最顶层的类加载器，主要加载核心类库。这个类加载器负责加载存放在 jre\lib 目录或者被<code>-Xbootclasspath</code> 参数所指定的路径中存放的类库。</li>
+<li><strong>Bootstrap ClassLoader（启动类加载器）</strong>：最顶层的类加载器，主要加载核心类库。这个类加载器负责加载存放在 jre\lib 目录下的部分jar包（如rt.jar、tools.jar）或者被<code>-Xbootclasspath</code> 参数所指定的路径中存放的类库。</li>
 <li><strong>Extension ClassLoader（扩展类加载器）</strong>：这个加载器由<code>sun.misc.Launcher$ExtClassLoader</code>实现，它负责加载 jre\lib\ext 目录中的，或者被 <code>java.ext.dirs</code> 系统变量所指定的路径中的所有类库</li>
 <li><strong>Application ClassLoader（系统类加载器）</strong>：这个类加载器由 sun.misc.Launcher$AppClassLoader 实现。它负责加载用户类路径（ClassPath）上所指定的类库。需要注意的是如果应用程序中没有自定义自己的类加载器，一般情况下<code>AppClassLoader</code>是默认的类加载器。</li>
 <li><strong>用户自定义加载器</strong></li>
