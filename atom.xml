@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-06-23T06:01:26.947Z</updated>
+  <updated>2024-08-13T03:10:32.431Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,217 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>URLDNS</title>
+    <link href="https://fupanc.github.io/2024/08/13/URLDNS/"/>
+    <id>https://fupanc.github.io/2024/08/13/URLDNS/</id>
+    <published>2024-08-13T03:00:32.836Z</published>
+    <updated>2024-08-13T03:10:32.431Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;java反序列化最简单的调用链&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="URLDNS" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/URLDNS/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Java反序列化</title>
+    <link href="https://fupanc.github.io/2024/08/13/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    <id>https://fupanc.github.io/2024/08/13/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</id>
+    <published>2024-08-13T03:00:32.834Z</published>
+    <updated>2024-08-13T03:08:39.421Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Java反序列化&quot;&gt;&lt;a href=&quot;#Java反序列化&quot; class=&quot;headerlink&quot; title=&quot;Java反序列化&quot;&gt;&lt;/a&gt;Java反序列化&lt;/h1&gt;&lt;p&gt;在分析反序列化调用链之前，需要有java反序列化的基本知识。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="Java反序列化" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC7</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC7/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC7/</id>
+    <published>2024-08-13T03:00:32.832Z</published>
+    <updated>2024-08-13T03:16:29.942Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC7学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC7" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC7/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC6</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC6/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC6/</id>
+    <published>2024-08-13T03:00:32.830Z</published>
+    <updated>2024-08-13T03:15:42.090Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC6学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC6" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC6/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC5</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC5/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC5/</id>
+    <published>2024-08-13T03:00:32.828Z</published>
+    <updated>2024-08-13T03:14:54.256Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC5学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC5" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC5/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC4</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC4/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC4/</id>
+    <published>2024-08-13T03:00:32.826Z</published>
+    <updated>2024-08-13T03:14:09.075Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC4学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC4" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC4/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC3</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC3/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC3/</id>
+    <published>2024-08-13T03:00:32.824Z</published>
+    <updated>2024-08-13T03:12:59.600Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC3学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC3" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC3/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC2</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC2/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC2/</id>
+    <published>2024-08-13T03:00:32.822Z</published>
+    <updated>2024-08-13T03:11:30.402Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Java学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC2" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC2/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CC1</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC1/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC1/</id>
+    <published>2024-08-13T03:00:32.820Z</published>
+    <updated>2024-08-13T03:11:52.274Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;CC1&quot;&gt;&lt;a href=&quot;#CC1&quot; class=&quot;headerlink&quot; title=&quot;CC1&quot;&gt;&lt;/a&gt;CC1&lt;/h1&gt;&lt;p&gt;前面说过了URLDNS这条链，现在我们就可以开始学习Common-Collections利用链，这是反序列化学习中不可逃过的一关。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;学习路线&lt;/strong&gt;：CC1 -&amp;gt; CC6 -&amp;gt; CC3 -&amp;gt; CC5 -&amp;gt; CC7 -&amp;gt; CC2 -&amp;gt; CC4 (其中CC2和CC4是common-collections4的利用链)&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC1" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC1/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CB链</title>
+    <link href="https://fupanc.github.io/2024/08/13/CB%E9%93%BE/"/>
+    <id>https://fupanc.github.io/2024/08/13/CB%E9%93%BE/</id>
+    <published>2024-08-13T03:00:32.795Z</published>
+    <updated>2024-08-13T03:17:57.331Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CB链学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CB链" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CB%E9%93%BE/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Javassist</title>
@@ -43,7 +254,7 @@
     <link href="https://fupanc.github.io/2024/06/23/%E5%8A%A8%E6%80%81%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81/"/>
     <id>https://fupanc.github.io/2024/06/23/%E5%8A%A8%E6%80%81%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81/</id>
     <published>2024-06-23T05:58:55.028Z</published>
-    <updated>2024-06-23T06:02:56.925Z</updated>
+    <updated>2024-07-29T11:30:18.952Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;动态加载字节码&quot;&gt;&lt;a href=&quot;#动态加载字节码&quot; class=&quot;headerlink&quot; title=&quot;动态加载字节码&quot;&gt;&lt;/a&gt;动态加载字节码&lt;/h1&gt;&lt;p&gt;Java字节码指的是JVM执行使用的一类指令，通常被存储在&lt;code&gt;.class&lt;/code&gt;文件中。&lt;/p&gt;</summary>
@@ -182,25 +393,6 @@
   </entry>
   
   <entry>
-    <title>沙箱逃逸做题总结</title>
-    <link href="https://fupanc.github.io/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/"/>
-    <id>https://fupanc.github.io/2024/06/02/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/</id>
-    <published>2024-06-02T09:16:01.481Z</published>
-    <updated>2024-06-02T09:24:56.420Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;持续更新中&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
-    
-    <category term="沙箱逃逸做题总结" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E5%81%9A%E9%A2%98%E6%80%BB%E7%BB%93/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>filter过滤器利用总结</title>
     <link href="https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/"/>
     <id>https://fupanc.github.io/2024/05/27/%E5%AF%B9php%E7%9A%84filter%E8%BF%87%E6%BB%A4%E5%99%A8%E5%88%A9%E7%94%A8%E7%9A%84%E6%80%BB%E7%BB%93/</id>
@@ -234,103 +426,6 @@
     <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
     
     <category term="python内存马分析" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/python%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Python Debug PIN码的利用及做题笔记</title>
-    <link href="https://fupanc.github.io/2024/05/16/Python%20Debug%20PIN%E7%A0%81%E7%9A%84%E5%88%A9%E7%94%A8/"/>
-    <id>https://fupanc.github.io/2024/05/16/Python%20Debug%20PIN%E7%A0%81%E7%9A%84%E5%88%A9%E7%94%A8/</id>
-    <published>2024-05-15T16:12:25.213Z</published>
-    <updated>2024-05-20T03:33:46.297Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;利用pin码可以在报错界面执行任意python代码&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
-    
-    <category term="debug pin码的利用" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/debug-pin%E7%A0%81%E7%9A%84%E5%88%A9%E7%94%A8/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>pickle反序列化</title>
-    <link href="https://fupanc.github.io/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    <id>https://fupanc.github.io/2024/05/09/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</id>
-    <published>2024-05-09T14:10:02.260Z</published>
-    <updated>2024-05-19T13:14:24.925Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;pickle反序列化&quot;&gt;&lt;a href=&quot;#pickle反序列化&quot; class=&quot;headerlink&quot; title=&quot;pickle反序列化&quot;&gt;&lt;/a&gt;pickle反序列化&lt;/h1&gt;&lt;p&gt;本篇文章用于简单入门，pickle反序列化危害性大，可以直接RCE&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Python漏洞" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/"/>
-    
-    <category term="pickle反序列化" scheme="https://fupanc.github.io/categories/Python%E6%BC%8F%E6%B4%9E/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>session反序列化学习</title>
-    <link href="https://fupanc.github.io/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/"/>
-    <id>https://fupanc.github.io/2024/04/28/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/</id>
-    <published>2024-04-28T06:37:55.888Z</published>
-    <updated>2024-06-02T09:10:53.506Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;好用，爱用，多用&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="php相关漏洞" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/"/>
-    
-    <category term="php反序列化" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
-    <category term="session反序列化" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>利用pearcmd.php进行文件包含</title>
-    <link href="https://fupanc.github.io/2024/04/28/pearcmd.php/"/>
-    <id>https://fupanc.github.io/2024/04/28/pearcmd.php/</id>
-    <published>2024-04-27T19:37:03.502Z</published>
-    <updated>2024-05-27T14:24:37.583Z</updated>
-    
-    
-    <summary type="html">&lt;h3 id=&quot;pearcmd-php&quot;&gt;&lt;a href=&quot;#pearcmd-php&quot; class=&quot;headerlink&quot; title=&quot;pearcmd.php&quot;&gt;&lt;/a&gt;pearcmd.php&lt;/h3&gt;&lt;p&gt;好看，爱看，多看&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="php相关漏洞" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/"/>
-    
-    <category term="文件包含" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
-    
-    <category term="利用pearcmd.php" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/%E5%88%A9%E7%94%A8pearcmd-php/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>JWT以及jwt伪造</title>
-    <link href="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/"/>
-    <id>https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/</id>
-    <published>2024-04-20T10:06:29.299Z</published>
-    <updated>2024-06-02T09:07:01.331Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;  JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="jwt" scheme="https://fupanc.github.io/categories/jwt/"/>
     
     
   </entry>
