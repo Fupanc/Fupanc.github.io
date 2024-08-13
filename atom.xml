@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-08-13T03:10:32.431Z</updated>
+  <updated>2024-08-13T03:11:52.274Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CC1</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC1/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC1/</id>
+    <published>2024-08-13T12:13:04.595Z</published>
+    <updated>2024-08-13T03:11:52.274Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;CC1&quot;&gt;&lt;a href=&quot;#CC1&quot; class=&quot;headerlink&quot; title=&quot;CC1&quot;&gt;&lt;/a&gt;CC1&lt;/h1&gt;&lt;p&gt;前面说过了URLDNS这条链，现在我们就可以开始学习Common-Collections利用链，这是反序列化学习中不可逃过的一关。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;学习路线&lt;/strong&gt;：CC1 -&amp;gt; CC6 -&amp;gt; CC3 -&amp;gt; CC5 -&amp;gt; CC7 -&amp;gt; CC2 -&amp;gt; CC4 (其中CC2和CC4是common-collections4的利用链)&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC1" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC1/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>URLDNS</title>
