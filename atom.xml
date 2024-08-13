@@ -6,7 +6,7 @@
   <link href="https://fupanc.github.io/atom.xml" rel="self"/>
   
   <link href="https://fupanc.github.io/"/>
-  <updated>2024-08-13T03:14:54.256Z</updated>
+  <updated>2024-08-13T03:12:59.600Z</updated>
   <id>https://fupanc.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CC3</title>
+    <link href="https://fupanc.github.io/2024/08/13/CC3/"/>
+    <id>https://fupanc.github.io/2024/08/13/CC3/</id>
+    <published>2024-08-13T12:17:27.214Z</published>
+    <updated>2024-08-13T03:12:59.600Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;CC3学习&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Java安全" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="Java反序列化调用链分析" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/"/>
+    
+    <category term="CC3" scheme="https://fupanc.github.io/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC3/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>CC5</title>
@@ -403,23 +424,6 @@
     <category term="文件包含" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
     <category term="利用pearcmd.php" scheme="https://fupanc.github.io/categories/php%E7%9B%B8%E5%85%B3%E6%BC%8F%E6%B4%9E/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/%E5%88%A9%E7%94%A8pearcmd-php/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>JWT以及jwt伪造</title>
-    <link href="https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/"/>
-    <id>https://fupanc.github.io/2024/04/20/JWT%E4%BB%A5%E5%8F%8A%E4%BC%AA%E9%80%A0/</id>
-    <published>2024-04-20T10:06:29.299Z</published>
-    <updated>2024-06-02T09:07:01.331Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;  JWT是一种安全机制，在某些情况下我们可以通过伪造jwt来任意用户登录&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="jwt" scheme="https://fupanc.github.io/categories/jwt/"/>
     
     
   </entry>
